@@ -1,9 +1,18 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { googleAuthEnabled } from "@/lib/features";
+
+const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
+  google_indisponivel: "Entrada com Google não está configurada no servidor.",
+  google_cancelado: "Entrada com Google cancelada.",
+  google_estado_invalido: "Sessão Google expirada. Tente novamente.",
+  google_demo: "Conta demo não pode usar Google em produção.",
+  google_falhou: "Não foi possível concluir a entrada com Google. Tente de novo.",
+  access_denied: "Permissão negada no Google.",
+};
 
 export function AuthForms() {
   const router = useRouter();
@@ -13,6 +22,13 @@ export function AuthForms() {
   const [mode, setMode] = useState<"login" | "register">("login");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const oauthError = searchParams.get("error");
+    if (oauthError) {
+      setError(GOOGLE_ERROR_MESSAGES[oauthError] ?? "Erro ao entrar com Google.");
+    }
+  }, [searchParams]);
 
   async function submitEmail(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -50,41 +66,26 @@ export function AuthForms() {
     }
   }
 
-  async function googleLogin() {
+  function googleLogin() {
     setError(null);
-    setLoading(true);
-    try {
-      const res = await fetch("/api/auth/google", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? "Não foi possível entrar com Google.");
-        return;
-      }
-      router.push(next);
-      router.refresh();
-    } finally {
-      setLoading(false);
-    }
+    const url = `/api/auth/google?next=${encodeURIComponent(next)}`;
+    window.location.href = url;
   }
 
   return (
     <div className="mx-auto w-full max-w-md">
       <div className="cm-panel p-6 md:p-8">
-        <div className="mb-6 flex rounded-md border border-white/10 bg-black/20 p-1">
+        <div className="mb-6 flex rounded-[4px] border border-cm-divider bg-black/30 p-1">
           <button
             type="button"
-            className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition ${mode === "login" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
+            className={`flex-1 rounded-[4px] py-2.5 text-sm font-semibold transition ${mode === "login" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
             onClick={() => setMode("login")}
           >
             Entrar
           </button>
           <button
             type="button"
-            className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition ${mode === "register" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
+            className={`flex-1 rounded-[4px] py-2.5 text-sm font-semibold transition ${mode === "register" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
             onClick={() => setMode("register")}
           >
             Criar conta
@@ -96,10 +97,19 @@ export function AuthForms() {
             type="button"
             onClick={googleLogin}
             disabled={loading}
-            className="mb-6 flex w-full min-h-11 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50"
+            className="mb-6 flex w-full min-h-12 items-center justify-center gap-2 rounded-[4px] border border-cm-divider bg-cm-bg-elevated px-4 py-3 text-sm font-medium text-white hover:bg-white/5 disabled:opacity-50"
           >
+            <span aria-hidden className="text-base">
+              G
+            </span>
             Continuar com Google
           </button>
+        )}
+
+        {googleAuthEnabled && (
+          <p className="-mt-4 mb-6 text-center text-[11px] text-cm-gray">
+            Usamos apenas e-mail e nome do perfil Google para criar ou acessar sua conta.
+          </p>
         )}
 
         <form onSubmit={submitEmail} className="space-y-4">

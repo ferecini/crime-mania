@@ -1,57 +1,29 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
-import { createEmailUser, findUserByEmail } from "@/lib/auth/users-store";
-import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
-import { googleAuthEnabled } from "@/lib/features";
+import {
+  buildGoogleAuthorizationUrl,
+  getGoogleRedirectUri,
+  isGoogleAuthConfigured,
+} from "@/lib/auth/google-config";
+import {
+  sanitizeNextPath,
+  setGoogleOAuthCookie,
+} from "@/lib/auth/google-oauth-cookie";
 
-const schema = z.object({
-  email: z.string().email().optional(),
-  displayName: z.string().min(2).max(80).optional(),
-});
-
-export async function POST(request: Request) {
-  if (!googleAuthEnabled) {
-    return NextResponse.json(
-      { error: "Entrada com Google indisponível no momento." },
-      { status: 503 },
+export async function GET(request: Request) {
+  if (!isGoogleAuthConfigured()) {
+    return NextResponse.redirect(
+      new URL("/entrar?error=google_indisponivel", request.url),
     );
   }
 
-  const body = await request.json().catch(() => ({}));
-  const parsed = schema.safeParse(body);
-  if (!parsed.success || !parsed.data.email || !parsed.data.displayName) {
-    return NextResponse.json(
-      { error: "Fluxo Google incompleto. Use e-mail e senha." },
-      { status: 400 },
-    );
-  }
+  const { searchParams } = new URL(request.url);
+  const next = sanitizeNextPath(searchParams.get("next"));
+  const state = crypto.randomUUID();
 
-  let user = await findUserByEmail(parsed.data.email);
-  if (!user) {
-    user = await createEmailUser({
-      email: parsed.data.email,
-      displayName: parsed.data.displayName,
-      password: crypto.randomUUID(),
-    });
-  }
+  await setGoogleOAuthCookie({ state, next });
 
-  const token = await createSessionToken({
-    id: user.id,
-    email: user.email,
-    displayName: user.displayName,
-    tier: user.tier,
-    provider: "google",
-    accountType: user.accountType,
-    isDemo: user.isDemo,
-  });
+  const redirectUri = getGoogleRedirectUri(request);
+  const authUrl = buildGoogleAuthorizationUrl({ redirectUri, state });
 
-  const response = NextResponse.json({ ok: true });
-  response.cookies.set(COOKIE_NAME, token, {
-    httpOnly: true,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    path: "/",
-    maxAge: 60 * 60 * 24 * 7,
-  });
-  return response;
+  return NextResponse.redirect(authUrl);
 }
