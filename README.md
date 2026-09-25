@@ -17,12 +17,22 @@ Implementação base alinhada aos documentos **REQUISITOS SITE**, **Documento me
 - Logo oficial: `public/logo-crime-mania.jpg`
 - Troque a foto do bloco 1 quando a imagem oficial da host estiver disponível.
 
+## Deploy
+
+- **GitHub:** https://github.com/ferecini/crime-mania
+- **Produção (Vercel):** https://crime-mania.vercel.app
+- **Painel Vercel:** https://vercel.com/investwise/crime-mania
+
+Push na branch `main` dispara deploy automático (GitHub conectado). Variável `AUTH_SECRET` está configurada no painel da Vercel (Production, Preview e Development).
+
 ## Desenvolvimento
 
 ```bash
 npm install
 npm run dev
 ```
+
+Para sessão local, copie `.env.example` para `.env.local` e defina `AUTH_SECRET` (ou use `vercel env pull`).
 
 Conta demo: `demo@crimemania.com.br` / `maniaco123`
 

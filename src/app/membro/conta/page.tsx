@@ -35,8 +35,8 @@ export default async function AccountPage() {
         </div>
       </dl>
       <p className="text-xs text-cm-gray">
-        Histórico de pagamentos, portal de cobrança e recuperação de senha serão conectados ao
-        gateway e provedor de identidade em produção.
+        Histórico de pagamentos e portal de cobrança ficam disponíveis após a ativação do gateway
+        de pagamentos.
       </p>
     </div>
   );

@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
+import { googleAuthEnabled } from "@/lib/features";
 
 export function AuthForms() {
   const router = useRouter();
@@ -49,21 +50,18 @@ export function AuthForms() {
     }
   }
 
-  async function googleDevLogin() {
+  async function googleLogin() {
     setError(null);
     setLoading(true);
     try {
       const res = await fetch("/api/auth/google", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: "google.user@crimemania.com.br",
-          displayName: "Conta Google (demo)",
-        }),
+        body: JSON.stringify({}),
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error ?? "Falha no login Google.");
+        setError(data.error ?? "Não foi possível entrar com Google.");
         return;
       }
       router.push(next);
@@ -74,82 +72,81 @@ export function AuthForms() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-md space-y-6">
-      <div className="flex rounded-sm border border-cm-gray-dark p-1">
-        <button
-          type="button"
-          className={`flex-1 rounded-sm py-2 text-sm font-semibold ${mode === "login" ? "bg-cm-red text-white" : "text-cm-gray"}`}
-          onClick={() => setMode("login")}
-        >
-          Entrar
-        </button>
-        <button
-          type="button"
-          className={`flex-1 rounded-sm py-2 text-sm font-semibold ${mode === "register" ? "bg-cm-red text-white" : "text-cm-gray"}`}
-          onClick={() => setMode("register")}
-        >
-          Criar conta
-        </button>
-      </div>
+    <div className="mx-auto w-full max-w-md">
+      <div className="cm-panel p-6 md:p-8">
+        <div className="mb-6 flex rounded-md border border-white/10 bg-black/20 p-1">
+          <button
+            type="button"
+            className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition ${mode === "login" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
+            onClick={() => setMode("login")}
+          >
+            Entrar
+          </button>
+          <button
+            type="button"
+            className={`flex-1 rounded-md py-2.5 text-sm font-semibold transition ${mode === "register" ? "bg-cm-red text-white" : "text-cm-gray hover:text-white"}`}
+            onClick={() => setMode("register")}
+          >
+            Criar conta
+          </button>
+        </div>
 
-      <button
-        type="button"
-        onClick={googleDevLogin}
-        disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-sm border border-cm-gray-dark bg-cm-surface px-4 py-3 text-sm font-medium text-white hover:border-cm-gray disabled:opacity-50"
-      >
-        Continuar com Google
-      </button>
-      <p className="text-center text-xs text-cm-gray">
-        OAuth Google real será conectado antes do go-live. Este botão cria uma sessão demo.
-      </p>
+        {googleAuthEnabled && (
+          <button
+            type="button"
+            onClick={googleLogin}
+            disabled={loading}
+            className="mb-6 flex w-full min-h-11 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white hover:bg-white/10 disabled:opacity-50"
+          >
+            Continuar com Google
+          </button>
+        )}
 
-      <form onSubmit={submitEmail} className="space-y-4">
-        {mode === "register" && (
+        <form onSubmit={submitEmail} className="space-y-4">
+          {mode === "register" && (
+            <label className="block text-sm">
+              <span className="mb-1.5 block text-cm-gray">Nome de exibição</span>
+              <input
+                name="displayName"
+                required
+                minLength={2}
+                className="cm-input"
+              />
+            </label>
+          )}
           <label className="block text-sm">
-            <span className="mb-1 block text-cm-gray">Nome de exibição</span>
+            <span className="mb-1.5 block text-cm-gray">E-mail</span>
             <input
-              name="displayName"
+              name="email"
+              type="email"
               required
-              minLength={2}
-              className="w-full rounded-sm border border-cm-gray-dark bg-cm-bg px-3 py-2.5 text-white outline-none focus:border-cm-red"
+              autoComplete="email"
+              className="cm-input"
             />
           </label>
-        )}
-        <label className="block text-sm">
-          <span className="mb-1 block text-cm-gray">E-mail</span>
-          <input
-            name="email"
-            type="email"
-            required
-            autoComplete="email"
-            className="w-full rounded-sm border border-cm-gray-dark bg-cm-bg px-3 py-2.5 text-white outline-none focus:border-cm-red"
-          />
-        </label>
-        <label className="block text-sm">
-          <span className="mb-1 block text-cm-gray">Senha</span>
-          <input
-            name="password"
-            type="password"
-            required
-            minLength={8}
-            autoComplete={mode === "login" ? "current-password" : "new-password"}
-            className="w-full rounded-sm border border-cm-gray-dark bg-cm-bg px-3 py-2.5 text-white outline-none focus:border-cm-red"
-          />
-        </label>
-        {error && (
-          <p className="text-sm text-cm-red-light" role="alert">
-            {error}
-          </p>
-        )}
-        <Button type="submit" disabled={loading} className="w-full">
-          {loading ? "Aguarde…" : mode === "login" ? "Entrar" : "Cadastrar"}
-        </Button>
-      </form>
-
-      <p className="text-xs leading-relaxed text-cm-gray">
-        Demo local: <strong className="text-white">demo@crimemania.com.br</strong> /{" "}
-        <strong className="text-white">maniaco123</strong>
+          <label className="block text-sm">
+            <span className="mb-1.5 block text-cm-gray">Senha</span>
+            <input
+              name="password"
+              type="password"
+              required
+              minLength={8}
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              className="cm-input"
+            />
+          </label>
+          {error && (
+            <p className="text-sm text-cm-red-light" role="alert">
+              {error}
+            </p>
+          )}
+          <Button type="submit" disabled={loading} className="w-full">
+            {loading ? "Aguarde…" : mode === "login" ? "Entrar" : "Cadastrar"}
+          </Button>
+        </form>
+      </div>
+      <p className="mt-4 text-center text-xs leading-relaxed text-cm-gray">
+        Cadastro não inclui assinatura automaticamente. Escolha um plano após entrar.
       </p>
     </div>
   );

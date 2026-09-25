@@ -18,16 +18,16 @@ export const PLANS: Plan[] = [
     name: "Tier 1",
     tier: "tier1",
     billing: "monthly",
-    priceLabel: "Valor a definir",
-    priceNote: "Cobrança mensal",
+    priceLabel: "Consulte na área de planos",
+    priceNote: "Cobrança mensal · benefícios Tier 1",
   },
   {
     id: "tier2-monthly",
     name: "Tier 2",
     tier: "tier2",
     billing: "monthly",
-    priceLabel: "Valor a definir",
-    priceNote: "Cobrança mensal",
+    priceLabel: "Consulte na área de planos",
+    priceNote: "Cobrança mensal · acesso completo premium",
     highlight: true,
   },
   {
@@ -35,8 +35,8 @@ export const PLANS: Plan[] = [
     name: "Tier 2 Anual",
     tier: "tier2",
     billing: "annual",
-    priceLabel: "Valor a definir",
-    priceNote: "Mesmos benefícios do Tier 2, ciclo anual",
+    priceLabel: "Consulte na área de planos",
+    priceNote: "Mesmos benefícios do Tier 2 · ciclo anual",
   },
 ];
 

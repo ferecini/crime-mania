@@ -15,6 +15,7 @@ export interface PublicEpisode {
   coverImage: string;
   spotifyEpisodeId: string;
   spotifyUrl: string;
+  audioUrl: string;
   youtubeVideoId?: string;
 }
 
@@ -36,6 +37,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e2bnjbv",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/ASSASSINATO-Carol-Stuart-e2bnjbv",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/78416703/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-10-9%2F511648e1-c0d3-c650-0c66-40012f535393.mp3",
   },
   {
     slug: "mabs-dottie-monica-alecia",
@@ -51,6 +54,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e2aphom",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/PREDADOR-Mabs--Dottie--Monica-e-Alecia-e2aphom",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/77432022/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-9-19%2F59ac960e-8ae3-3fd5-7db0-c11fad4cfe0f.mp3",
   },
   {
     slug: "raynella-david",
@@ -66,6 +71,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e2agc5b",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/MISTRIO-Raynella-e-David-e2agc5b",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/77131371/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-9-12%2Fc550c68c-287c-cada-3df4-3315544c970e.mp3",
   },
   {
     slug: "gailen-thurnau",
@@ -81,6 +88,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e2a75p2",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/ASSASSINATO-Gailen-Thurnau-e2a75p2",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/76829922/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-9-5%2Fb00a1f1f-1bff-f728-6217-08d91ed2bf7d.mp3",
   },
   {
     slug: "stephanie-scott",
@@ -96,6 +105,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e29tve1",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/ASSASSINATO-Stephanie-Scott-e29tve1",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/76528513/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-8-28%2F36020c3f-69a0-0a9a-8b6f-bd25e1a744dd.mp3",
   },
   {
     slug: "kenia-monge",
@@ -110,6 +121,8 @@ export const PUBLIC_EPISODES: PublicEpisode[] = [
     spotifyEpisodeId: "e29kama",
     spotifyUrl:
       "https://podcasters.spotify.com/pod/show/guria-studios/episodes/DESAPARECIDA-Kenia-Monge-e29kama",
+    audioUrl:
+      "https://anchor.fm/s/43210668/podcast/play/76212362/https%3A%2F%2Fd3ctxlq1ktw2nl.cloudfront.net%2Fstaging%2F2023-8-21%2F24eb8f5d-6a32-2480-71e4-db87921c0d24.mp3",
   },
 ];
 
@@ -118,7 +131,7 @@ export function getEpisodeBySlug(slug: string): PublicEpisode | undefined {
 }
 
 export const SPOTIFY_SHOW_URL =
-  "https://open.spotify.com/show/0QJ8xJZQZQZQZQZQZQZQZQ";
+  "https://podcasters.spotify.com/pod/show/guria-studios";
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@crimemania";
 export const INSTAGRAM_URL = "https://www.instagram.com/crimemania/";
 export const SITE_URL = "https://www.crimemania.com.br/";

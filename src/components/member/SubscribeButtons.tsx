@@ -4,15 +4,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PLANS, type PlanId } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
+import { billingEnabled } from "@/lib/features";
 
 export function SubscribeButtons() {
   const router = useRouter();
   const [loading, setLoading] = useState<PlanId | null>(null);
-  const [message, setMessage] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
 
   async function choose(planId: PlanId) {
+    if (!billingEnabled) {
+      setFeedback(
+        "Assinaturas online em breve. Enquanto isso, entre em contato pelo Instagram @crimemania.",
+      );
+      return;
+    }
+
     setLoading(planId);
-    setMessage(null);
+    setFeedback(null);
     try {
       const res = await fetch("/api/subscribe", {
         method: "POST",
@@ -21,10 +29,10 @@ export function SubscribeButtons() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setMessage(data.error ?? "Não foi possível simular o pagamento.");
+        setFeedback(data.error ?? "Não foi possível concluir a assinatura.");
         return;
       }
-      setMessage(data.message);
+      setFeedback("Plano atualizado com sucesso.");
       router.refresh();
     } finally {
       setLoading(null);
@@ -37,25 +45,25 @@ export function SubscribeButtons() {
         {PLANS.map((plan) => (
           <div
             key={plan.id}
-            className={`rounded-sm border p-5 ${plan.highlight ? "border-cm-red bg-cm-red/5" : "border-cm-gray-dark bg-cm-surface"}`}
+            className={`cm-panel p-6 ${plan.highlight ? "ring-1 ring-cm-red/40" : ""}`}
           >
             <p className="font-display text-sm text-white">{plan.name}</p>
-            <p className="mt-2 text-2xl font-semibold text-white">{plan.priceLabel}</p>
-            <p className="mt-1 text-xs text-cm-gray">{plan.priceNote}</p>
+            <p className="mt-3 text-lg font-semibold text-white">{plan.priceLabel}</p>
+            <p className="mt-2 text-xs leading-relaxed text-cm-gray">{plan.priceNote}</p>
             <Button
-              className="mt-4 w-full"
+              className="mt-5 w-full"
               variant={plan.highlight ? "primary" : "secondary"}
               disabled={loading !== null}
               onClick={() => choose(plan.id)}
             >
-              {loading === plan.id ? "Processando…" : "Assinar (simulação)"}
+              {loading === plan.id ? "Processando…" : "Quero este plano"}
             </Button>
           </div>
         ))}
       </div>
-      {message && (
+      {feedback && (
         <p className="text-sm text-cm-gray" role="status">
-          {message}
+          {feedback}
         </p>
       )}
     </div>

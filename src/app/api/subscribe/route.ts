@@ -44,8 +44,7 @@ export async function POST(request: Request) {
     ok: true,
     planId: plan.id as PlanId,
     tier: plan.tier,
-    message:
-      "Assinatura simulada com sucesso. Substitua este endpoint pelo webhook do provedor de pagamentos.",
+    message: "Plano atualizado com sucesso.",
   });
   response.cookies.set(COOKIE_NAME, token, {
     httpOnly: true,

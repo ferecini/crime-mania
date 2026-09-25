@@ -1,52 +1,50 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Tag } from "@/components/ui/Tag";
 import type { PublicEpisode } from "@/data/episodes";
 
 export function EpisodeListItem({ episode }: { episode: PublicEpisode }) {
   return (
-    <article className="group grid gap-4 border-b border-cm-gray-dark/70 py-6 transition-colors hover:bg-cm-surface/40 md:grid-cols-[auto_1fr_auto] md:items-center md:gap-6 md:px-4">
-      <div className="flex items-center gap-3 md:flex-col md:items-start md:gap-1">
-        <span className="font-display text-xs text-cm-gray">
-          {String(episode.number).padStart(3, "0")}
-        </span>
-        <span className="rounded-sm border border-cm-gray-dark px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-cm-gray">
-          {episode.category}
-        </span>
-        <span className="text-xs text-cm-gray">{episode.duration}</span>
-      </div>
-      <div className="flex min-w-0 gap-4">
-        <div className="relative hidden h-16 w-16 shrink-0 overflow-hidden rounded-sm border border-cm-gray-dark sm:block">
+    <article className="cm-panel group p-4 transition hover:border-cm-red/25 md:p-5">
+      <div className="flex flex-col gap-4 md:grid md:grid-cols-[5.5rem_1fr_auto] md:items-center md:gap-5">
+        <div className="relative h-36 w-full overflow-hidden rounded-md border border-white/5 md:h-20 md:w-20">
           <Image
             src={episode.coverImage}
             alt=""
             fill
-            className="object-cover"
-            sizes="64px"
+            className="object-cover transition duration-500 group-hover:scale-105"
+            sizes="(max-width: 768px) 100vw, 80px"
           />
         </div>
-        <div className="min-w-0 flex-1">
-          <h3 className="text-base font-semibold leading-snug text-white group-hover:text-cm-red-light md:text-lg">
+
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="font-display text-[10px] text-cm-gray">
+              {String(episode.number).padStart(3, "0")}
+            </span>
+            <Tag>{episode.category}</Tag>
+            <span className="text-xs text-cm-gray">{episode.duration}</span>
+          </div>
+          <h3 className="text-lg font-semibold leading-snug text-white group-hover:text-cm-red-light md:text-xl">
             <Link href={`/episodios/${episode.slug}`} className="hover:underline">
               {episode.title}
             </Link>
           </h3>
-          <p className="mt-1 line-clamp-3 text-sm leading-relaxed text-cm-gray md:line-clamp-2">
+          <p className="line-clamp-3 text-sm leading-relaxed text-cm-gray md:line-clamp-2">
             {episode.summary}
           </p>
         </div>
-      </div>
-      <Link
-        href={`/episodios/${episode.slug}#player`}
-        className="inline-flex items-center gap-2 self-start text-sm font-semibold text-cm-red hover:text-cm-red-light md:self-center"
-      >
-        <span
-          className="flex h-9 w-9 items-center justify-center rounded-full border border-cm-red/40 bg-cm-red/10"
-          aria-hidden
+
+        <Link
+          href={`/episodios/${episode.slug}#player`}
+          className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-md border border-cm-red/30 bg-cm-red/10 px-4 text-sm font-semibold text-white transition hover:bg-cm-red/20 md:w-auto"
         >
-          ▶
-        </span>
-        Ouvir
-      </Link>
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-cm-red/20 text-xs" aria-hidden>
+            ▶
+          </span>
+          Ouvir
+        </Link>
+      </div>
     </article>
   );
 }

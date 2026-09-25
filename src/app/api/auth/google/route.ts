@@ -2,21 +2,28 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createEmailUser, findUserByEmail } from "@/lib/auth/users-store";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
+import { googleAuthEnabled } from "@/lib/features";
 
-/**
- * Stub de login Google para desenvolvimento.
- * Integrar OAuth real (Google Identity) antes do go-live.
- */
 const schema = z.object({
-  email: z.string().email(),
-  displayName: z.string().min(2).max(80),
+  email: z.string().email().optional(),
+  displayName: z.string().min(2).max(80).optional(),
 });
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  if (!googleAuthEnabled) {
+    return NextResponse.json(
+      { error: "Entrada com Google indisponível no momento." },
+      { status: 503 },
+    );
+  }
+
+  const body = await request.json().catch(() => ({}));
   const parsed = schema.safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+  if (!parsed.success || !parsed.data.email || !parsed.data.displayName) {
+    return NextResponse.json(
+      { error: "Fluxo Google incompleto. Use e-mail e senha." },
+      { status: 400 },
+    );
   }
 
   let user = await findUserByEmail(parsed.data.email);

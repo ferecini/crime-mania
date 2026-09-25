@@ -1,12 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import { EpisodeListItem } from "@/components/episodes/EpisodeListItem";
-import { SpotifyEmbed } from "@/components/media/SpotifyEmbed";
+import { EpisodePlayer } from "@/components/media/EpisodePlayer";
+import { ProductVisual } from "@/components/shop/ProductVisual";
 import { ButtonLink } from "@/components/ui/Button";
+import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SHOP_PRODUCTS } from "@/data/products";
 import {
   INSTAGRAM_URL,
   PUBLIC_EPISODES,
+  SPOTIFY_SHOW_URL,
   YOUTUBE_CHANNEL_URL,
 } from "@/data/episodes";
 
@@ -15,88 +18,93 @@ const HOST_PORTRAIT =
 
 export default function HomePage() {
   const featured = PUBLIC_EPISODES.slice(0, 4);
+  const highlight = featured[0];
 
   return (
     <>
-      {/* Bloco 1 — Convite */}
-      <section id="top" className="cm-block bg-cm-bg">
-        <div className="cm-container grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
-          <div className="order-2 space-y-6 lg:order-1">
-            <p className="font-display text-sm text-cm-red">Crime Mania</p>
-            <h1 className="font-display text-3xl leading-tight text-white sm:text-4xl lg:text-5xl">
+      <section id="top" className="cm-block cm-hero-bg overflow-hidden">
+        <div className="cm-container grid items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
+          <div className="order-1 space-y-6 lg:order-1">
+            <p className="font-display text-xs tracking-[0.4em] text-cm-red md:text-sm">
+              True crime editorial
+            </p>
+            <h1 className="font-display max-w-xl text-[2rem] leading-[1.05] text-white sm:text-5xl lg:text-6xl">
               Oi, Crime Maníacos…
             </h1>
-            <p className="text-lg text-white/90">Vamos seguir falando sobre true crime?</p>
-            <p className="max-w-xl text-base leading-relaxed text-cm-gray">
+            <p className="text-lg text-white/90 md:text-xl">
+              Vamos seguir falando sobre true crime?
+            </p>
+            <p className="max-w-lg text-base leading-relaxed text-cm-gray md:text-lg">
               Quer conteúdos exclusivos, acesso aos nossos debates e mais informações sobre o
               universo do true crime?
             </p>
-            <ButtonLink href="/entrar">Entre</ButtonLink>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <ButtonLink href="/entrar">Entre</ButtonLink>
+              <ButtonLink href="/episodios" variant="secondary">
+                Ouvir episódios
+              </ButtonLink>
+            </div>
           </div>
-          <div className="order-1 relative mx-auto aspect-[4/5] w-full max-w-md lg:order-2 lg:max-w-lg">
-            <div className="absolute -inset-3 rounded-sm bg-gradient-to-br from-cm-gray-dark/40 to-transparent" />
-            <Image
-              src={HOST_PORTRAIT}
-              alt="Arte do podcast Crime Mania — substituir pela foto oficial da host quando disponível"
-              fill
-              className="relative rounded-sm object-cover object-center grayscale-[15%]"
-              priority
-              sizes="(max-width: 1024px) 100vw, 480px"
-            />
+
+          <div className="order-2 w-full lg:order-2">
+            <div className="cm-portrait-frame mx-auto aspect-[5/6] max-h-[min(70vh,520px)] w-full max-w-md lg:max-w-none">
+              <Image
+                src={HOST_PORTRAIT}
+                alt="Identidade visual Crime Mania"
+                fill
+                className="object-cover object-center"
+                priority
+                sizes="(max-width: 1024px) 90vw, 480px"
+              />
+            </div>
           </div>
         </div>
       </section>
 
       <div className="cm-editorial-rule" aria-hidden />
 
-      {/* Bloco 2 — O Crime Mania */}
-      <section id="sobre" className="cm-block bg-cm-surface">
-        <div className="cm-container grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:items-center">
-          <div>
-            <h2 className="font-display text-4xl text-white lg:text-5xl">O Crime Mania</h2>
-            <p className="mt-4 text-xl text-cm-gray">
-              O conteúdo feito para maníacos por true crime
-            </p>
+      <section id="sobre" className="cm-block bg-cm-bg-elevated">
+        <div className="cm-container grid gap-12 lg:grid-cols-2 lg:items-center lg:gap-16">
+          <div className="cm-portrait-frame relative mx-auto aspect-[4/5] w-full max-w-sm lg:mx-0 lg:max-w-md">
+            <Image
+              src={HOST_PORTRAIT}
+              alt="Crime Mania — podcast"
+              fill
+              className="object-cover object-top"
+              sizes="(max-width: 1024px) 320px, 384px"
+            />
           </div>
-          <div className="space-y-5 text-base leading-relaxed text-cm-gray">
-            <p>
-              Somos um podcast brasileiro de true crime em português, produzido pela audiosamba.
-              Histórias verdadeiras apresentadas por Rafa — com tom investigativo, curioso e
-              sofisticado, longe de sensacionalismo gore ou estética de terror.
-            </p>
-            <p>
-              Rafaelle conduz narrativas que valorizam memória, contexto e inteligência editorial —
-              para quem quer ir além do episódio sem perder credibilidade jornalística.
-            </p>
-            <ul className="flex flex-wrap gap-3 pt-2">
+          <div>
+            <SectionHeader
+              kicker="Sobre"
+              title="O Crime Mania"
+              description="O conteúdo feito para maníacos por true crime"
+            />
+            <div className="mt-8 space-y-5 text-base leading-relaxed text-cm-gray md:text-[1.05rem]">
+              <p>
+                Somos um podcast brasileiro de true crime em português, produzido pela audiosamba.
+                Histórias verdadeiras apresentadas por Rafa — investigação, curiosidade e
+                sofisticação, longe de sensacionalismo gore ou estética de terror.
+              </p>
+              <p>
+                Rafaelle conduz narrativas que valorizam memória, contexto e inteligência editorial
+                — para quem quer ir além do episódio com credibilidade jornalística.
+              </p>
+            </div>
+            <ul className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <li>
-                <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-sm border border-cm-gray-dark px-4 py-2 text-sm text-white hover:border-cm-red"
-                >
+                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
                   Instagram @crimemania
                 </a>
               </li>
               <li>
-                <a
-                  href="https://podcasters.spotify.com/pod/show/guria-studios"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-sm border border-cm-gray-dark px-4 py-2 text-sm text-white hover:border-cm-red"
-                >
-                  Ouça no Spotify
+                <a href={SPOTIFY_SHOW_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
+                  Spotify
                 </a>
               </li>
               <li>
-                <a
-                  href={YOUTUBE_CHANNEL_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-sm border border-cm-gray-dark px-4 py-2 text-sm text-white hover:border-cm-red"
-                >
-                  Veja no YouTube
+                <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
+                  YouTube
                 </a>
               </li>
             </ul>
@@ -106,34 +114,29 @@ export default function HomePage() {
 
       <div className="cm-editorial-rule" aria-hidden />
 
-      {/* Bloco 3 — Merchandising */}
-      <section id="shop" className="cm-block bg-cm-bg">
+      <section id="shop" className="cm-block">
         <div className="cm-container">
-          <div className="mb-10 flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="font-display text-sm text-cm-red">Shop</p>
-              <h2 className="font-display text-3xl text-white md:text-4xl">Merchandising</h2>
-              <p className="mt-2 text-cm-gray">Produtos para compra — caneca e camiseta oficiais.</p>
-            </div>
-            <ButtonLink href="/shop" variant="secondary">
+          <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <SectionHeader kicker="Shop" title="Merchandising" description="Produtos oficiais Crime Mania." />
+            <ButtonLink href="/shop" variant="secondary" className="shrink-0">
               Ver shop
             </ButtonLink>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2">
+          <div className="grid gap-6 md:grid-cols-2">
             {SHOP_PRODUCTS.map((product) => (
               <Link
                 key={product.slug}
                 href={`/shop/${product.slug}`}
-                className="group rounded-sm border border-cm-gray-dark bg-cm-surface p-6 transition hover:border-cm-gray"
+                className="cm-panel group overflow-hidden transition hover:border-cm-red/30"
               >
-                <div className="mb-4 flex h-40 items-center justify-center rounded-sm bg-cm-surface-elevated text-5xl text-cm-gray-dark">
-                  {product.imagePlaceholder === "mug" ? "☕" : "👕"}
+                <ProductVisual type={product.imagePlaceholder} />
+                <div className="p-6">
+                  <h3 className="text-lg font-semibold text-white group-hover:text-cm-red-light">
+                    {product.name}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-cm-gray">{product.description}</p>
+                  <p className="mt-4 text-sm font-semibold text-white">{product.priceLabel}</p>
                 </div>
-                <h3 className="text-lg font-semibold text-white group-hover:text-cm-red-light">
-                  {product.name}
-                </h3>
-                <p className="mt-2 text-sm text-cm-gray">{product.description}</p>
-                <p className="mt-3 text-sm font-semibold text-white">{product.priceLabel}</p>
               </Link>
             ))}
           </div>
@@ -142,36 +145,30 @@ export default function HomePage() {
 
       <div className="cm-editorial-rule" aria-hidden />
 
-      {/* Bloco 4 — Episódios */}
-      <section id="episodios" className="cm-block bg-cm-surface">
+      <section id="episodios" className="cm-block bg-cm-bg-elevated">
         <div className="cm-container">
-          <div className="mb-8 max-w-2xl">
-            <p className="font-display text-sm text-cm-red">Grátis</p>
-            <h2 className="font-display text-3xl text-white md:text-4xl">Episódios</h2>
-            <p className="mt-3 text-cm-gray">
-              Episódios disponíveis no Spotify e YouTube, com player incorporado em cada página.
+          <SectionHeader
+            kicker="Grátis"
+            title="Episódios"
+            description="Ouça no site, no Spotify ou acesse cada caso com mais contexto na área de membros."
+          />
+
+          <div className="mt-10 cm-panel cm-panel-glow p-4 md:p-6">
+            <p className="mb-4 text-xs font-semibold uppercase tracking-[0.25em] text-cm-gray">
+              Em destaque · {highlight.category}
             </p>
+            <EpisodePlayer episode={highlight} />
           </div>
 
-          <div className="mb-10 rounded-sm border border-cm-gray-dark bg-cm-bg p-4 md:p-6">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-cm-gray">
-              Destaque
-            </p>
-            <SpotifyEmbed
-              episodeId={featured[0].spotifyEpisodeId}
-              title={featured[0].title}
-            />
-          </div>
-
-          <div className="divide-y divide-cm-gray-dark/50">
+          <div className="mt-8 space-y-2">
             {featured.map((episode) => (
               <EpisodeListItem key={episode.slug} episode={episode} />
             ))}
           </div>
 
-          <div className="mt-10 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <ButtonLink href="/episodios" variant="secondary">
-              Ver todos os episódios
+              Ver catálogo completo
             </ButtonLink>
             <ButtonLink href="/membro/planos">Faça parte</ButtonLink>
           </div>
