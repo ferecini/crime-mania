@@ -6,6 +6,8 @@ import { PUBLIC_EPISODES } from "@/data/episodes";
 import { getSession } from "@/lib/auth/session";
 import { tierHasFeature } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/Button";
+import { memberSectionArtwork } from "@/lib/visual/category-artwork";
+import { EpisodeCover } from "@/components/episodes/EpisodeCover";
 
 export const metadata = { title: "Área de membros" };
 
@@ -21,35 +23,35 @@ export default async function MemberHomePage() {
       description: "Material complementar aos episódios públicos.",
       href: "/membro/dossies",
       feature: "dossierSummary" as const,
-      image: latestDossier.coverImage,
+      image: memberSectionArtwork.dossies,
     },
     {
       title: "Arquivo",
       description: "Casos não públicos, somente em áudio.",
       href: "/membro/arquivo",
       feature: "archive" as const,
-      image: PUBLIC_EPISODES[1]?.coverImage,
+      image: memberSectionArtwork.arquivo,
     },
     {
       title: "Conteúdo exclusivo",
       description: "Episódios extras e newsletter em áudio/vídeo.",
       href: "/membro/exclusivo",
       feature: "exclusive" as const,
-      image: PUBLIC_EPISODES[2]?.coverImage,
+      image: memberSectionArtwork.exclusivo,
     },
     {
       title: "Crime Mania Juris",
       description: "Análises jurídicas em áudio e vídeo.",
       href: "/membro/juris",
       feature: "jurisCatalog" as const,
-      image: latestDossier.coverImage,
+      image: memberSectionArtwork.juris,
     },
     {
       title: "Comunidade",
       description: "Fórum geral e sugestões de casos.",
       href: "/membro/comunidade",
       feature: "forum" as const,
-      image: latestEpisode.coverImage,
+      image: memberSectionArtwork.comunidade,
     },
     {
       title: "Shop",
@@ -57,14 +59,14 @@ export default async function MemberHomePage() {
       href: "/membro/shop",
       feature: "shopDiscount" as const,
       unlockedAlways: true,
-      image: latestEpisode.coverImage,
+      image: memberSectionArtwork.shop,
     },
   ];
 
   return (
     <div className="space-y-10">
-      <header className="cm-panel overflow-hidden p-0">
-        <div className="grid md:grid-cols-[1.2fr_0.8fr]">
+      <header className="overflow-hidden rounded-[4px] bg-cm-bg-low">
+        <div className="grid md:grid-cols-[1.15fr_0.85fr]">
           <div className="p-6 md:p-8">
             <p className="font-display text-xs tracking-[0.3em] text-cm-red">Central do maníaco</p>
             <h1 className="font-display mt-3 text-2xl text-white md:text-3xl">
@@ -80,17 +82,22 @@ export default async function MemberHomePage() {
                 Conheça os planos
               </ButtonLink>
             ) : (
-              <ButtonLink href="/episodios" variant="secondary" className="mt-5">
+              <ButtonLink href={`/episodios/${latestEpisode.slug}#player`} variant="secondary" className="mt-5">
                 Continuar ouvindo
               </ButtonLink>
             )}
           </div>
-          <div className="relative min-h-[180px] border-t border-white/5 md:min-h-0 md:border-l md:border-t-0">
-            <Image src={latestEpisode.coverImage} alt="" fill className="object-cover opacity-80" sizes="400px" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent p-5 flex flex-col justify-end">
+          <div className="relative min-h-[200px] border-t border-cm-divider md:min-h-[220px] md:border-l md:border-t-0">
+            <div className="absolute inset-3 overflow-hidden rounded-[4px]">
+              <EpisodeCover episode={latestEpisode} index={0} variant="compact" className="h-full w-full !aspect-auto" />
+            </div>
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-5">
               <p className="text-[10px] uppercase tracking-widest text-cm-gray">Continuar ouvindo</p>
               <p className="font-medium text-white">{latestEpisode.title}</p>
-              <Link href={`/episodios/${latestEpisode.slug}`} className="mt-2 text-xs font-semibold text-cm-red-light hover:text-white">
+              <Link
+                href={`/episodios/${latestEpisode.slug}#player`}
+                className="cm-text-link mt-2 inline-flex min-h-11 items-center text-xs font-semibold"
+              >
                 Ouvir episódio →
               </Link>
             </div>
@@ -116,6 +123,7 @@ export default async function MemberHomePage() {
                   title={section.title}
                   description={section.description}
                   href={section.href}
+                  imageSrc={section.image}
                   planHint={
                     section.feature === "archive" || section.feature === "jurisCatalog"
                       ? "Tier 2"
@@ -128,12 +136,19 @@ export default async function MemberHomePage() {
               <Link
                 key={section.href}
                 href={section.href}
-                className="cm-panel group overflow-hidden p-0 transition hover:border-cm-red/30"
+                className="group overflow-hidden rounded-[4px] bg-cm-bg-low transition hover:bg-cm-bg-elevated"
               >
-                <div className="relative h-28">
-                  <Image src={section.image} alt="" fill className="object-cover opacity-70 transition group-hover:opacity-90" sizes="320px" />
+                <div className="relative h-32">
+                  <Image
+                    src={section.image}
+                    alt=""
+                    fill
+                    className="object-cover transition duration-300 group-hover:scale-[1.02]"
+                    sizes="320px"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" aria-hidden />
                 </div>
-                <div className="p-4">
+                <div className="border-t border-cm-divider p-4">
                   <h3 className="font-semibold text-white">{section.title}</h3>
                   <p className="mt-1 text-sm text-cm-gray">{section.description}</p>
                   <p className="mt-3 text-xs font-semibold text-cm-red-light">Acessar →</p>
@@ -144,11 +159,11 @@ export default async function MemberHomePage() {
         </div>
       </section>
 
-      <section className="cm-panel p-6">
+      <section className="border-t border-cm-divider pt-8">
         <p className="font-display text-xs tracking-[0.25em] text-cm-gray">Último dossiê em destaque</p>
         <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-md">
-            <Image src={latestDossier.coverImage} alt="" fill className="object-cover" sizes="96px" />
+          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[4px]">
+            <Image src={memberSectionArtwork.dossies} alt="" fill className="object-cover" sizes="96px" />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold text-white">{latestDossier.title}</p>

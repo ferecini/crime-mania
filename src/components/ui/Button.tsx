@@ -5,10 +5,10 @@ type Variant = "primary" | "secondary" | "ghost";
 
 const variants: Record<Variant, string> = {
   primary:
-    "bg-cm-red text-white shadow-[0_8px_24px_rgba(144,2,0,0.35)] hover:bg-cm-red-light border border-transparent",
+    "min-h-12 bg-cm-red text-white hover:bg-cm-red-light border border-transparent shadow-[0_12px_32px_rgba(0,0,0,0.35)]",
   secondary:
-    "bg-white/5 text-white border border-white/10 hover:border-cm-gray hover:bg-white/[0.08]",
-  ghost: "bg-transparent text-cm-gray hover:text-white border border-transparent",
+    "min-h-12 bg-transparent text-white border border-cm-divider hover:border-cm-gray hover:bg-white/[0.04]",
+  ghost: "min-h-12 bg-transparent text-cm-gray hover:text-white border border-transparent",
 };
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -24,7 +24,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex min-h-11 items-center justify-center rounded-md px-6 py-2.5 text-sm font-semibold tracking-wide transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cm-red disabled:opacity-50 ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[4px] px-6 py-2.5 text-sm font-semibold tracking-wide transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-white disabled:opacity-50 ${variants[variant]} ${className}`}
       {...props}
     >
       {children}
@@ -51,7 +51,7 @@ export function ButtonLink({
     <Link
       href={href}
       onClick={onClick}
-      className={`inline-flex min-h-11 items-center justify-center rounded-md px-6 py-2.5 text-sm font-semibold tracking-wide transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cm-red ${variants[variant]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-[4px] px-6 py-2.5 text-sm font-semibold tracking-wide transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-white ${variants[variant]} ${className}`}
     >
       {children}
     </Link>

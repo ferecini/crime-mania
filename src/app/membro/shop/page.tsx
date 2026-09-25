@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { MemberSectionHeader } from "@/components/member/MemberSectionHeader";
 import { getSession } from "@/lib/auth/session";
 import { tierHasFeature } from "@/lib/plans";
 import { SHOP_PRODUCTS, memberDiscountLabel } from "@/data/products";
 import { ProductVisual } from "@/components/shop/ProductVisual";
+import { memberSectionArtwork } from "@/lib/visual/category-artwork";
 
 export const metadata = { title: "Shop · Membros" };
 
@@ -13,7 +15,11 @@ export default async function MemberShopPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-display text-3xl text-white">Shop para membros</h1>
+      <MemberSectionHeader
+        title="Shop para membros"
+        description="Merchandising oficial — pré-venda com benefícios para assinantes."
+        imageSrc={memberSectionArtwork.shop}
+      />
       {discount ? (
         <p className="cm-panel border-cm-red/30 bg-cm-red/5 p-4 text-sm text-white">{discount}</p>
       ) : (
