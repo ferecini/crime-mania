@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PublicEpisode } from "@/data/episodes";
-import { NativeAudioPlayer } from "@/components/media/NativeAudioPlayer";
+import { formatEpisodeNumber } from "@/data/episodes";
+import { ListenAlsoLinks } from "@/components/media/ListenAlsoLinks";
+import { NativeAudioPlayer, type NativeAudioPlayerHandle } from "@/components/media/NativeAudioPlayer";
 import { spotifyOpenEpisodeUrl } from "@/lib/media/spotify";
+
+type MediaSurface = "listen" | "watch";
 
 interface EpisodePlayerProps {
   episode: Pick<
@@ -16,12 +20,42 @@ interface EpisodePlayerProps {
     | "spotifyOpenEpisodeId"
     | "audioUrl"
     | "youtubeVideoId"
+    | "appleUrl"
+    | "deezerShowUrl"
   >;
 }
 
+function readInitialSurface(hasVideo: boolean): MediaSurface {
+  if (!hasVideo || typeof window === "undefined") return "listen";
+  const params = new URLSearchParams(window.location.search);
+  if (params.get("midia") === "video") return "watch";
+  if (window.location.hash === "#video") return "watch";
+  return "listen";
+}
+
+function MediaSkeleton() {
+  return (
+    <div
+      className="cm-panel overflow-hidden p-0"
+      role="status"
+      aria-label="Carregando player"
+    >
+      <div className="border-b border-white/5 px-4 py-3">
+        <div className="h-3 w-24 animate-pulse rounded bg-white/10" />
+      </div>
+      <div className="flex min-h-[152px] items-center justify-center bg-[#121212] px-4 py-8 sm:min-h-[232px]">
+        <div className="h-10 w-full max-w-md animate-pulse rounded-md bg-white/10" />
+      </div>
+    </div>
+  );
+}
+
 export function EpisodePlayer({ episode }: EpisodePlayerProps) {
+  const hasVideo = Boolean(episode.youtubeVideoId);
+  const [surface, setSurface] = useState<MediaSurface>("listen");
   const [embedOk, setEmbedOk] = useState<boolean | null>(null);
   const [embedLoaded, setEmbedLoaded] = useState(false);
+  const nativeRef = useRef<NativeAudioPlayerHandle>(null);
 
   const openId = episode.spotifyOpenEpisodeId;
   const spotifyOpenUrl = openId ? spotifyOpenEpisodeUrl(openId) : episode.spotifyUrl;
@@ -32,6 +66,18 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
   );
 
   useEffect(() => {
+    setSurface(readInitialSurface(hasVideo));
+  }, [hasVideo, episode.spotifyOpenEpisodeId]);
+
+  useEffect(() => {
+    nativeRef.current?.pause();
+  }, [surface]);
+
+  useEffect(() => {
+    if (surface !== "listen") {
+      setEmbedOk(null);
+      return;
+    }
     if (!openId) {
       setEmbedOk(false);
       return;
@@ -39,37 +85,97 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
     let cancelled = false;
     setEmbedOk(null);
     setEmbedLoaded(false);
-    fetch(`/api/media/spotify-embed?id=${encodeURIComponent(openId)}`)
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 12_000);
+    fetch(`/api/media/spotify-embed?id=${encodeURIComponent(openId)}`, {
+      signal: controller.signal,
+    })
       .then((r) => r.json())
       .then((data: { ok?: boolean }) => {
         if (!cancelled) setEmbedOk(Boolean(data.ok));
       })
       .catch(() => {
         if (!cancelled) setEmbedOk(false);
-      });
+      })
+      .finally(() => window.clearTimeout(timeout));
     return () => {
       cancelled = true;
+      controller.abort();
+      window.clearTimeout(timeout);
     };
-  }, [openId]);
+  }, [openId, surface]);
 
-  const subtitle = `${episode.category} · Ep. ${String(episode.number).padStart(3, "0")} · ${episode.duration}`;
+  const switchSurface = useCallback((next: MediaSurface) => {
+    nativeRef.current?.pause();
+    setSurface(next);
+  }, []);
+
+  const epLabel = formatEpisodeNumber(episode.number);
+  const subtitleParts = [episode.category, epLabel ? `Ep. ${epLabel}` : null, episode.duration].filter(
+    Boolean,
+  );
+  const subtitle = subtitleParts.join(" · ");
+
+  const showListenSelector = hasVideo;
 
   return (
     <div className="cm-player-stack space-y-4">
-      <NativeAudioPlayer src={episode.audioUrl} title={episode.title} subtitle={subtitle} />
-
-      {embedOk === null && openId && (
-        <div className="cm-panel px-4 py-3 text-sm text-cm-gray" role="status">
-          Verificando player Spotify…
+      {showListenSelector && (
+        <div
+          className="inline-flex rounded-md border border-white/10 bg-cm-bg-elevated p-0.5"
+          role="tablist"
+          aria-label="Modo de mídia"
+        >
+          <button
+            type="button"
+            role="tab"
+            aria-selected={surface === "listen"}
+            className={`min-h-9 rounded px-4 text-xs font-semibold uppercase tracking-wider transition ${
+              surface === "listen"
+                ? "bg-cm-red text-white"
+                : "text-cm-gray hover:text-white"
+            }`}
+            onClick={() => switchSurface("listen")}
+          >
+            Ouvir
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={surface === "watch"}
+            className={`min-h-9 rounded px-4 text-xs font-semibold uppercase tracking-wider transition ${
+              surface === "watch"
+                ? "bg-cm-red text-white"
+                : "text-cm-gray hover:text-white"
+            }`}
+            onClick={() => switchSurface("watch")}
+          >
+            Assistir
+          </button>
         </div>
       )}
 
-      {embedOk && embedSrc && (
-        <div className="cm-panel cm-panel-glow overflow-hidden p-0">
+      {surface === "watch" && episode.youtubeVideoId && (
+        <div key={`yt-${episode.youtubeVideoId}`} className="cm-panel overflow-hidden p-0">
+          <div className="aspect-video min-h-[200px] bg-black sm:min-h-[240px]">
+            <iframe
+              title={`Vídeo — ${episode.title}`}
+              src={`https://www.youtube-nocookie.com/embed/${episode.youtubeVideoId}`}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="h-full w-full border-0"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      )}
+
+      {surface === "listen" && embedOk === null && openId && <MediaSkeleton />}
+
+      {surface === "listen" && embedOk === true && embedSrc && (
+        <div key={`sp-${openId}`} className="cm-panel cm-panel-glow overflow-hidden p-0">
           <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cm-gray">
-              Spotify
-            </p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cm-gray">Spotify</p>
             <a
               href={spotifyOpenUrl}
               target="_blank"
@@ -103,41 +209,38 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
         </div>
       )}
 
-      {embedOk === false && (
-        <div className="cm-panel flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-cm-gray">
-            Player incorporado indisponível para este episódio. Ouça acima ou abra no Spotify.
-          </p>
-          <a
-            href={spotifyOpenUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-cm-red px-5 text-sm font-semibold text-white hover:bg-cm-red-light"
-          >
-            Ouvir no Spotify
-          </a>
+      {surface === "listen" && embedOk === false && (
+        <div key={`native-${episode.spotifyOpenEpisodeId}`} className="space-y-3">
+          {episode.audioUrl ? (
+            <NativeAudioPlayer
+              ref={nativeRef}
+              src={episode.audioUrl}
+              title={episode.title}
+              subtitle={subtitle}
+            />
+          ) : (
+            <div className="cm-panel p-4">
+              <p className="text-sm text-cm-gray">
+                Player incorporado indisponível e áudio RSS não encontrado para este episódio.
+              </p>
+            </div>
+          )}
+          {spotifyOpenUrl && (
+            <p className="text-center text-sm sm:text-left">
+              <a
+                href={spotifyOpenUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-cm-red-light underline-offset-2 hover:underline"
+              >
+                Abrir no Spotify
+              </a>
+            </p>
+          )}
         </div>
       )}
 
-      {episode.youtubeVideoId && (
-        <div className="cm-panel overflow-hidden p-0">
-          <div className="border-b border-white/5 px-4 py-3">
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-cm-gray">
-              YouTube
-            </p>
-          </div>
-          <div className="aspect-video bg-black">
-            <iframe
-              title={`YouTube — ${episode.title}`}
-              src={`https://www.youtube-nocookie.com/embed/${episode.youtubeVideoId}`}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              className="h-full w-full border-0"
-              loading="lazy"
-            />
-          </div>
-        </div>
-      )}
+      <ListenAlsoLinks episode={episode} />
     </div>
   );
 }

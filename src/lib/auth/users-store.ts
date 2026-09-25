@@ -1,4 +1,6 @@
 import bcrypt from "bcryptjs";
+import type { AccountType } from "@/lib/auth/session";
+import { DEMO_USER_ID } from "@/lib/auth/session";
 import type { SubscriptionTier } from "@/lib/plans";
 
 export interface StoredUser {
@@ -7,6 +9,8 @@ export interface StoredUser {
   displayName: string;
   passwordHash: string;
   tier: SubscriptionTier;
+  accountType: AccountType;
+  isDemo: boolean;
 }
 
 /** Armazenamento em memória para desenvolvimento — substituir por banco em produção. */
@@ -34,6 +38,8 @@ export async function createEmailUser(input: {
     displayName: input.displayName.trim(),
     passwordHash: await bcrypt.hash(input.password, 10),
     tier: "none",
+    accountType: "standard",
+    isDemo: false,
   };
   users.set(user.id, user);
   return user;
@@ -64,9 +70,14 @@ export async function ensureDemoUser(): Promise<void> {
   if (process.env.ENABLE_DEMO_USER !== "true") return;
   const email = "demo@crimemania.com.br";
   if (await findUserByEmail(email)) return;
-  await createEmailUser({
+  const user: StoredUser = {
+    id: DEMO_USER_ID,
     email,
     displayName: "Conta de teste",
-    password: "maniaco123",
-  });
+    passwordHash: await bcrypt.hash("maniaco123", 10),
+    tier: "none",
+    accountType: "demo",
+    isDemo: true,
+  };
+  users.set(user.id, user);
 }
