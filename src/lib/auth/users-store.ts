@@ -11,6 +11,7 @@ export interface StoredUser {
   tier: SubscriptionTier;
   accountType: AccountType;
   isDemo: boolean;
+  googleSub?: string;
 }
 
 /** Armazenamento em memória para desenvolvimento — substituir por banco em produção. */
@@ -62,6 +63,48 @@ export function getUserById(id: string): StoredUser | undefined {
 export function setUserTier(userId: string, tier: SubscriptionTier): void {
   const user = users.get(userId);
   if (user) user.tier = tier;
+}
+
+function findUserByGoogleSub(sub: string): StoredUser | undefined {
+  return [...users.values()].find((u) => u.googleSub === sub);
+}
+
+/** Entrada ou cadastro via Google OAuth (e-mail verificado). */
+export async function findOrCreateUserFromGoogle(profile: {
+  sub: string;
+  email: string;
+  name: string;
+}): Promise<StoredUser> {
+  const bySub = findUserByGoogleSub(profile.sub);
+  if (bySub) {
+    if (profile.name && bySub.displayName !== profile.name) {
+      bySub.displayName = profile.name;
+    }
+    return bySub;
+  }
+
+  const existing = await findUserByEmail(profile.email);
+  if (existing) {
+    if (existing.isDemo) {
+      throw new Error("Conta demo não pode ser vinculada ao Google.");
+    }
+    existing.googleSub = profile.sub;
+    if (profile.name) existing.displayName = profile.name;
+    return existing;
+  }
+
+  const user: StoredUser = {
+    id: crypto.randomUUID(),
+    email: profile.email,
+    displayName: profile.name,
+    passwordHash: await bcrypt.hash(crypto.randomUUID(), 10),
+    tier: "none",
+    accountType: "standard",
+    isDemo: false,
+    googleSub: profile.sub,
+  };
+  users.set(user.id, user);
+  return user;
 }
 
 /** Apenas desenvolvimento local com ENABLE_DEMO_USER=true */
