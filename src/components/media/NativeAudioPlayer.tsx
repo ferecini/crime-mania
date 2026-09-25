@@ -1,6 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
+
+export interface NativeAudioPlayerHandle {
+  pause: () => void;
+}
 
 interface NativeAudioPlayerProps {
   src: string;
@@ -15,7 +19,8 @@ function formatTime(seconds: number): string {
   return `${m}:${String(s).padStart(2, "0")}`;
 }
 
-export function NativeAudioPlayer({ src, title, subtitle }: NativeAudioPlayerProps) {
+export const NativeAudioPlayer = forwardRef<NativeAudioPlayerHandle, NativeAudioPlayerProps>(
+  function NativeAudioPlayer({ src, title, subtitle }, ref) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [playing, setPlaying] = useState(false);
@@ -28,6 +33,15 @@ export function NativeAudioPlayer({ src, title, subtitle }: NativeAudioPlayerPro
     setCurrent(0);
     setDuration(0);
   }, [src]);
+
+  useImperativeHandle(ref, () => ({
+    pause: () => {
+      const el = audioRef.current;
+      if (!el) return;
+      el.pause();
+      setPlaying(false);
+    },
+  }));
 
   const toggle = useCallback(async () => {
     const el = audioRef.current;
@@ -64,7 +78,7 @@ export function NativeAudioPlayer({ src, title, subtitle }: NativeAudioPlayerPro
 
       {status === "error" ? (
         <p className="text-sm text-cm-red-light" role="alert">
-          Não foi possível carregar este episódio agora. Use o botão Ouvir no Spotify abaixo.
+          Não foi possível carregar este episódio agora. Use o link Abrir no Spotify.
         </p>
       ) : (
         <>
@@ -118,4 +132,5 @@ export function NativeAudioPlayer({ src, title, subtitle }: NativeAudioPlayerPro
       )}
     </div>
   );
-}
+},
+);

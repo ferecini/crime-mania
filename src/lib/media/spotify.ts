@@ -8,6 +8,7 @@ export async function isSpotifyEmbedAvailable(
   try {
     const res = await fetch(`${OEMBED}?url=${encodeURIComponent(target)}`, {
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(10_000),
     });
     if (!res.ok) return false;
     const data = (await res.json()) as { html?: string };

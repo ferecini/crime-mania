@@ -26,6 +26,12 @@ export async function POST(request: Request) {
       { status: 401 },
     );
   }
+  if (process.env.NODE_ENV === "production" && user.isDemo) {
+    return NextResponse.json(
+      { error: "Conta de demonstração não disponível em produção." },
+      { status: 403 },
+    );
+  }
 
   const token = await createSessionToken({
     id: user.id,
@@ -33,6 +39,8 @@ export async function POST(request: Request) {
     displayName: user.displayName,
     tier: user.tier,
     provider: "email",
+    accountType: user.accountType,
+    isDemo: user.isDemo,
   });
 
   const response = NextResponse.json({ ok: true });

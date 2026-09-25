@@ -5,8 +5,12 @@ import { notFound } from "next/navigation";
 import { EpisodePlayer } from "@/components/media/EpisodePlayer";
 import { ButtonLink } from "@/components/ui/Button";
 import { Tag } from "@/components/ui/Tag";
-import { getEpisodeBySlug } from "@/data/episodes";
+import { formatEpisodeNumber, getEpisodeBySlug, PUBLIC_EPISODES, SITE_URL } from "@/data/episodes";
 import { formatDateBR } from "@/lib/format";
+
+export function generateStaticParams() {
+  return PUBLIC_EPISODES.map((episode) => ({ slug: episode.slug }));
+}
 
 export async function generateMetadata({
   params,
@@ -44,8 +48,42 @@ export default async function EpisodeDetailPage({
   const episode = getEpisodeBySlug(slug);
   if (!episode) notFound();
 
+  const epLabel = formatEpisodeNumber(episode.number);
+  const pageUrl = `${SITE_URL.replace(/\/$/, "")}/episodios/${episode.slug}`;
+  const jsonLd: Record<string, unknown>[] = [
+    {
+      "@context": "https://schema.org",
+      "@type": "PodcastEpisode",
+      name: episode.displayTitle,
+      description: episode.summary,
+      datePublished: episode.publishedAt || undefined,
+      url: pageUrl,
+      partOfSeries: {
+        "@type": "PodcastSeries",
+        name: "Crime Mania",
+        url: SITE_URL,
+      },
+    },
+  ];
+  if (episode.youtubeVideoId && episode.youtubeUrl) {
+    jsonLd.push({
+      "@context": "https://schema.org",
+      "@type": "VideoObject",
+      name: `Vídeo — ${episode.title}`,
+      description: episode.summary,
+      thumbnailUrl: episode.coverImage,
+      uploadDate: episode.publishedAt || undefined,
+      contentUrl: episode.youtubeUrl,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${episode.youtubeVideoId}`,
+    });
+  }
+
   return (
     <div className="cm-block min-h-0 py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="cm-container max-w-4xl">
         <Link href="/episodios" className="text-sm text-cm-gray transition hover:text-white">
           ← Episódios
@@ -65,9 +103,9 @@ export default async function EpisodeDetailPage({
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <Tag>{episode.category}</Tag>
-              <span className="font-display text-xs text-cm-gray">
-                Ep. {String(episode.number).padStart(3, "0")}
-              </span>
+              {epLabel && (
+                <span className="font-display text-xs text-cm-gray">Ep. {epLabel}</span>
+              )}
             </div>
             <h1 className="font-display mt-4 text-3xl leading-tight text-white md:text-4xl lg:text-5xl">
               {episode.title}

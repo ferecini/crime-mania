@@ -28,6 +28,8 @@ export async function POST(request: Request) {
       displayName: user.displayName,
       tier: user.tier,
       provider: "email",
+      accountType: user.accountType,
+      isDemo: user.isDemo,
     });
     const response = NextResponse.json({ ok: true });
     response.cookies.set(COOKIE_NAME, token, {

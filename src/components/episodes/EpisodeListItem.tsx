@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { Tag } from "@/components/ui/Tag";
 import type { PublicEpisode } from "@/data/episodes";
+import { formatEpisodeNumber } from "@/data/episodes";
 
 export function EpisodeListItem({ episode }: { episode: PublicEpisode }) {
+  const epLabel = formatEpisodeNumber(episode.number);
   return (
     <article className="cm-panel group p-4 transition hover:border-cm-red/25 md:p-5">
       <div className="flex flex-col gap-4 md:grid md:grid-cols-[5.5rem_1fr_auto] md:items-center md:gap-5">
@@ -19,9 +21,9 @@ export function EpisodeListItem({ episode }: { episode: PublicEpisode }) {
 
         <div className="min-w-0 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-display text-[10px] text-cm-gray">
-              {String(episode.number).padStart(3, "0")}
-            </span>
+            {epLabel && (
+              <span className="font-display text-[10px] text-cm-gray">{epLabel}</span>
+            )}
             <Tag>{episode.category}</Tag>
             <span className="text-xs text-cm-gray">{episode.duration}</span>
           </div>

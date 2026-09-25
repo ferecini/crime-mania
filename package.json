@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "generate:episodes": "node scripts/generate-episodes.mjs",
+    "validate:spotify": "node scripts/validate-spotify-embeds.mjs",
+    "build": "node scripts/validate-spotify-embeds.mjs && next build",
     "start": "next start",
     "lint": "eslint"
   },

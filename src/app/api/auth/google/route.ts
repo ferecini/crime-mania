@@ -41,6 +41,8 @@ export async function POST(request: Request) {
     displayName: user.displayName,
     tier: user.tier,
     provider: "google",
+    accountType: user.accountType,
+    isDemo: user.isDemo,
   });
 
   const response = NextResponse.json({ ok: true });
