@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "Panton Rust Extra Bold Base";
+  src: local("Panton Rust Extra Bold Base"), local("PantonRustExtraBold-Base");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --cm-red: #900200;
+  --cm-red-light: #ad1b1b;
+  --cm-gray: #999999;
+  --cm-gray-dark: #545454;
+  --cm-black: #000000;
+  --cm-white: #ffffff;
+  --cm-bg: #0a0a0a;
+  --cm-surface: #141414;
+  --cm-surface-elevated: #1c1c1c;
+  --font-display: "Panton Rust Extra Bold Base", "Arial Black", sans-serif;
+  --font-body: var(--font-open-sans), "Open Sans", system-ui, sans-serif;
+}
+
+@theme inline {
+  --color-cm-red: var(--cm-red);
+  --color-cm-red-light: var(--cm-red-light);
+  --color-cm-gray: var(--cm-gray);
+  --color-cm-gray-dark: var(--cm-gray-dark);
+  --color-cm-bg: var(--cm-bg);
+  --color-cm-surface: var(--cm-surface);
+  --color-cm-surface-elevated: var(--cm-surface-elevated);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--cm-bg);
+  color: var(--cm-white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--cm-red) 40%, transparent);
+}
+
+.cm-block {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 6rem 1.25rem 4rem;
+}
+
+@media (min-width: 1024px) {
+  .cm-block {
+    padding: 7rem 3rem 5rem;
+  }
+}
+
+.cm-container {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+.cm-editorial-rule {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--cm-gray-dark) 20%,
+    var(--cm-gray-dark) 80%,
+    transparent
+  );
+}
