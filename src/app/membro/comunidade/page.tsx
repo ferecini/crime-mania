@@ -1,6 +1,8 @@
+import { MemberSectionHeader } from "@/components/member/MemberSectionHeader";
 import { PaywallCard } from "@/components/member/PaywallCard";
 import { getSession } from "@/lib/auth/session";
 import { evaluateAccess } from "@/lib/paywall";
+import { memberSectionArtwork } from "@/lib/visual/category-artwork";
 
 export const metadata = { title: "Comunidade" };
 
@@ -11,7 +13,11 @@ export default async function CommunityPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="font-display text-3xl text-white">Comunidade</h1>
+      <MemberSectionHeader
+        title="Comunidade"
+        description="Debates, fórum geral e sugestões de casos para assinantes."
+        imageSrc={memberSectionArtwork.comunidade}
+      />
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-white">Fórum geral</h2>
         {!forum.allowed ? (

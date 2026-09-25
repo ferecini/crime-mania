@@ -1,10 +1,16 @@
 import Link from "next/link";
-import { INSTAGRAM_URL, YOUTUBE_CHANNEL_URL } from "@/data/episodes";
+import {
+  APPLE_PODCAST_URL,
+  DEEZER_SHOW_URL,
+  INSTAGRAM_URL,
+  SPOTIFY_SHOW_URL,
+  YOUTUBE_CHANNEL_URL,
+} from "@/data/episodes";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-white/5 bg-black/40 px-5 py-14 lg:px-8">
-      <div className="cm-container grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-cm-divider bg-black px-[1.125rem] py-14 md:px-6 lg:px-[4.5rem]">
+      <div className="cm-container grid gap-12 md:grid-cols-3">
         <div className="space-y-3">
           <p className="font-display text-sm text-white">Crime Mania</p>
           <p className="max-w-sm text-sm leading-relaxed text-cm-gray">
@@ -33,6 +39,11 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/membro/planos" className="text-white/80 hover:text-white">
+                Planos
+              </Link>
+            </li>
+            <li>
               <Link href="/entrar" className="text-white/80 hover:text-white">
                 Entrar
               </Link>
@@ -41,7 +52,7 @@ export function SiteFooter() {
         </div>
         <div>
           <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-cm-gray">
-            Redes
+            Legal e plataformas
           </p>
           <ul className="space-y-2 text-sm">
             <li>
@@ -51,7 +62,37 @@ export function SiteFooter() {
                 rel="noopener noreferrer"
                 className="text-white/80 hover:text-white"
               >
-                Instagram @crimemania
+                Instagram
+              </a>
+            </li>
+            <li>
+              <a
+                href={SPOTIFY_SHOW_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/80 hover:text-white"
+              >
+                Spotify
+              </a>
+            </li>
+            <li>
+              <a
+                href={APPLE_PODCAST_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/80 hover:text-white"
+              >
+                Apple Podcasts
+              </a>
+            </li>
+            <li>
+              <a
+                href={DEEZER_SHOW_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/80 hover:text-white"
+              >
+                Deezer
               </a>
             </li>
             <li>
@@ -66,25 +107,8 @@ export function SiteFooter() {
             </li>
           </ul>
         </div>
-        <div>
-          <p className="mb-3 text-[10px] font-semibold uppercase tracking-[0.25em] text-cm-gray">
-            Membros
-          </p>
-          <ul className="space-y-2 text-sm">
-            <li>
-              <Link href="/membro" className="text-white/80 hover:text-white">
-                Área logada
-              </Link>
-            </li>
-            <li>
-              <Link href="/membro/planos" className="text-white/80 hover:text-white">
-                Planos
-              </Link>
-            </li>
-          </ul>
-        </div>
       </div>
-      <div className="cm-container mt-10 border-t border-white/5 pt-6 text-xs text-cm-gray">
+      <div className="cm-container mt-10 border-t border-cm-divider pt-6 text-xs text-cm-gray">
         © {new Date().getFullYear()} Crime Mania · audiosamba
       </div>
     </footer>
