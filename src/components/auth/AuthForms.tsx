@@ -146,7 +146,8 @@ export function AuthForms() {
         </form>
       </div>
       <p className="mt-4 text-center text-xs leading-relaxed text-cm-gray">
-        Cadastro não inclui assinatura automaticamente. Escolha um plano após entrar.
+        Criar conta é gratuito e libera a área de membros. Episódios públicos continuam abertos.
+        Dossiês, Arquivo e conteúdo premium exigem assinatura — escolha um plano depois de entrar.
       </p>
     </div>
   );

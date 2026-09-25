@@ -58,13 +58,15 @@ export function setUserTier(userId: string, tier: SubscriptionTier): void {
   if (user) user.tier = tier;
 }
 
-/** Conta demo para testes locais (senha: maniaco123) */
+/** Apenas desenvolvimento local com ENABLE_DEMO_USER=true */
 export async function ensureDemoUser(): Promise<void> {
+  if (process.env.NODE_ENV === "production") return;
+  if (process.env.ENABLE_DEMO_USER !== "true") return;
   const email = "demo@crimemania.com.br";
   if (await findUserByEmail(email)) return;
   await createEmailUser({
     email,
-    displayName: "Crime Maníaco Demo",
+    displayName: "Conta de teste",
     password: "maniaco123",
   });
 }

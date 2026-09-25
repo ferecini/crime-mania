@@ -1,4 +1,6 @@
+import Image from "next/image";
 import { PaywallCard } from "@/components/member/PaywallCard";
+import { PUBLIC_EPISODES } from "@/data/episodes";
 import { getSession } from "@/lib/auth/session";
 import { evaluateAccess } from "@/lib/paywall";
 
@@ -7,6 +9,7 @@ export const metadata = { title: "Arquivo" };
 export default async function ArchivePage() {
   const session = await getSession();
   const access = evaluateAccess(session, "archive");
+  const preview = PUBLIC_EPISODES[1];
 
   return (
     <div className="space-y-6">
@@ -17,11 +20,17 @@ export default async function ArchivePage() {
       {!access.allowed ? (
         <PaywallCard state={access} />
       ) : (
-        <ul className="space-y-3 text-sm text-cm-gray">
-          <li className="rounded-sm border border-cm-gray-dark p-4">
-            Ficha de caso (player protegido) — aguardando cadastro editorial no admin.
-          </li>
-        </ul>
+        <div className="cm-panel overflow-hidden p-0">
+          <div className="relative h-40">
+            <Image src={preview.coverImage} alt="" fill className="object-cover opacity-60" sizes="800px" />
+          </div>
+          <div className="p-6">
+            <p className="text-sm text-cm-gray">
+              O catálogo premium em áudio está sendo migrado para esta área. Em breve você verá fichas
+              com player protegido por episódio.
+            </p>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -12,7 +12,7 @@ export default function ShopPage() {
         <SectionHeader
           kicker="Merchandising"
           title="Shop Crime Mania"
-          description="Compra disponível sem assinatura. Membros Tier 1 e 2 têm desconto e prioridade quando o checkout estiver ativo."
+          description="Pré-venda em preparação. Assinantes Tier 1 e 2 terão 15% de desconto e prioridade quando o checkout abrir."
         />
         <div className="mt-10 grid gap-6 md:grid-cols-2">
           {SHOP_PRODUCTS.map((product) => (
@@ -23,11 +23,14 @@ export default function ShopPage() {
             >
               <ProductVisual type={product.imagePlaceholder} />
               <div className="p-6">
-                <h2 className="text-xl font-semibold text-white group-hover:text-cm-red-light">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-cm-red">
+                  Pré-venda
+                </p>
+                <h2 className="mt-2 text-xl font-semibold text-white group-hover:text-cm-red-light">
                   {product.name}
                 </h2>
-                <p className="mt-2 text-sm leading-relaxed text-cm-gray">{product.description}</p>
-                <p className="mt-4 font-semibold text-white">{product.priceLabel}</p>
+                <p className="mt-2 text-sm leading-relaxed text-cm-gray">{product.shortDescription}</p>
+                <p className="mt-4 font-semibold text-white">{product.listPriceLabel}</p>
               </div>
             </Link>
           ))}

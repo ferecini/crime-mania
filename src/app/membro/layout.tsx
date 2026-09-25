@@ -5,6 +5,7 @@ import { MemberNav } from "@/components/member/MemberNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getSession } from "@/lib/auth/session";
 import { LogoutButton } from "@/components/member/LogoutButton";
+import { MemberBottomNav } from "@/components/member/MemberBottomNav";
 
 export default async function MemberLayout({
   children,
@@ -58,8 +59,9 @@ export default async function MemberLayout({
           <p className="font-display mb-4 text-[10px] tracking-[0.35em] text-cm-gray">Área logada</p>
           <MemberNav layout="sidebar" />
         </aside>
-        <main className="min-w-0">{children}</main>
+        <main className="min-w-0 pb-20 lg:pb-0">{children}</main>
       </div>
+      <MemberBottomNav />
       <SiteFooter />
     </div>
   );

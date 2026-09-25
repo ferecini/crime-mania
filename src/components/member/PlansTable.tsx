@@ -22,7 +22,7 @@ function cell(value: boolean) {
 export function PlansTable() {
   const features = Object.keys(FEATURE_MATRIX) as FeatureKey[];
   return (
-    <div className="cm-table-scroll cm-panel">
+    <div className="cm-table-scroll cm-panel hidden lg:block">
       <table className="min-w-[640px] w-full border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-white/10 bg-black/20">
@@ -50,8 +50,8 @@ export function PlansTable() {
         </tbody>
       </table>
       <p className="border-t border-white/10 p-4 text-xs leading-relaxed text-cm-gray">
-        Planos: {PLANS.map((p) => p.name).join(" · ")}. Valores comerciais serão publicados pela
-        equipe Crime Mania.
+        Planos: {PLANS.map((p) => p.name).join(" · ")}. Valores comerciais serão anunciados no
+        lançamento oficial.
       </p>
     </div>
   );

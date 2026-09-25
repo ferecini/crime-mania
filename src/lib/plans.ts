@@ -7,9 +7,13 @@ export interface Plan {
   name: string;
   tier: Exclude<SubscriptionTier, "none">;
   billing: "monthly" | "annual";
+  /** Exibido quando billingEnabled=false ou preço ainda não publicado. */
   priceLabel: string;
-  priceNote?: string;
+  priceNote: string;
+  billingDetail: string;
+  cancelPolicy: string;
   highlight?: boolean;
+  recommendedReason?: string;
 }
 
 export const PLANS: Plan[] = [
@@ -18,25 +22,32 @@ export const PLANS: Plan[] = [
     name: "Tier 1",
     tier: "tier1",
     billing: "monthly",
-    priceLabel: "Consulte na área de planos",
-    priceNote: "Cobrança mensal · benefícios Tier 1",
+    priceLabel: "Lançamento em breve",
+    priceNote: "Cobrança mensal · renovação automática",
+    billingDetail: "Você será avisado por e-mail quando a assinatura Tier 1 abrir.",
+    cancelPolicy: "Cancelamento a qualquer momento, conforme termos publicados no lançamento.",
   },
   {
     id: "tier2-monthly",
     name: "Tier 2",
     tier: "tier2",
     billing: "monthly",
-    priceLabel: "Consulte na área de planos",
-    priceNote: "Cobrança mensal · acesso completo premium",
+    priceLabel: "Lançamento em breve",
+    priceNote: "Cobrança mensal · acesso premium completo",
+    billingDetail: "Inclui Arquivo, Juris, exclusivos e comunidade avançada.",
+    cancelPolicy: "Cancelamento a qualquer momento, conforme termos publicados no lançamento.",
     highlight: true,
+    recommendedReason: "Melhor para quem quer Arquivo, Juris e conteúdo exclusivo.",
   },
   {
     id: "tier2-annual",
     name: "Tier 2 Anual",
     tier: "tier2",
     billing: "annual",
-    priceLabel: "Consulte na área de planos",
+    priceLabel: "Lançamento em breve",
     priceNote: "Mesmos benefícios do Tier 2 · ciclo anual",
+    billingDetail: "Economia prevista em relação ao mensal — valores no anúncio oficial.",
+    cancelPolicy: "Renovação anual com aviso prévio conforme termos do lançamento.",
   },
 ];
 
@@ -165,3 +176,22 @@ export function minTierForFeature(feature: FeatureKey): SubscriptionTier {
   if (row.tier2) return "tier2";
   return "tier2";
 }
+
+/** Benefícios-chave por plano (mobile). */
+export const PLAN_HIGHLIGHTS: Record<PlanId, string[]> = {
+  "tier1-monthly": [
+    "Dossiês completos (exceto Juris)",
+    "Fórum geral",
+    "15% off no shop + prioridade",
+  ],
+  "tier2-monthly": [
+    "Tudo do Tier 1",
+    "Arquivo e conteúdo exclusivo",
+    "Crime Mania Juris + sugestão de casos",
+  ],
+  "tier2-annual": [
+    "Mesmos benefícios do Tier 2 mensal",
+    "Ciclo anual de cobrança",
+    "Ideal para ouvir o catálogo premium o ano todo",
+  ],
+};

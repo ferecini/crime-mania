@@ -39,9 +39,9 @@ export default function HomePage() {
               universo do true crime?
             </p>
             <div className="flex flex-wrap gap-3 pt-1">
-              <ButtonLink href="/entrar">Entre</ButtonLink>
-              <ButtonLink href="/episodios" variant="secondary">
-                Ouvir episódios
+              <ButtonLink href="/membro/planos">Faça parte</ButtonLink>
+              <ButtonLink href="/entrar" variant="secondary">
+                Entrar
               </ButtonLink>
             </div>
           </div>
@@ -87,8 +87,8 @@ export default function HomePage() {
                 sofisticação, longe de sensacionalismo gore ou estética de terror.
               </p>
               <p>
-                Rafaelle conduz narrativas que valorizam memória, contexto e inteligência editorial
-                — para quem quer ir além do episódio com credibilidade jornalística.
+                Rafa conduz narrativas que valorizam memória, contexto e inteligência editorial — para
+              quem quer ir além do episódio com credibilidade jornalística.
               </p>
             </div>
             <ul className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -134,8 +134,8 @@ export default function HomePage() {
                   <h3 className="text-lg font-semibold text-white group-hover:text-cm-red-light">
                     {product.name}
                   </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-cm-gray">{product.description}</p>
-                  <p className="mt-4 text-sm font-semibold text-white">{product.priceLabel}</p>
+                  <p className="mt-2 text-sm leading-relaxed text-cm-gray">{product.shortDescription}</p>
+                  <p className="mt-4 text-sm font-semibold text-white">{product.listPriceLabel}</p>
                 </div>
               </Link>
             ))}

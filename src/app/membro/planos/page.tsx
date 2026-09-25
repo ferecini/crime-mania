@@ -1,3 +1,4 @@
+import { PlansComparisonMobile } from "@/components/member/PlansComparisonMobile";
 import { PlansTable } from "@/components/member/PlansTable";
 import { SubscribeButtons } from "@/components/member/SubscribeButtons";
 import { SectionHeader } from "@/components/ui/SectionHeader";
@@ -12,7 +13,7 @@ export default async function PlansPage() {
       <SectionHeader
         kicker="Assinatura"
         title="Planos e benefícios"
-        description="Tier 1 mensal, Tier 2 mensal ou Tier 2 anual — o Tier 2 mensal e anual incluem os mesmos recursos premium."
+        description="Escolha Tier 1 mensal, Tier 2 mensal ou Tier 2 anual. O Tier 2 mensal e anual compartilham os mesmos recursos premium."
       />
       {session?.tier !== "none" && (
         <p className="cm-panel px-4 py-3 text-sm text-white">
@@ -23,6 +24,7 @@ export default async function PlansPage() {
         </p>
       )}
       <SubscribeButtons />
+      <PlansComparisonMobile />
       <PlansTable />
     </div>
   );
