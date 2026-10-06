@@ -2,7 +2,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DossierGalleryCarousel } from "@/components/dossier/DossierGalleryCarousel";
 import { DossierDownloadPdfLink } from "@/components/dossier/DossierDownloadPdfLink";
+import { SemanticDossierReader } from "@/components/dossier/SemanticDossierReader";
 import { ResponsiveDossierReader } from "@/components/dossier/ResponsiveDossierReader";
+import { legacyCropReaderEnabled } from "@/lib/dossier/access";
+import { readMemberDocument, resolvePublishedFormat } from "@/lib/dossier/document-store";
 import { readProcessedManifest } from "@/lib/dossier/manifest-store";
 import { DossierTextSummary } from "@/components/dossier/DossierTextSummary";
 import { PaywallCard } from "@/components/member/PaywallCard";
@@ -28,9 +31,22 @@ export default async function DossierDetailPage({
   const summaryAccess = evaluateAccess(session, "dossierSummary");
   const jurisAccess = evaluateAccess(session, "dossierJuris");
   const canViewSummary = summaryAccess.allowed;
+  const publishedFormat = await resolvePublishedFormat(slug);
+  const htmlDocument = await readMemberDocument(slug);
+  const useHtmlReader =
+    publishedFormat === "html" &&
+    htmlDocument?.status === "ready" &&
+    htmlDocument.sections.some((s) => s.blocks.length > 0);
   const processedManifest = await readProcessedManifest(slug);
-  const useNativeReader =
+  const useLegacyCropReader =
+    legacyCropReaderEnabled() &&
     Boolean(processedManifest?.status === "ready" && processedManifest.blocks.length > 0);
+  const documentProcessing =
+    publishedFormat === "html" &&
+    htmlDocument &&
+    htmlDocument.status !== "ready" &&
+    htmlDocument.status !== "failed";
+  const documentFailed = publishedFormat === "html" && htmlDocument?.status === "failed";
   const jurisItem = dossier.jurisMediaId ? getJurisItem(dossier.jurisMediaId) : undefined;
 
   return (
@@ -48,7 +64,7 @@ export default async function DossierDetailPage({
               href={`/membro/admin/dossiers/${slug}`}
               className="text-sm text-cm-red-light hover:text-white"
             >
-              Revisão PDF
+              Revisão dossiê
             </Link>
             <Link
               href={`/membro/admin/galerias/${slug}`}
@@ -69,17 +85,42 @@ export default async function DossierDetailPage({
         <PaywallCard state={summaryAccess} />
       ) : (
         <>
-          {useNativeReader ? (
+          {useHtmlReader ? (
+            <>
+              <SemanticDossierReader slug={dossier.slug} />
+              {dossier.documentFile ? (
+                <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
+              ) : null}
+            </>
+          ) : useLegacyCropReader ? (
             <>
               <ResponsiveDossierReader slug={dossier.slug} />
               {dossier.documentFile ? (
                 <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
               ) : null}
             </>
-          ) : dossier.documentFile ? (
-            <p className="text-sm text-cm-gray">
-              Documento editorial em preparação ou aguardando revisão do pipeline.
-            </p>
+          ) : documentProcessing ? (
+            <div className="space-y-3 rounded-[4px] border border-dashed border-cm-divider p-6">
+              <p className="font-display text-white">Documento em processamento</p>
+              <p className="text-sm text-cm-gray">
+                A extração para HTML editorial está em andamento. Use o PDF original enquanto isso.
+              </p>
+              {dossier.documentFile ? (
+                <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
+              ) : null}
+            </div>
+          ) : documentFailed || dossier.documentFile ? (
+            <div className="space-y-3">
+              <p className="text-sm text-cm-gray" role="status">
+                {documentFailed
+                  ? (htmlDocument?.processingError ??
+                    "Falha na conversão para HTML. Download do PDF original disponível.")
+                  : "Documento editorial em preparação ou aguardando revisão."}
+              </p>
+              {dossier.documentFile ? (
+                <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
+              ) : null}
+            </div>
           ) : (
             <p className="text-sm text-cm-gray">Documento editorial em preparação.</p>
           )}

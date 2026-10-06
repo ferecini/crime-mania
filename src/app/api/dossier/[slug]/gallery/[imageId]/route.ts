@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import sharp from "sharp";
 import { getDossierRecord } from "@/data/dossiers";
 import { canAccessDossierDocument } from "@/lib/dossier/access";
 import { isDossierAdmin } from "@/lib/dossier/admin-access";
@@ -7,7 +8,7 @@ import { createDossierStorage } from "@/lib/dossier/storage";
 import { getSession } from "@/lib/auth/session";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string; imageId: string }> },
 ) {
   const { slug, imageId } = await params;
@@ -34,11 +35,34 @@ export async function GET(
     return NextResponse.json({ error: "Arquivo indisponível." }, { status: 503 });
   }
 
-  return new NextResponse(new Uint8Array(data), {
+  const url = new URL(request.url);
+  const wRaw = Number(url.searchParams.get("w") ?? "0");
+  const targetW = Number.isFinite(wRaw) && wRaw > 0 ? Math.min(1440, Math.round(wRaw)) : 0;
+
+  let pipeline = sharp(data).rotate();
+  try {
+    pipeline = sharp(await pipeline.trim({ threshold: 14 }).toBuffer()).rotate();
+  } catch {
+    pipeline = sharp(data).rotate();
+  }
+
+  let outBuf: Buffer;
+  let contentType = item.mimeType;
+  if (targetW > 0) {
+    outBuf = await pipeline
+      .resize({ width: targetW, withoutEnlargement: true })
+      .webp({ quality: 86, effort: 4 })
+      .toBuffer();
+    contentType = "image/webp";
+  } else {
+    outBuf = await pipeline.toBuffer();
+  }
+
+  return new NextResponse(new Uint8Array(outBuf), {
     headers: {
-      "Content-Type": item.mimeType,
+      "Content-Type": contentType,
       "Cache-Control": "private, max-age=300",
-      "Content-Length": String(data.length),
+      "Content-Length": String(outBuf.length),
     },
   });
 }

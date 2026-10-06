@@ -15,6 +15,8 @@ export function toPublicGalleryManifest(manifest: GalleryManifest): GalleryManif
         credit: item.credit,
         sourceType: item.sourceType,
         isIllustrative: item.isIllustrative,
+        width: item.width,
+        height: item.height,
       })),
   };
 }

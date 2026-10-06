@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { GalleryItemPublic } from "@/lib/gallery/types";
 
-function imageSrc(slug: string, id: string) {
-  return `/api/dossier/${encodeURIComponent(slug)}/gallery/${encodeURIComponent(id)}`;
+function imageSrc(slug: string, id: string, width?: number) {
+  const base = `/api/dossier/${encodeURIComponent(slug)}/gallery/${encodeURIComponent(id)}`;
+  return width ? `${base}?w=${width}` : base;
 }
 
 const ILLUSTRATIVE_LABEL = "Imagem ilustrativa para demonstração";
@@ -15,6 +16,7 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
   const [index, setIndex] = useState(0);
   const [lightbox, setLightbox] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [slideReady, setSlideReady] = useState(false);
   const touchStartX = useRef<number | null>(null);
   const closeBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -53,9 +55,15 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
       if (!items.length) return;
       setIndex((i) => (i + delta + items.length) % items.length);
       setLoadError(null);
+      setSlideReady(false);
     },
     [items.length],
   );
+
+  useEffect(() => {
+    setSlideReady(false);
+    setLoadError(null);
+  }, [index, items]);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -92,6 +100,8 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
   const current = items[index];
   const prev = items[(index - 1 + items.length) % items.length];
   const next = items[(index + 1) % items.length];
+  const isPortrait =
+    Boolean(current.width && current.height && current.height > current.width);
 
   return (
     <section className="max-w-full space-y-3 overflow-x-hidden md:space-y-4" aria-label="Galeria do caso">
@@ -116,15 +126,26 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
         <button
           type="button"
           onClick={() => setLightbox(true)}
-          className="relative block w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
+          className="relative mx-auto block w-full max-w-[calc(100vw-32px)] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
         >
+          {!slideReady ? (
+            <div className="min-h-[12rem] animate-pulse bg-cm-bg-elevated" aria-hidden />
+          ) : null}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={imageSrc(slug, current.id)}
+            src={imageSrc(slug, current.id, 780)}
             alt={current.alt}
-            className="mx-auto block h-auto max-h-[min(70vh,520px)] w-full max-w-full object-contain"
+            className={`mx-auto block w-full max-w-full object-contain ${
+              isPortrait ? "max-h-[75vh] h-auto" : "h-auto max-h-[75vh]"
+            }`}
             draggable={false}
-            onError={() => setLoadError("Não foi possível carregar esta imagem.")}
+            onLoad={(e) => {
+              if (e.currentTarget.naturalWidth > 0) setSlideReady(true);
+            }}
+            onError={() => {
+              setSlideReady(false);
+              setLoadError("Não foi possível carregar esta imagem.");
+            }}
           />
         </button>
         <button
@@ -182,13 +203,13 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           <button
             type="button"
             onClick={() => setLightbox(true)}
-            className="relative min-w-0 flex-[1_1_80%] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
+            className="relative min-w-0 flex-[1_1_78%] basis-[78%] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20 md:max-w-[85%]"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageSrc(slug, current.id)}
+              src={imageSrc(slug, current.id, 960)}
               alt={current.alt}
-              className="mx-auto block max-h-[70vh] w-full max-w-full object-contain"
+              className="mx-auto block max-h-[75vh] w-full max-w-full object-contain"
               draggable={false}
               onError={() => setLoadError("Não foi possível carregar esta imagem.")}
             />
@@ -265,9 +286,9 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           <div className="max-h-[75vh] w-full max-w-3xl overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={imageSrc(slug, current.id)}
+              src={imageSrc(slug, current.id, 1200)}
               alt={current.alt}
-              className="mx-auto max-h-[75vh] w-auto max-w-full object-contain"
+              className="mx-auto max-h-[75vh] w-full max-w-full object-contain"
             />
           </div>
           <div className="mt-4 max-w-lg px-4 text-center text-sm">

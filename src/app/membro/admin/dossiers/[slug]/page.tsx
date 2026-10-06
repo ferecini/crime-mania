@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { DossierHtmlReviewPanel } from "@/components/dossier/DossierHtmlReviewPanel";
 import { DossierReviewPanel } from "@/components/dossier/DossierReviewPanel";
 import { getDossierRecord } from "@/data/dossiers";
 import { isDossierAdmin } from "@/lib/dossier/admin-access";
@@ -31,7 +32,15 @@ export default async function MemberAdminDossierPage({
       <Link href="/membro/dossies" className="text-sm text-cm-gray hover:text-white">
         ← Dossiês
       </Link>
-      <DossierReviewPanel slug={slug} title={dossier.title} />
+      <DossierHtmlReviewPanel slug={slug} />
+      <details className="rounded border border-cm-divider p-4">
+        <summary className="cursor-pointer text-sm text-cm-gray">
+          Recortes legados (rollback — não usar como leitor principal)
+        </summary>
+        <div className="mt-4">
+          <DossierReviewPanel slug={slug} title={dossier.title} />
+        </div>
+      </details>
     </main>
   );
 }

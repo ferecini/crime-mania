@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { getDossierRecord } from "../src/data/dossiers";
 import { canAccessDossierDocument } from "../src/lib/dossier/access";
 import { pickVariantWidth, readProcessedManifest } from "../src/lib/dossier/manifest-store";
+import { readMemberDocument, resolvePublishedFormat } from "../src/lib/dossier/document-store";
 import { toPublicManifest } from "../src/lib/dossier/public-manifest";
+import { toPublicDocument } from "../src/lib/dossier/public-document";
+import { sanitizeDocument } from "../src/lib/dossier/document-sanitize";
 
 function testAccessTiers() {
   const dossier = getDossierRecord("familia-banfield");
@@ -41,6 +44,11 @@ async function testManifestOrder() {
   assert.ok(!JSON.stringify(pub).includes("passwordHash"));
   assert.ok(pub.blocks.some((b) => b.viewport === "mobile"));
   assert.ok(pub.blocks.some((b) => b.viewport === "desktop"));
+  const mobileN = manifest.blocks.filter((b) => b.viewport === "mobile").length;
+  const desktopN = manifest.blocks.filter((b) => b.viewport === "desktop").length;
+  assert.equal(mobileN, 15, "Banfield mobile crop count");
+  assert.equal(desktopN, 13, "Banfield desktop crop count");
+  assert.ok(manifest.blocks.some((b) => b.id === "m05b-timeline-titulo"));
 }
 
 function testPickWidth() {
@@ -49,10 +57,24 @@ function testPickWidth() {
   assert.equal(pickVariantWidth(2000), 1440);
 }
 
+async function testHtmlDocument() {
+  const format = await resolvePublishedFormat("familia-banfield");
+  const doc = await readMemberDocument("familia-banfield");
+  if (format === "html" && doc?.status === "ready") {
+    assert.ok(doc.sections.length >= 1, "seções HTML Banfield");
+    const pub = toPublicDocument(doc, true);
+    assert.ok(!JSON.stringify(pub).includes("storageKey"));
+    assert.ok(pub.sections.some((s) => s.blocks.some((b) => b.type === "timeline")));
+    const sanitized = sanitizeDocument(doc);
+    assert.ok(sanitized.meta.charCount > 500);
+  }
+}
+
 async function main() {
   testAccessTiers();
   await testManifestOrder();
   testPickWidth();
+  await testHtmlDocument();
   console.log("test:dossier-pipeline OK");
 }
 

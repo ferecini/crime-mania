@@ -30,6 +30,8 @@ export type GalleryItemPublic = {
   credit?: string;
   sourceType: GallerySourceType;
   isIllustrative: boolean;
+  width?: number;
+  height?: number;
 };
 
 export type GalleryManifestPublic = {
