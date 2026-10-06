@@ -21,10 +21,10 @@
     "sha256": "8432490f4b01fc7ea78ca209d053e243c17b89233dae34d91fd7063eb757ab74"
   },
   "fig-mapa": {
-    "width": 1582,
-    "height": 275,
-    "aspect": 5.753,
-    "bytes": 79216,
-    "sha256": "372ff2a6e55118d9b1f40772d57c90079d7f54e271dc61d60e972c3d117d481a"
+    "width": 1594,
+    "height": 294,
+    "aspect": 5.422,
+    "bytes": 62800,
+    "sha256": "2aff24438fa234434fd726d492e40da6961294531e229d5ca72c474ca9c047b4"
   }
 }

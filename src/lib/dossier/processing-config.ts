@@ -377,10 +377,10 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
   },
   {
     assetId: "fig-mapa",
-    xStart: 0.012,
-    xEnd: 0.988,
-    yStart: 0.405,
-    yEnd: 0.5,
+    xStart: 0.009,
+    xEnd: 0.992,
+    yStart: 0.38,
+    yEnd: 0.482,
   },
 ];
 
