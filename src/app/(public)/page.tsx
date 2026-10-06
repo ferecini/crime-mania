@@ -3,75 +3,40 @@ import { EpisodeListItem } from "@/components/episodes/EpisodeListItem";
 import { EditorialHero } from "@/components/home/EditorialHero";
 import { RecentEpisodeStrip } from "@/components/home/RecentEpisodeStrip";
 import { ProductVisual } from "@/components/shop/ProductVisual";
+import { PlatformSocialLinks } from "@/components/social/PlatformSocialLinks";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { EditorialImage } from "@/components/visual/EditorialImage";
 import { SHOP_PRODUCTS } from "@/data/products";
-import {
-  INSTAGRAM_URL,
-  PUBLIC_EPISODES,
-  SPOTIFY_SHOW_URL,
-  YOUTUBE_CHANNEL_URL,
-} from "@/data/episodes";
-import { aboutPlaceholder } from "@/lib/visual/category-artwork";
+import { getPublicEpisodes } from "@/data/episodes";
+/** ISR catálogo — alinhar com EPISODE_REVALIDATE_SECONDS no servidor */
+export const revalidate = 1800;
 
-export default function HomePage() {
-  const latest = PUBLIC_EPISODES[0];
-  const preview = PUBLIC_EPISODES.slice(1, 4);
+export default async function HomePage() {
+  const episodes = await getPublicEpisodes();
+  const latest = episodes[0];
+  const preview = episodes.slice(1, 4);
 
   return (
     <>
       <EditorialHero />
-      <RecentEpisodeStrip episode={latest} />
+      {latest && <RecentEpisodeStrip episode={latest} />}
 
       <section id="sobre" className="cm-block bg-cm-bg-low">
-        <div className="cm-container grid gap-12 lg:grid-cols-[minmax(0,0.95fr)_1.05fr] lg:items-center lg:gap-16">
-          {/* Placeholder provisório — substituir pela foto oficial da Rafa quando disponível */}
-          <div className="relative mx-auto aspect-[5/6] w-full max-w-md overflow-hidden rounded-[4px] lg:mx-0">
-            <EditorialImage
-              src={aboutPlaceholder}
-              alt="Imagem provisória da apresentadora em estúdio"
-              fill
-              sizes="(max-width: 1024px) 90vw, 420px"
-              className="object-cover object-[70%_center]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" aria-hidden />
-          </div>
-          <div>
-            <SectionHeader
-              kicker="Sobre"
-              title="O Crime Mania"
-              description="O conteúdo feito para maníacos por true crime"
-            />
-            <div className="mt-8 space-y-5 text-base leading-relaxed text-cm-gray md:text-[1.05rem]">
-              <p>
-                Somos um podcast brasileiro de true crime em português, produzido pela audiosamba.
-                Histórias verdadeiras apresentadas por Rafa — investigação, curiosidade e
-                sofisticação, longe de sensacionalismo gore ou estética de terror.
-              </p>
-              <p>
-                Rafa conduz narrativas que valorizam memória, contexto e inteligência editorial — para
-                quem quer ir além do episódio com credibilidade jornalística.
-              </p>
-            </div>
-            <ul className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-              <li>
-                <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
-                  Instagram @crimemania
-                </a>
-              </li>
-              <li>
-                <a href={SPOTIFY_SHOW_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
-                  Spotify
-                </a>
-              </li>
-              <li>
-                <a href={YOUTUBE_CHANNEL_URL} target="_blank" rel="noopener noreferrer" className="cm-social-link">
-                  YouTube
-                </a>
-              </li>
-            </ul>
-          </div>
+        <div className="cm-container max-w-3xl">
+          <h2 className="font-display text-3xl leading-tight text-white md:text-4xl lg:text-5xl">
+            O CRIME MANIA
+          </h2>
+          <p className="mt-4 text-lg font-bold leading-relaxed text-white md:text-xl">
+            O conteúdo feito para maníacos por true crime.
+          </p>
+          <p className="mt-6 text-base font-bold leading-relaxed text-cm-gray md:text-lg">
+            Somos um podcast de true crime que transforma casos em conversa. Histórias verdadeiras
+            sobre assassinatos, mortes misteriosas e desaparecimentos apresentadas por Rafa, que
+            conduz narrativas cheias de curiosidade e investigação. Aqui valorizamos a memória e o
+            respeito às vítimas. Para os verdadeiros fãs de true crime que querem se manter
+            informados.
+          </p>
+          <PlatformSocialLinks className="mt-8" />
         </div>
       </section>
 
@@ -80,9 +45,9 @@ export default function HomePage() {
       <section id="shop" className="cm-block">
         <div className="cm-container">
           <div className="mb-10 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <SectionHeader kicker="Shop" title="Merchandising" description="Produtos oficiais Crime Mania." />
-            <ButtonLink href="/shop" variant="secondary" className="shrink-0">
-              Ver shop
+            <SectionHeader title="Shop" description="Produtos oficiais Crime Mania." />
+            <ButtonLink href="/shop" variant="secondary" className="min-h-11 shrink-0">
+              Ver produtos
             </ButtonLink>
           </div>
           <div className="grid gap-8 md:grid-cols-2">
@@ -111,41 +76,50 @@ export default function HomePage() {
 
       <div className="cm-editorial-rule" aria-hidden />
 
-      <section id="episodios" className="cm-block bg-cm-bg-low">
-        <div className="cm-container">
+      <section className="cm-block bg-cm-bg">
+        <div className="cm-container max-w-2xl">
           <SectionHeader
-            kicker="Grátis"
-            title="Episódios"
-            description="Histórias investigativas em áudio — ouça no site ou nas plataformas."
+            title="Membros"
+            description="Acesse nossos conteúdos exclusivos, debates e mais informações sobre o universo do true crime."
           />
-
-          <div className="mt-10 md:hidden">
-            <EpisodeListItem episode={latest} index={0} variant="featured" />
-          </div>
-
-          <div className="mt-10 hidden md:block">
-            <EpisodeListItem episode={latest} index={0} variant="featured" />
-          </div>
-
-          <div className="mt-12 lg:hidden">
-            {preview.map((episode, i) => (
-              <EpisodeListItem key={episode.slug} episode={episode} index={i + 1} variant="row" />
-            ))}
-          </div>
-          <div className="mt-12 hidden gap-6 lg:grid lg:grid-cols-3">
-            {preview.map((episode, i) => (
-              <EpisodeListItem key={episode.slug} episode={episode} index={i + 1} variant="grid" />
-            ))}
-          </div>
-
-          <div className="mt-12 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <ButtonLink href="/episodios" variant="secondary">
-              Ver catálogo completo
-            </ButtonLink>
-            <ButtonLink href="/membro/planos">Faça parte</ButtonLink>
-          </div>
+          <ButtonLink href="/planos" className="mt-8 min-h-11">
+            Faça parte
+          </ButtonLink>
         </div>
       </section>
+
+      <div className="cm-editorial-rule" aria-hidden />
+
+      {latest && (
+        <section id="episodios" className="cm-block bg-cm-bg-low">
+          <div className="cm-container">
+            <SectionHeader title="Episódios" description="Ouça aqui ou nas plataformas." />
+
+            <div className="mt-10 md:hidden">
+              <EpisodeListItem episode={latest} index={0} variant="featured" />
+            </div>
+
+            <div className="mt-10 hidden md:block">
+              <EpisodeListItem episode={latest} index={0} variant="featured" />
+            </div>
+
+            <div className="mt-12 lg:hidden">
+              {preview.map((episode, i) => (
+                <EpisodeListItem key={episode.slug} episode={episode} index={i + 1} variant="row" />
+              ))}
+            </div>
+            <div className="mt-12 hidden gap-6 lg:grid lg:grid-cols-3">
+              {preview.map((episode, i) => (
+                <EpisodeListItem key={episode.slug} episode={episode} index={i + 1} variant="grid" />
+              ))}
+            </div>
+
+            <ButtonLink href="/episodios" variant="secondary" className="mt-12 min-h-11">
+              Ver catálogo completo
+            </ButtonLink>
+          </div>
+        </section>
+      )}
     </>
   );
 }

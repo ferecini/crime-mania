@@ -1,17 +1,22 @@
-import rawEpisodes from "@/data/episodes.generated.json";
 import {
   APPLE_PODCAST_URL,
-  DEEZER_SHOW_ID,
   DEEZER_SHOW_URL,
   INSTAGRAM_URL,
   SITE_URL,
   SPOTIFY_SHOW_URL,
   YOUTUBE_CHANNEL_URL,
 } from "@/data/platforms";
+import {
+  getArchivedEpisodeBySlug,
+  getEpisodeBySlug as getEpisodeBySlugAsync,
+  getPublicEpisodes,
+} from "@/lib/podcast/episode-catalog";
 
 export type EpisodeCategory = string;
+export type EpisodeStatus = "published" | "archived";
 
 export interface PublicEpisode {
+  guid: string;
   slug: string;
   /** Número editorial quando há correspondência confiável no RSS. */
   number?: number;
@@ -33,42 +38,37 @@ export interface PublicEpisode {
   audioUrl: string;
   youtubeVideoId?: string;
   youtubeUrl?: string;
+  status?: EpisodeStatus;
 }
 
-type RawEpisode = (typeof rawEpisodes)[number];
-
-function mapEpisode(raw: RawEpisode): PublicEpisode {
-  return {
-    slug: raw.slug,
-    number: raw.number ?? undefined,
-    category: raw.category,
-    title: raw.title,
-    displayTitle: raw.displayTitle,
-    summary: raw.summary,
-    duration: raw.duration,
-    publishedAt: raw.publishedAt,
-    coverImage: raw.coverImage,
-    spotifyOpenEpisodeId: raw.spotifyOpenEpisodeId,
-    spotifyUrl: raw.spotifyUrl,
-    appleEpisodeId: raw.appleEpisodeId,
-    appleUrl: raw.appleUrl,
-    deezerShowId: raw.deezerShowId ?? DEEZER_SHOW_ID,
-    deezerShowUrl: raw.deezerShowUrl ?? DEEZER_SHOW_URL,
-    audioUrl: raw.audioUrl,
-    youtubeVideoId: raw.youtubeVideoId ?? undefined,
-    youtubeUrl: raw.youtubeUrl ?? undefined,
-  };
-}
-
-export const PUBLIC_EPISODES: PublicEpisode[] = (rawEpisodes as RawEpisode[]).map(mapEpisode);
-
-export function getEpisodeBySlug(slug: string): PublicEpisode | undefined {
-  return PUBLIC_EPISODES.find((e) => e.slug === slug);
-}
+export { getPublicEpisodes, getEpisodeBySlugAsync as getEpisodeBySlug, getArchivedEpisodeBySlug };
 
 export function formatEpisodeNumber(number?: number): string | null {
   if (number == null || number <= 0) return null;
   return String(number).padStart(3, "0");
+}
+
+/** Título canônico igual às plataformas oficiais (Spotify, Apple, etc.). */
+export function episodePublicTitle(episode: Pick<PublicEpisode, "displayTitle" | "title">): string {
+  const canonical = episode.displayTitle?.trim();
+  return canonical || episode.title;
+}
+
+function normalizeEpisodeLabel(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/\u0300-\u036f/g, "")
+    .toUpperCase()
+    .trim();
+}
+
+/** Categoria já aparece no prefixo do título canônico (ex.: ASSASSINATO: Carol Stuart). */
+export function episodeCategoryInTitle(
+  episode: Pick<PublicEpisode, "displayTitle" | "title" | "category">,
+): boolean {
+  const title = normalizeEpisodeLabel(episodePublicTitle(episode));
+  const category = normalizeEpisodeLabel(episode.category);
+  return title.startsWith(`${category}:`) || title.startsWith(`${category} `);
 }
 
 export {

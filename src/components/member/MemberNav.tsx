@@ -3,18 +3,52 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const links = [
+type NavItem = {
+  href: string;
+  label: string;
+  shortLabel?: string;
+  description?: string;
+  group?: "comunidade";
+};
+
+const links: NavItem[] = [
   { href: "/membro", label: "Início" },
-  { href: "/membro/dossies", label: "Dossiês" },
-  { href: "/membro/arquivo", label: "Arquivo" },
-  { href: "/membro/exclusivo", label: "Exclusivo" },
-  { href: "/membro/juris", label: "Juris" },
-  { href: "/membro/comunidade", label: "Comunidade" },
+  {
+    href: "/membro/episodios",
+    label: "Episódios",
+    description: "Episódios para você",
+  },
+  {
+    href: "/membro/dossies",
+    label: "Dossiês",
+    description: "Informação, fatos e fotos.",
+  },
+  {
+    href: "/membro/juris",
+    label: "Crime Mania Juris",
+    shortLabel: "CM Juris",
+  },
+  {
+    href: "/membro/comunidade",
+    label: "Comunidade",
+    description:
+      "Espaço exclusivo para debater casos, crimes e tudo sobre o universo do true crime",
+  },
+  { href: "/membro/comunidade/forum", label: "Fórum da comunidade", group: "comunidade" },
+  { href: "/membro/comunidade/sugira", label: "Sugira um caso", group: "comunidade" },
+  {
+    href: "/membro/arquivo",
+    label: "Arquivo",
+    description: "Explore nosso acervo privado de episódios",
+  },
   { href: "/membro/shop", label: "Shop" },
-  { href: "/membro/busca", label: "Busca" },
-  { href: "/membro/planos", label: "Planos" },
   { href: "/membro/conta", label: "Minha conta" },
 ];
+
+function isActive(pathname: string, href: string): boolean {
+  if (href === "/membro") return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export function MemberNav({ layout = "sidebar" }: { layout?: "sidebar" | "rail" }) {
   const pathname = usePathname();
@@ -30,16 +64,20 @@ export function MemberNav({ layout = "sidebar" }: { layout?: "sidebar" | "rail" 
       aria-label="Área de membros"
     >
       {links.map((link) => {
-        const active =
-          pathname === link.href ||
-          (link.href !== "/membro" && pathname.startsWith(link.href));
+        const active = isActive(pathname, link.href);
+        const label =
+          !isSidebar && link.shortLabel && link.label === "Crime Mania Juris"
+            ? link.shortLabel
+            : link.label;
         return (
           <Link
             key={link.href}
             href={link.href}
             className={
               isSidebar
-                ? `rounded-md px-3 py-2.5 text-sm transition ${
+                ? `rounded-md px-3 py-2.5 transition ${
+                    link.group === "comunidade" ? "ml-3 border-l border-white/10 pl-4" : ""
+                  } ${
                     active
                       ? "bg-cm-red/15 font-semibold text-white ring-1 ring-cm-red/30"
                       : "text-cm-gray hover:bg-white/5 hover:text-white"
@@ -51,7 +89,10 @@ export function MemberNav({ layout = "sidebar" }: { layout?: "sidebar" | "rail" 
                   }`
             }
           >
-            {link.label}
+            <span className="block text-sm">{label}</span>
+            {isSidebar && link.description && (
+              <span className="mt-0.5 block text-xs leading-snug text-cm-gray">{link.description}</span>
+            )}
           </Link>
         );
       })}

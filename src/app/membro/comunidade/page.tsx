@@ -1,8 +1,8 @@
+import Link from "next/link";
 import { MemberSectionHeader } from "@/components/member/MemberSectionHeader";
 import { PaywallCard } from "@/components/member/PaywallCard";
 import { getSession } from "@/lib/auth/session";
 import { evaluateAccess } from "@/lib/paywall";
-import { memberSectionArtwork } from "@/lib/visual/category-artwork";
 
 export const metadata = { title: "Comunidade" };
 
@@ -15,37 +15,36 @@ export default async function CommunityPage() {
     <div className="space-y-8">
       <MemberSectionHeader
         title="Comunidade"
-        description="Debates, fórum geral e sugestões de casos para assinantes."
-        imageSrc={memberSectionArtwork.comunidade}
+        description="Espaço exclusivo para debater casos, crimes e tudo sobre o universo do true crime"
       />
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-white">Fórum geral</h2>
-        {!forum.allowed ? (
-          <PaywallCard state={forum} />
-        ) : (
-          <p className="text-sm text-cm-gray">
-            Fórum geral (não por caso) — módulo de discussão será integrado na próxima etapa.
-          </p>
-        )}
-      </section>
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-white">Sugestão de caso</h2>
-        {!suggestion.allowed ? (
-          <PaywallCard state={suggestion} />
-        ) : (
-          <form className="max-w-lg space-y-3">
-            <label className="block text-sm text-cm-gray">
-              Descreva o caso sugerido
-              <textarea
-                className="mt-1 w-full rounded-sm border border-cm-gray-dark bg-cm-bg p-3 text-white"
-                rows={4}
-                placeholder="Em breve: envio moderado Tier 2"
-                disabled
-              />
-            </label>
-          </form>
-        )}
-      </section>
+      <div className="grid gap-4 md:grid-cols-2">
+        <section className="rounded-[4px] border border-cm-divider bg-cm-bg-low p-6">
+          <h2 className="text-lg font-semibold text-white">Fórum da comunidade</h2>
+          <p className="mt-2 text-sm text-cm-gray">Debates gerais sobre true crime — Tier 1 e Tier 2.</p>
+          {!forum.allowed ? (
+            <div className="mt-4">
+              <PaywallCard state={forum} />
+            </div>
+          ) : (
+            <Link href="/membro/comunidade/forum" className="cm-text-link mt-4 inline-flex min-h-11 items-center text-sm font-semibold">
+              Entrar no fórum →
+            </Link>
+          )}
+        </section>
+        <section className="rounded-[4px] border border-cm-divider bg-cm-bg-low p-6">
+          <h2 className="text-lg font-semibold text-white">Sugira um caso</h2>
+          <p className="mt-2 text-sm text-cm-gray">Envie sugestões moderadas — exclusivo Tier 2.</p>
+          {!suggestion.allowed ? (
+            <div className="mt-4">
+              <PaywallCard state={suggestion} />
+            </div>
+          ) : (
+            <Link href="/membro/comunidade/sugira" className="cm-text-link mt-4 inline-flex min-h-11 items-center text-sm font-semibold">
+              Abrir formulário →
+            </Link>
+          )}
+        </section>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { PublicEpisode } from "@/data/episodes";
-import { formatEpisodeNumber } from "@/data/episodes";
+import { episodePublicTitle, formatEpisodeNumber } from "@/data/episodes";
 import { formatDateBR } from "@/lib/format";
 
 export function RecentEpisodeStrip({ episode }: { episode: PublicEpisode }) {
@@ -23,7 +23,9 @@ export function RecentEpisodeStrip({ episode }: { episode: PublicEpisode }) {
             {episode.duration && episode.duration !== "—" && <> · {episode.duration}</>}
             {episode.publishedAt && <> · {formatDateBR(episode.publishedAt)}</>}
           </p>
-          <p className="truncate text-base font-semibold text-white">{episode.title}</p>
+          <p className="cm-episode-title line-clamp-2 text-base leading-snug text-white">
+            {episodePublicTitle(episode)}
+          </p>
         </div>
         <Link
           href={`/episodios/${episode.slug}#player`}

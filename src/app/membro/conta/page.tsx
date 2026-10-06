@@ -1,4 +1,6 @@
+import { AccountPreferredNameForm } from "@/components/member/AccountPreferredNameForm";
 import { getSession } from "@/lib/auth/session";
+import { getUserById } from "@/lib/auth/users-store";
 
 export const metadata = { title: "Minha conta" };
 
@@ -6,6 +8,7 @@ export default async function AccountPage() {
   const session = await getSession();
   if (!session) return null;
 
+  const stored = getUserById(session.id);
   const tierLabel =
     session.tier === "tier2"
       ? "Tier 2 ativo"
@@ -18,7 +21,7 @@ export default async function AccountPage() {
       <h1 className="font-display text-3xl text-white">Minha conta</h1>
       <dl className="divide-y divide-cm-gray-dark rounded-sm border border-cm-gray-dark text-sm">
         <div className="grid grid-cols-3 gap-2 p-4">
-          <dt className="text-cm-gray">Nome</dt>
+          <dt className="text-cm-gray">Como te chamamos</dt>
           <dd className="col-span-2 text-white">{session.displayName}</dd>
         </div>
         <div className="grid grid-cols-3 gap-2 p-4">
@@ -33,6 +36,10 @@ export default async function AccountPage() {
           <dt className="text-cm-gray">Provedor</dt>
           <dd className="col-span-2 capitalize text-white">{session.provider}</dd>
         </div>
+        <AccountPreferredNameForm
+          initialPreferredName={stored?.preferredName ?? session.displayName}
+          needsConfirm={stored?.needsPreferredNameConfirm}
+        />
       </dl>
       <p className="text-xs text-cm-gray">
         Histórico de pagamentos e portal de cobrança ficam disponíveis após a ativação do gateway

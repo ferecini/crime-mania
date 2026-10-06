@@ -1,6 +1,10 @@
 import Link from "next/link";
 import type { PublicEpisode } from "@/data/episodes";
-import { formatEpisodeNumber } from "@/data/episodes";
+import {
+  episodeCategoryInTitle,
+  episodePublicTitle,
+  formatEpisodeNumber,
+} from "@/data/episodes";
 import { formatDateBR } from "@/lib/format";
 import { EpisodeCover } from "@/components/episodes/EpisodeCover";
 
@@ -16,23 +20,38 @@ export function EpisodeListItem({
   variant = "row",
 }: EpisodeListItemProps) {
   const epLabel = formatEpisodeNumber(episode.number);
+  const publicTitle = episodePublicTitle(episode);
+  const hideCategoryFromA11y = episodeCategoryInTitle(episode);
 
   if (variant === "featured") {
     return (
       <article className="group grid gap-5 md:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)] md:items-stretch">
-        <Link href={`/episodios/${episode.slug}`} className="block min-h-[280px]">
-          <EpisodeCover episode={episode} index={index} variant="feature" className="h-full min-h-[280px]" />
+        <Link
+          href={`/episodios/${episode.slug}`}
+          className="block min-h-[280px]"
+          aria-label={publicTitle}
+        >
+          <EpisodeCover
+            episode={episode}
+            index={index}
+            variant="feature"
+            className="h-full min-h-[280px]"
+            showMetaOnCover={false}
+          />
         </Link>
         <div className="flex flex-col justify-center py-1">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cm-red">
+          <p
+            className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cm-red"
+            aria-hidden={hideCategoryFromA11y ? true : undefined}
+          >
             {episode.category}
           </p>
           {epLabel && (
             <p className="mt-1 text-[10px] uppercase tracking-widest text-cm-gray">Ep. {epLabel}</p>
           )}
-          <h2 className="font-display mt-3 text-2xl leading-tight text-white md:text-3xl">
+          <h2 className="cm-episode-title mt-3 text-2xl leading-tight text-white md:text-3xl">
             <Link href={`/episodios/${episode.slug}`} className="hover:text-cm-red-light">
-              {episode.title}
+              {publicTitle}
             </Link>
           </h2>
           {episode.publishedAt && (
@@ -56,14 +75,21 @@ export function EpisodeListItem({
   if (variant === "grid") {
     return (
       <article className="group">
-        <Link href={`/episodios/${episode.slug}`} className="block">
+        <Link
+          href={`/episodios/${episode.slug}`}
+          className="block"
+          aria-label={publicTitle}
+        >
           <EpisodeCover episode={episode} index={index} variant="compact" className="w-full" />
           <div className="mt-3 space-y-1 border-t border-cm-divider pt-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cm-red">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-[0.18em] text-cm-red"
+              aria-hidden={hideCategoryFromA11y ? true : undefined}
+            >
               {episode.category}
             </p>
-            <h3 className="text-base font-semibold leading-snug text-white group-hover:text-cm-red-light">
-              {episode.title}
+            <h3 className="cm-episode-title text-base leading-snug text-white group-hover:text-cm-red-light">
+              {publicTitle}
             </h3>
             {episode.publishedAt && (
               <p className="text-xs text-cm-gray">{formatDateBR(episode.publishedAt)}</p>
@@ -80,19 +106,27 @@ export function EpisodeListItem({
         <Link
           href={`/episodios/${episode.slug}`}
           className="relative h-28 w-28 shrink-0 overflow-hidden rounded-[4px] sm:h-[7rem] sm:w-[7rem]"
+          aria-label={publicTitle}
         >
           <EpisodeCover episode={episode} index={index} variant="compact" className="h-full w-full" />
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] uppercase tracking-wider">
-            <span className="font-semibold text-cm-red">{episode.category}</span>
+            <span
+              className="font-semibold text-cm-red"
+              aria-hidden={hideCategoryFromA11y ? true : undefined}
+            >
+              {episode.category}
+            </span>
             {epLabel && <span className="text-cm-gray">Ep. {epLabel}</span>}
             {episode.publishedAt && (
               <span className="text-cm-gray">{formatDateBR(episode.publishedAt)}</span>
             )}
           </div>
-          <h3 className="mt-2 text-lg font-semibold leading-snug text-white group-hover:text-cm-red-light">
-            <Link href={`/episodios/${episode.slug}`}>{episode.title}</Link>
+          <h3 className="cm-episode-title mt-2 text-lg leading-snug text-white group-hover:text-cm-red-light">
+            <Link href={`/episodios/${episode.slug}`} aria-label={publicTitle}>
+              {publicTitle}
+            </Link>
           </h3>
           <Link
             href={`/episodios/${episode.slug}#player`}

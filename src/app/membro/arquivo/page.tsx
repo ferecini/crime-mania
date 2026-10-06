@@ -1,8 +1,9 @@
 import { MemberSectionHeader } from "@/components/member/MemberSectionHeader";
 import { PaywallCard } from "@/components/member/PaywallCard";
+import { MemberMediaEmptyState, MemberMediaPlayer } from "@/components/media/MemberMediaPlayer";
+import { ARCHIVE_EPISODES } from "@/data/member-media";
 import { getSession } from "@/lib/auth/session";
 import { evaluateAccess } from "@/lib/paywall";
-import { memberSectionArtwork } from "@/lib/visual/category-artwork";
 
 export const metadata = { title: "Arquivo" };
 
@@ -14,18 +15,20 @@ export default async function ArchivePage() {
     <div className="space-y-6">
       <MemberSectionHeader
         title="Arquivo"
-        description="Casos não públicos, disponíveis somente em áudio para assinantes Tier 2."
-        imageSrc={memberSectionArtwork.arquivo}
+        description="Explore nosso acervo privado de episódios"
       />
       {!access.allowed ? (
         <PaywallCard state={access} />
+      ) : ARCHIVE_EPISODES.length === 0 ? (
+        <MemberMediaEmptyState message="O acervo privado está sendo migrado. Episódios extras aparecerão aqui com player protegido — não usamos YouTube público como único controle de acesso." />
       ) : (
-        <div className="rounded-[4px] border border-cm-divider bg-cm-bg-low p-6">
-          <p className="text-sm leading-relaxed text-cm-gray">
-            O catálogo premium em áudio está sendo migrado para esta área. Em breve você verá fichas
-            com player protegido por episódio.
-          </p>
-        </div>
+        <ul className="space-y-4">
+          {ARCHIVE_EPISODES.map((item) => (
+            <li key={item.id}>
+              <MemberMediaPlayer item={item} />
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

@@ -1,12 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { LockedTile } from "@/components/member/LockedTile";
-import { DOSSIER_PREVIEWS } from "@/data/dossiers";
-import { PUBLIC_EPISODES } from "@/data/episodes";
+import { getFeaturedDossierSlug, getDossierPreview } from "@/data/dossiers";
+import { episodePublicTitle, getPublicEpisodes } from "@/data/episodes";
 import { getSession } from "@/lib/auth/session";
 import { tierHasFeature } from "@/lib/plans";
 import { ButtonLink } from "@/components/ui/Button";
-import { memberSectionArtwork } from "@/lib/visual/category-artwork";
 import { EpisodeCover } from "@/components/episodes/EpisodeCover";
 
 export const metadata = { title: "Área de membros" };
@@ -14,44 +12,41 @@ export const metadata = { title: "Área de membros" };
 export default async function MemberHomePage() {
   const session = await getSession();
   const tier = session?.tier ?? "none";
-  const latestEpisode = PUBLIC_EPISODES[0];
-  const latestDossier = DOSSIER_PREVIEWS[0];
+  const episodes = await getPublicEpisodes();
+  const latestEpisode = episodes[0];
+  const latestDossier = getDossierPreview(getFeaturedDossierSlug());
 
   const sections = [
     {
-      title: "Dossiês",
-      description: "Material complementar aos episódios públicos.",
-      href: "/membro/dossies",
-      feature: "dossierSummary" as const,
-      image: memberSectionArtwork.dossies,
-    },
-    {
-      title: "Arquivo",
-      description: "Casos não públicos, somente em áudio.",
-      href: "/membro/arquivo",
-      feature: "archive" as const,
-      image: memberSectionArtwork.arquivo,
-    },
-    {
-      title: "Conteúdo exclusivo",
-      description: "Episódios extras e newsletter em áudio/vídeo.",
-      href: "/membro/exclusivo",
+      title: "Episódios",
+      description: "Episódios para você",
+      href: "/membro/episodios",
       feature: "exclusive" as const,
-      image: memberSectionArtwork.exclusivo,
+    },
+    {
+      title: "Dossiês",
+      description: "Informação, fatos e fotos.",
+      href: `/membro/dossies/${getFeaturedDossierSlug()}`,
+      feature: "dossierSummary" as const,
     },
     {
       title: "Crime Mania Juris",
-      description: "Análises jurídicas em áudio e vídeo.",
+      description: "Episódios selecionados comentados por especialistas.",
       href: "/membro/juris",
       feature: "jurisCatalog" as const,
-      image: memberSectionArtwork.juris,
     },
     {
       title: "Comunidade",
-      description: "Fórum geral e sugestões de casos.",
+      description:
+        "Espaço exclusivo para debater casos, crimes e tudo sobre o universo do true crime",
       href: "/membro/comunidade",
       feature: "forum" as const,
-      image: memberSectionArtwork.comunidade,
+    },
+    {
+      title: "Arquivo",
+      description: "Explore nosso acervo privado de episódios",
+      href: "/membro/arquivo",
+      feature: "archive" as const,
     },
     {
       title: "Shop",
@@ -59,7 +54,6 @@ export default async function MemberHomePage() {
       href: "/membro/shop",
       feature: "shopDiscount" as const,
       unlockedAlways: true,
-      image: memberSectionArtwork.shop,
     },
   ];
 
@@ -78,37 +72,39 @@ export default async function MemberHomePage() {
                 : "Seu plano está ativo. Continue ouvindo, explore dossiês e participe da comunidade."}
             </p>
             {tier === "none" ? (
-              <ButtonLink href="/membro/planos" className="mt-5">
+              <ButtonLink href="/planos" className="mt-5">
                 Conheça os planos
               </ButtonLink>
-            ) : (
+            ) : latestEpisode ? (
               <ButtonLink href={`/episodios/${latestEpisode.slug}#player`} variant="secondary" className="mt-5">
                 Continuar ouvindo
               </ButtonLink>
-            )}
+            ) : null}
           </div>
-          <div className="relative min-h-[200px] border-t border-cm-divider md:min-h-[220px] md:border-l md:border-t-0">
-            <div className="absolute inset-3 overflow-hidden rounded-[4px]">
-              <EpisodeCover episode={latestEpisode} index={0} variant="compact" className="h-full w-full !aspect-auto" />
+          {latestEpisode && (
+            <div className="relative min-h-[200px] border-t border-cm-divider md:min-h-[220px] md:border-l md:border-t-0">
+              <div className="absolute inset-3 overflow-hidden rounded-[4px]">
+                <EpisodeCover episode={latestEpisode} index={0} variant="compact" className="h-full w-full !aspect-auto" />
+              </div>
+              <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-5">
+                <p className="text-[10px] uppercase tracking-widest text-cm-gray">Continuar ouvindo</p>
+                <p className="font-medium text-white">{episodePublicTitle(latestEpisode)}</p>
+                <Link
+                  href={`/episodios/${latestEpisode.slug}#player`}
+                  className="cm-text-link mt-2 inline-flex min-h-11 items-center text-xs font-semibold"
+                >
+                  Ouvir episódio →
+                </Link>
+              </div>
             </div>
-            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/80 to-transparent p-5">
-              <p className="text-[10px] uppercase tracking-widest text-cm-gray">Continuar ouvindo</p>
-              <p className="font-medium text-white">{latestEpisode.title}</p>
-              <Link
-                href={`/episodios/${latestEpisode.slug}#player`}
-                className="cm-text-link mt-2 inline-flex min-h-11 items-center text-xs font-semibold"
-              >
-                Ouvir episódio →
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </header>
 
       <section>
         <div className="mb-4 flex items-end justify-between gap-3">
           <h2 className="font-display text-sm tracking-[0.25em] text-cm-gray">Seu acesso</h2>
-          <Link href="/membro/planos" className="text-xs font-semibold text-cm-red hover:text-white">
+          <Link href="/planos" className="text-xs font-semibold text-cm-red hover:text-white">
             Ver planos
           </Link>
         </div>
@@ -123,9 +119,8 @@ export default async function MemberHomePage() {
                   title={section.title}
                   description={section.description}
                   href={section.href}
-                  imageSrc={section.image}
                   planHint={
-                    section.feature === "archive" || section.feature === "jurisCatalog"
+                    section.feature === "archive" || section.feature === "jurisCatalog" || section.feature === "exclusive"
                       ? "Tier 2"
                       : "Assinatura"
                   }
@@ -136,44 +131,31 @@ export default async function MemberHomePage() {
               <Link
                 key={section.href}
                 href={section.href}
-                className="group overflow-hidden rounded-[4px] bg-cm-bg-low transition hover:bg-cm-bg-elevated"
+                className="group block rounded-[4px] border border-cm-divider bg-cm-bg-low p-4 transition hover:bg-cm-bg-elevated"
               >
-                <div className="relative h-32">
-                  <Image
-                    src={section.image}
-                    alt=""
-                    fill
-                    className="object-cover transition duration-300 group-hover:scale-[1.02]"
-                    sizes="320px"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" aria-hidden />
-                </div>
-                <div className="border-t border-cm-divider p-4">
-                  <h3 className="font-semibold text-white">{section.title}</h3>
-                  <p className="mt-1 text-sm text-cm-gray">{section.description}</p>
-                  <p className="mt-3 text-xs font-semibold text-cm-red-light">Acessar →</p>
-                </div>
+                <h3 className="font-semibold text-white">{section.title}</h3>
+                <p className="mt-1 text-sm text-cm-gray">{section.description}</p>
+                <p className="mt-3 text-xs font-semibold text-cm-red-light">Acessar →</p>
               </Link>
             );
           })}
         </div>
       </section>
 
-      <section className="border-t border-cm-divider pt-8">
-        <p className="font-display text-xs tracking-[0.25em] text-cm-gray">Último dossiê em destaque</p>
-        <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
-          <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-[4px]">
-            <Image src={memberSectionArtwork.dossies} alt="" fill className="object-cover" sizes="96px" />
+      {latestDossier && (
+        <section className="border-t border-cm-divider pt-8">
+          <p className="font-display text-xs tracking-[0.25em] text-cm-gray">Dossiê em destaque</p>
+          <div className="mt-4 flex flex-col gap-4 sm:flex-row sm:items-center">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-white">{latestDossier.title}</p>
+              <p className="mt-1 line-clamp-2 text-sm text-cm-gray">{latestDossier.intro}</p>
+            </div>
+            <ButtonLink href={`/membro/dossies/${latestDossier.slug}`} variant="secondary" className="shrink-0">
+              Abrir dossiê
+            </ButtonLink>
           </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white">{latestDossier.title}</p>
-            <p className="mt-1 line-clamp-2 text-sm text-cm-gray">{latestDossier.intro}</p>
-          </div>
-          <ButtonLink href={`/membro/dossies/${latestDossier.slug}`} variant="secondary" className="shrink-0">
-            Abrir dossiê
-          </ButtonLink>
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }

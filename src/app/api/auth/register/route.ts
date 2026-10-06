@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createEmailUser, ensureDemoUser } from "@/lib/auth/users-store";
+import { createEmailUser, ensureDemoUser, sessionPayloadFromUser } from "@/lib/auth/users-store";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
 
 const schema = z.object({
   email: z.string().email(),
-  displayName: z.string().min(2).max(80),
+  preferredName: z.string().min(1).max(80).optional(),
+  displayName: z.string().min(1).max(80).optional(),
   password: z.string().min(8),
 });
 
@@ -20,16 +21,16 @@ export async function POST(request: Request) {
     );
   }
 
+  const preferredName = parsed.data.preferredName ?? parsed.data.displayName;
+  if (!preferredName) {
+    return NextResponse.json({ error: "Informe como deseja ser chamado." }, { status: 400 });
+  }
+
   try {
-    const user = await createEmailUser(parsed.data);
+    const user = await createEmailUser({ ...parsed.data, preferredName });
     const token = await createSessionToken({
-      id: user.id,
-      email: user.email,
-      displayName: user.displayName,
-      tier: user.tier,
+      ...sessionPayloadFromUser(user),
       provider: "email",
-      accountType: user.accountType,
-      isDemo: user.isDemo,
     });
     const response = NextResponse.json({ ok: true });
     response.cookies.set(COOKIE_NAME, token, {

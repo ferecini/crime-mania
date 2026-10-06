@@ -14,8 +14,7 @@ export function SiteFooter() {
         <div className="space-y-3">
           <p className="font-display text-sm text-white">Crime Mania</p>
           <p className="max-w-sm text-sm leading-relaxed text-cm-gray">
-            Histórias verdadeiras para maníacos de true crime — jornalismo investigativo com tom
-            pop, sofisticado e imersivo.
+            Histórias verdadeiras para maníacos por true crime.
           </p>
         </div>
         <div>
@@ -25,7 +24,7 @@ export function SiteFooter() {
           <ul className="space-y-2 text-sm">
             <li>
               <Link href="/#sobre" className="text-white/80 hover:text-white">
-                Sobre
+                O Crime Mania
               </Link>
             </li>
             <li>
@@ -39,7 +38,7 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/membro/planos" className="text-white/80 hover:text-white">
+              <Link href="/planos" className="text-white/80 hover:text-white">
                 Planos
               </Link>
             </li>

@@ -49,7 +49,7 @@ export function evaluateAccess(
       allowed: false,
       reason: "registered",
       message: "Conheça os planos e escolha a assinatura ideal para você.",
-      ctaHref: "/membro/planos",
+      ctaHref: "/planos",
       ctaLabel: "Ver planos",
       requiredTier,
     };
@@ -59,7 +59,7 @@ export function evaluateAccess(
     allowed: false,
     reason: "upgrade",
     message: "Disponível no Tier 2 — faça upgrade para desbloquear.",
-    ctaHref: "/membro/planos",
+    ctaHref: "/planos",
     ctaLabel: "Fazer upgrade",
     requiredTier,
   };

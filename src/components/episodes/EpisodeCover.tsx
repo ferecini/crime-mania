@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { PublicEpisode } from "@/data/episodes";
 import { formatEpisodeNumber } from "@/data/episodes";
+import { episodePublicTitle } from "@/data/episodes";
 import { formatDateBR } from "@/lib/format";
 import {
   getEpisodeCoverVariation,
@@ -11,7 +12,7 @@ import { EditorialImage } from "@/components/visual/EditorialImage";
 interface EpisodeCoverProps {
   episode: Pick<
     PublicEpisode,
-    "title" | "category" | "number" | "publishedAt" | "coverImage"
+    "title" | "displayTitle" | "category" | "number" | "publishedAt" | "coverImage"
   >;
   index?: number;
   /** compact = listagem; feature = destaque; hero = página do episódio */
@@ -31,7 +32,8 @@ export function EpisodeCover({
   showMetaOnCover = true,
 }: EpisodeCoverProps) {
   const src = resolveEpisodeBackgroundSrc(episode);
-  const { scale, objectPosition, accentStyle } = getEpisodeCoverVariation(index);
+  const { scale, objectPosition } = getEpisodeCoverVariation(index);
+  const publicTitle = episodePublicTitle(episode);
   const epLabel = formatEpisodeNumber(episode.number);
   const aspect =
     variant === "hero"
@@ -66,11 +68,6 @@ export function EpisodeCover({
         className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-transparent"
         aria-hidden
       />
-      <span
-        className="pointer-events-none absolute bottom-0 top-0 w-px bg-cm-red/70"
-        style={accentStyle}
-        aria-hidden
-      />
       {showMetaOnCover && (variant === "feature" || variant === "hero") && (
         <div className="absolute inset-x-0 bottom-0 p-4 md:p-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cm-red">
@@ -81,8 +78,8 @@ export function EpisodeCover({
               Ep. {epLabel}
             </p>
           )}
-          <p className="mt-2 font-display text-lg leading-snug text-white md:text-xl">
-            {episode.title}
+          <p className="cm-episode-title mt-2 text-lg leading-snug text-white md:text-xl">
+            {publicTitle}
           </p>
           {episode.publishedAt && variant === "hero" && (
             <p className="mt-2 text-xs text-cm-gray">{formatDateBR(episode.publishedAt)}</p>

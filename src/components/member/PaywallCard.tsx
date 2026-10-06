@@ -28,7 +28,7 @@ export function PaywallCard({ state }: { state: PaywallState }) {
           <div className="mt-5 flex flex-wrap gap-3">
             <ButtonLink href={state.ctaHref}>{state.ctaLabel}</ButtonLink>
             <Link
-              href="/membro/planos"
+              href="/planos"
               className="inline-flex min-h-11 items-center text-sm font-semibold text-cm-gray hover:text-white"
             >
               Comparar benefícios
