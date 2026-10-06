@@ -12,6 +12,7 @@ export interface SessionUser {
   provider: "email" | "google";
   accountType?: AccountType;
   isDemo?: boolean;
+  isTestUser?: boolean;
   sessionVersion?: number;
   needsPreferredName?: boolean;
   needsPreferredNameConfirm?: boolean;
@@ -83,7 +84,9 @@ export async function getSession(): Promise<SessionUser | null> {
     return null;
   }
 
+  const { hydrateUsersStore } = await import("@/lib/auth/users-store-hydrate");
   const { getUserById, sessionPayloadFromUser } = await import("@/lib/auth/users-store");
+  hydrateUsersStore();
   const stored = getUserById(user.id);
   if (stored) {
     const fresh = sessionPayloadFromUser(stored);

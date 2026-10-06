@@ -33,6 +33,9 @@ export async function POST(request: Request) {
       { status: 403 },
     );
   }
+  if (process.env.NODE_ENV === "production" && user.isTestUser && process.env.ALLOW_TEST_USERS !== "true") {
+    return NextResponse.json({ error: "Contas de QA desabilitadas neste ambiente." }, { status: 403 });
+  }
 
   const token = await createSessionToken({
     ...sessionPayloadFromUser(user),
