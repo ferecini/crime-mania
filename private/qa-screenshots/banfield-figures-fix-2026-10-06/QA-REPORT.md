@@ -44,13 +44,18 @@
 - `npm run test:banfield-html-figures` — PASS.
 - `npm run build` — PASS.
 
+## DOM mapa (768 / 1280)
+
+Ver `dom-map-768.json` e `dom-map-1280.json` — rect + computed styles dos `<img>`.
+
 ## Reader screenshots (390 / 430 / 768 / 1280 + lightbox)
 
 Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa-main`, `fig-mapa-inset`:
 
-- `reader-390.png`, `reader-430.png`, `reader-768.png`, `reader-1280.png`
-- `vitimas-390.png`, `map-main-390.png`, `map-inset-390.png`
-- `lightbox-map-390.png`
+- `reader-390.png`, `reader-768.png`, `reader-1280.png`
+- `map-section-768.png`, `map-section-1280.png`, `img-main-768.png`, `img-inset-768.png`
+- `dom-map-768.json`, `dom-map-1280.json`
+- `vitimas-390.png`, `map-main-390.png`, `map-inset-390.png`, `lightbox-map-390.png` (só o dialog)
 
 ## QA pass table
 
@@ -72,15 +77,16 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 | reader mostra fig-mapa-main @390 | PASS | img h=199.7px |
 | reader mostra fig-mapa-inset @390 | PASS | naturalWidth=705 |
 | fig-mapa-main img height @390 ≥180px | PASS | img w×h=390.0×199.7 |
-| lightbox mapa img ≥180px h @390 | PASS | {"width":374,"height":191.515625} |
-| reader @1280 sem loading | PASS | |
+| lightbox mapa img ≥180px h @390 | PASS | {"width":366,"height":187.421875} |
+| map imgs visíveis @768 (DOM) | PASS | ver dom-map-768.json |
+| map imgs visíveis @1280 (DOM) | PASS | ver dom-map-1280.json |
 | npm test:banfield-html-figures | PASS | |
 | npm run build | PASS | |
 
 ## Preview deploy (não produção)
 
 - Base URL: http://localhost:3021
-- Commit: `afec939` on branch `hotfix/banfield-figures-2026-10-06`
+- Commit: `21710c6` on branch `hotfix/banfield-figures-2026-10-06`
 
 ## Produção
 

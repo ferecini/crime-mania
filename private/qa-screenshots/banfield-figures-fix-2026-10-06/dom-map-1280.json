@@ -1,0 +1,46 @@
+{
+  "fig-mapa-main": {
+    "rect": {
+      "x": 380,
+      "y": 389.875,
+      "width": 392,
+      "height": 200.734375,
+      "top": 389.875,
+      "left": 380
+    },
+    "naturalWidth": 908,
+    "naturalHeight": 465,
+    "computed": {
+      "display": "block",
+      "visibility": "visible",
+      "opacity": "1",
+      "width": "392px",
+      "height": "200.734px",
+      "objectFit": "fill",
+      "position": "static"
+    },
+    "visible": true
+  },
+  "fig-mapa-inset": {
+    "rect": {
+      "x": 796,
+      "y": 389.875,
+      "width": 392,
+      "height": 264.65625,
+      "top": 389.875,
+      "left": 796
+    },
+    "naturalWidth": 705,
+    "naturalHeight": 476,
+    "computed": {
+      "display": "block",
+      "visibility": "visible",
+      "opacity": "1",
+      "width": "392px",
+      "height": "264.656px",
+      "objectFit": "fill",
+      "position": "static"
+    },
+    "visible": true
+  }
+}

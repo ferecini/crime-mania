@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 function assetSrc(slug: string, assetId: string, width = 1440) {
   return `/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(assetId)}?w=${width}`;
@@ -25,7 +26,12 @@ export function DocumentFigureBlock({
 }) {
   const mapPanel = assetId.startsWith("fig-mapa");
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const close = useCallback(() => setOpen(false), []);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -33,22 +39,60 @@ export function DocumentFigureBlock({
       if (e.key === "Escape") close();
     };
     window.addEventListener("keydown", onKey);
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
     document.body.style.overflow = "hidden";
     return () => {
       window.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
     };
   }, [open, close]);
 
+  /** Full-bleed só em viewports estreitos; md+ fica contido no grid/coluna */
   const bleed =
     mapPanelLayout && mapPanel
-      ? "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 lg:left-auto lg:w-full lg:max-w-none lg:translate-x-0"
+      ? "max-md:relative max-md:left-1/2 max-md:w-screen max-md:max-w-[100vw] max-md:-translate-x-1/2"
       : "";
+
+  const lightbox =
+    open && mounted
+      ? createPortal(
+          <div
+            className="fixed inset-0 z-[200] flex flex-col bg-black"
+            role="dialog"
+            aria-modal="true"
+            aria-label={alt}
+            style={{ isolation: "isolate" }}
+          >
+            <div className="flex shrink-0 items-center justify-end gap-2 px-4 py-3 pt-[max(0.75rem,env(safe-area-inset-top))]">
+              <button
+                type="button"
+                className="min-h-11 min-w-11 rounded-[4px] border border-cm-divider px-3 text-sm text-white"
+                onClick={close}
+              >
+                Fechar
+              </button>
+            </div>
+            <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={assetSrc(slug, assetId, mapPanel ? 1920 : 1440)}
+                alt={alt}
+                className="block h-auto w-full max-w-[min(100%,960px)] object-contain"
+                draggable={false}
+              />
+            </div>
+          </div>,
+          document.body,
+        )
+      : null;
 
   return (
     <>
       <figure
-        className={`mx-auto w-full ${mapPanelLayout ? "max-w-none" : "max-w-[75rem]"} ${bleed}`}
+        className={`min-w-0 w-full ${mapPanelLayout ? "max-w-none" : "mx-auto max-w-[75rem]"} ${bleed}`}
         data-dossier-figure={assetId}
       >
         <button
@@ -61,9 +105,7 @@ export function DocumentFigureBlock({
           <img
             src={assetSrc(slug, assetId, 960)}
             alt={alt}
-            className={`mx-auto block w-full object-contain ${
-              portrait ? "h-auto max-h-[75vh]" : "h-auto"
-            }`}
+            className={`block w-full ${portrait ? "h-auto max-h-[75vh]" : "h-auto"}`}
             loading="eager"
             decoding="async"
           />
@@ -71,50 +113,7 @@ export function DocumentFigureBlock({
         {caption ? <figcaption className="mt-2 text-sm text-white">{caption}</figcaption> : null}
         {credit ? <p className="text-xs text-cm-gray">Crédito: {credit}</p> : null}
       </figure>
-
-      {open ? (
-        <div
-          className="fixed inset-0 z-50 flex flex-col bg-black/95 pb-[env(safe-area-inset-bottom)] pt-[env(safe-area-inset-top)]"
-          role="dialog"
-          aria-modal="true"
-          aria-label={alt}
-        >
-          <div className="flex min-h-11 shrink-0 items-center justify-end gap-2 px-4 py-2">
-            <button
-              type="button"
-              className="min-h-11 min-w-11 rounded-[4px] border border-cm-divider px-3 text-sm text-white"
-              onClick={close}
-            >
-              Fechar
-            </button>
-          </div>
-          <div
-            className={`min-h-0 flex-1 ${
-              mapPanel ? "overflow-auto overscroll-contain px-2 pb-6" : "overflow-hidden px-2"
-            }`}
-          >
-            <div
-              className={
-                mapPanel
-                  ? "mx-auto w-full max-w-[min(100vw,960px)]"
-                  : "flex h-full min-h-[50vh] items-center justify-center"
-              }
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={assetSrc(slug, assetId, mapPanel ? 1920 : 1440)}
-                alt={alt}
-                className={
-                  mapPanel
-                    ? "block h-auto w-full max-w-none object-contain"
-                    : "max-h-[85vh] max-w-full object-contain"
-                }
-                draggable={false}
-              />
-            </div>
-          </div>
-        </div>
-      ) : null}
+      {lightbox}
     </>
   );
 }

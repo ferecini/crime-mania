@@ -122,6 +122,7 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
                 key={section.id}
                 className="space-y-5"
                 aria-labelledby={`sec-${section.id}`}
+                data-dossier-section="mapa"
               >
                 {section.title ? (
                   <h2 id={`sec-${section.id}`} className="sr-only">
@@ -131,7 +132,7 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
                 {prose.map((block) => (
                   <DocumentBlockView key={block.id} slug={slug} block={block} />
                 ))}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+                <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
                   {figures.map((block) => (
                     <DocumentBlockView
                       key={block.id}

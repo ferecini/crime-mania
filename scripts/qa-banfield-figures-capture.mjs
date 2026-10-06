@@ -201,7 +201,8 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
     `| reader mostra fig-mapa-inset @390 | ${metrics.insetVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.insetNaturalWidth} |`,
     `| fig-mapa-main img height @390 ≥180px | ${metrics.mapMainImgHeight390 >= 180 ? "PASS" : "FAIL"} | img w×h=${metrics.mapMainImgWidth390?.toFixed?.(1)}×${metrics.mapMainImgHeight390?.toFixed?.(1)} |`,
     `| lightbox mapa img ≥180px h @390 | ${metrics.lightboxOk && (metrics.lightboxMainImgRect390?.height ?? 0) >= 180 ? "PASS" : "FAIL"} | ${JSON.stringify(metrics.lightboxMainImgRect390)} |`,
-    `| reader @1280 sem loading | ${metrics.reader1280Ready ? "PASS" : "FAIL"} | |`,
+    `| map imgs visíveis @768 (DOM) | ${metrics.domMap768?.["fig-mapa-main"]?.visible && metrics.domMap768?.["fig-mapa-inset"]?.visible ? "PASS" : "PENDENTE INSPEÇÃO"} | ver dom-map-768.json |`,
+    `| map imgs visíveis @1280 (DOM) | ${metrics.domMap1280?.["fig-mapa-main"]?.visible && metrics.domMap1280?.["fig-mapa-inset"]?.visible ? "PASS" : "PENDENTE INSPEÇÃO"} | ver dom-map-1280.json |`,
     `| npm test:banfield-html-figures | ${metrics.figureTestOk ? "PASS" : "FAIL"} | |`,
     `| npm run build | ${metrics.buildOk ? "PASS" : "FAIL"} | |`,
   ];
@@ -230,13 +231,18 @@ ${JSON.stringify(manifest, null, 2)}
 - \`npm run test:banfield-html-figures\` — ${metrics.figureTestOk ? "PASS" : "FAIL"}.
 - \`npm run build\` — ${metrics.buildOk ? "PASS" : "FAIL"}.
 
+## DOM mapa (768 / 1280)
+
+Ver \`dom-map-768.json\` e \`dom-map-1280.json\` — rect + computed styles dos \`<img>\`.
+
 ## Reader screenshots (390 / 430 / 768 / 1280 + lightbox)
 
 Capturas após \`document ready\` e \`naturalWidth > 0\` em \`fig-vitimas\`, \`fig-mapa-main\`, \`fig-mapa-inset\`:
 
-- \`reader-390.png\`, \`reader-430.png\`, \`reader-768.png\`, \`reader-1280.png\`
-- \`vitimas-390.png\`, \`map-main-390.png\`, \`map-inset-390.png\`
-- \`lightbox-map-390.png\`
+- \`reader-390.png\`, \`reader-768.png\`, \`reader-1280.png\`
+- \`map-section-768.png\`, \`map-section-1280.png\`, \`img-main-768.png\`, \`img-inset-768.png\`
+- \`dom-map-768.json\`, \`dom-map-1280.json\`
+- \`vitimas-390.png\`, \`map-main-390.png\`, \`map-inset-390.png\`, \`lightbox-map-390.png\` (só o dialog)
 
 ## QA pass table
 
@@ -253,6 +259,59 @@ ${rows.join("\n")}
 
 - **Não promover** até validação visual da proprietária neste chat.
 `;
+}
+
+async function mapImgDomDiagnostics(page) {
+  return page.evaluate(() => {
+    const ids = ["fig-mapa-main", "fig-mapa-inset"];
+    const out = {};
+    for (const id of ids) {
+      const img = document.querySelector(`[data-dossier-figure="${id}"] img`);
+      if (!img) {
+        out[id] = null;
+        continue;
+      }
+      const r = img.getBoundingClientRect();
+      const cs = getComputedStyle(img);
+      out[id] = {
+        rect: { x: r.x, y: r.y, width: r.width, height: r.height, top: r.top, left: r.left },
+        naturalWidth: img.naturalWidth,
+        naturalHeight: img.naturalHeight,
+        computed: {
+          display: cs.display,
+          visibility: cs.visibility,
+          opacity: cs.opacity,
+          width: cs.width,
+          height: cs.height,
+          objectFit: cs.objectFit,
+          position: cs.position,
+        },
+        visible: r.width > 8 && r.height > 8 && cs.visibility !== "hidden" && cs.opacity !== "0",
+      };
+    }
+    return out;
+  });
+}
+
+async function captureMapSection(page, tag) {
+  await page.evaluate(() => {
+    document.querySelector('[data-dossier-section="mapa"]')?.scrollIntoView({ block: "start" });
+  });
+  await page.waitForTimeout(500);
+  const dom = await mapImgDomDiagnostics(page);
+  fs.writeFileSync(path.join(outDir, `dom-map-${tag}.json`), JSON.stringify(dom, null, 2));
+
+  const section = page.locator('[data-dossier-section="mapa"]');
+  await section.screenshot({ path: path.join(outDir, `map-section-${tag}.png`) });
+
+  for (const id of ["fig-mapa-main", "fig-mapa-inset"]) {
+    const img = page.locator(`[data-dossier-figure="${id}"] img`).first();
+    if ((await img.count()) > 0) {
+      await img.scrollIntoViewIfNeeded();
+      await img.screenshot({ path: path.join(outDir, `img-${id.replace("fig-mapa-", "")}-${tag}.png`) });
+    }
+  }
+  return dom;
 }
 
 async function imgClientRect(page, assetId) {
@@ -367,18 +426,26 @@ async function main() {
         return { width: r.width, height: r.height };
       })
     : null;
-  await page.screenshot({ path: path.join(outDir, "lightbox-map-390.png") });
+  await page.locator('[role="dialog"]').screenshot({
+    path: path.join(outDir, "lightbox-map-390.png"),
+  });
   await page.keyboard.press("Escape");
 
-  let reader1280Ready = false;
-  await page.setViewportSize({ width: 1280, height: 900 });
-  await gotoDossier(page, dossierUrl);
-  try {
+  const dom768 = await (async () => {
+    await page.setViewportSize({ width: 768, height: 1024 });
+    await gotoDossier(page, dossierUrl);
     await waitReaderReady(page);
-    reader1280Ready = true;
-  } catch {
-    reader1280Ready = false;
-  }
+    await page.screenshot({ path: path.join(outDir, "reader-768.png"), fullPage: true });
+    return captureMapSection(page, "768");
+  })();
+
+  const dom1280 = await (async () => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await gotoDossier(page, dossierUrl);
+    await waitReaderReady(page);
+    await page.screenshot({ path: path.join(outDir, "reader-1280.png"), fullPage: true });
+    return captureMapSection(page, "1280");
+  })();
 
   await browser.close();
 
@@ -397,7 +464,9 @@ async function main() {
     insetImgRect390: inset.rect,
     lightboxOk,
     lightboxMainImgRect390: lightboxMainRect,
-    reader1280Ready,
+    reader1280Ready: Boolean(dom1280?.["fig-mapa-main"]?.visible && dom1280?.["fig-mapa-inset"]?.visible),
+    domMap768: dom768,
+    domMap1280: dom1280,
     figureTestOk,
     buildOk: process.env.QA_BUILD_OK === "1",
   };
