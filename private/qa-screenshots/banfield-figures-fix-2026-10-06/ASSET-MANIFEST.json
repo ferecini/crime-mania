@@ -15,10 +15,10 @@
   },
   "fig-mapa-inset": {
     "width": 705,
-    "height": 433,
-    "aspect": 1.628,
-    "bytes": 29420,
-    "sha256": "8432490f4b01fc7ea78ca209d053e243c17b89233dae34d91fd7063eb757ab74"
+    "height": 476,
+    "aspect": 1.481,
+    "bytes": 33206,
+    "sha256": "491cecfdf85083663eb4202eba0bba10bc38fff872b51eed8a12d3d5c6d2e15a"
   },
   "fig-mapa": {
     "width": 1594,

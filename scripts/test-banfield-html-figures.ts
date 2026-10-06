@@ -56,7 +56,7 @@ async function testFigureAssets() {
   assert.ok(mainAspect <= 352 / MOBILE_MAP_MIN_HEIGHT_AT_352 + 0.02, `fig-mapa-main aspect ${mainAspect}`);
 
   assert.ok(miw >= 650 && miw <= 780, `fig-mapa-inset width ${miw}`);
-  assert.ok(mih >= 400 && mih <= 460, `fig-mapa-inset height ${mih}`);
+  assert.ok(mih >= 400 && mih <= 490, `fig-mapa-inset height ${mih}`);
 
   assert.ok(mw >= 1500, `fig-mapa width ${mw}`);
   assert.ok(mh >= 250 && mh <= 320, `fig-mapa height ${mh}`);

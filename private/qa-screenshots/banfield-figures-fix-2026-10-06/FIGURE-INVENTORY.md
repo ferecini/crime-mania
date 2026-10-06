@@ -20,4 +20,11 @@ Blocos `m05-mapa` / `d03-mapa` ainda cobrem a **seção** 02 (inclui título). O
 
 ## Assets HTML locais (após `dossier:extract-banfield-figures`)
 
-Ver `ASSET-MANIFEST.json` nesta pasta (gerado na QA).
+Ver `ASSET-MANIFEST.json` nesta pasta.
+
+| Asset | Dimensões | SHA-256 (prefixo) | Notas |
+| --- | --- | --- | --- |
+| fig-vitimas | 414×410 | `98419580f172080a` | Aprovado; crop inalterado |
+| fig-mapa-main | 908×465 | `7a0d7a6e97e2ab13` | Aprovado anteriormente |
+| fig-mapa-inset | 705×476 | `491cecfdf8508366` | `yEnd=0.525`; coords completas |
+| fig-mapa | 1594×294 | `2aff24438fa23443` | Panorama mapa HTML |
