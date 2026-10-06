@@ -87,8 +87,10 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 
 ## Preview deploy (não produção)
 
-- Base URL: http://127.0.0.1:3021
-- Commit: `be6fee9` on branch `hotfix/banfield-figures-2026-10-06`
+- Preview: https://crime-mania-git-hotfix-banfield-figures-2026-10-06-investwise.vercel.app/membro/dossies/familia-banfield
+- Capturas locais (dev `:3021`): mesma pasta `reader-*.png` / `vitimas-390.png` / `map-*-390.png`
+- Commit: `85f71fd` on branch `hotfix/banfield-figures-2026-10-06`
+- Postgres/Blob: `npm run dossier:bootstrap-banfield-html` → documento **v4** (figuras nas seções `vitimas` / `mapa`)
 
 ## Produção
 
