@@ -1,3 +1,12 @@
+/** Ordem preferida no painel admin (mais urgentes primeiro). */
+export const DOSSIER_JOB_STATUS_DISPLAY_ORDER = [
+  "processing",
+  "uploaded",
+  "needs_review",
+  "failed",
+  "published",
+] as const;
+
 const STATUS: Record<string, string> = {
   uploaded: "PDF recebido",
   processing: "Processando",
