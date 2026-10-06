@@ -13,7 +13,12 @@
 
 ## Reader screenshots (390 / 430 / 768 / 1280 + lightbox)
 
-Pendente: `node scripts/qa-banfield-figures-capture.mjs http://127.0.0.1:3000` após `npx playwright install chromium` (Chromium não estava instalado neste ambiente).
+Pendente: `node scripts/qa-banfield-figures-capture.mjs https://crime-mania-jkh527u06-investwise.vercel.app` após `npx playwright install chromium`.
+
+## Preview deploy (não produção)
+
+- https://crime-mania-jkh527u06-investwise.vercel.app/dossiers/familia-banfield
+- Commit: `c36f66a` on branch `hotfix/banfield-figures-2026-10-06`
 
 ## Produção
 

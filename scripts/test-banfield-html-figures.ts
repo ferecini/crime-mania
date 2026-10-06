@@ -42,10 +42,10 @@ async function testFigureAssets() {
   const mw = mapa.width ?? 0;
   const mh = mapa.height ?? 0;
 
-  assert.ok(vw >= 400 && vw <= 450, `fig-vitimas width ${vw}`);
-  assert.ok(vh >= 310 && vh <= 340, `fig-vitimas height ${vh}`);
+  assert.ok(vw >= 400 && vw <= 430, `fig-vitimas width ${vw}`);
+  assert.ok(vh >= 395 && vh <= 425, `fig-vitimas height ${vh}`);
   const vAspect = vw / vh;
-  assert.ok(vAspect >= 1.2 && vAspect <= 1.45, `fig-vitimas aspect ${vAspect}`);
+  assert.ok(vAspect >= 0.95 && vAspect <= 1.1, `fig-vitimas aspect ${vAspect}`);
 
   const mainAspect = mmw / mmh;
   const mainRenderedH = MOBILE_VIEWPORT_WIDTH / mainAspect;
@@ -55,8 +55,8 @@ async function testFigureAssets() {
   );
   assert.ok(mainAspect <= 352 / MOBILE_MAP_MIN_HEIGHT_AT_352 + 0.02, `fig-mapa-main aspect ${mainAspect}`);
 
-  assert.ok(miw >= 650, `fig-mapa-inset width ${miw}`);
-  assert.ok(mih >= 350, `fig-mapa-inset height ${mih}`);
+  assert.ok(miw >= 650 && miw <= 780, `fig-mapa-inset width ${miw}`);
+  assert.ok(mih >= 400 && mih <= 460, `fig-mapa-inset height ${mih}`);
 
   assert.ok(mw >= 1500, `fig-mapa width ${mw}`);
   assert.ok(mh >= 250 && mh <= 320, `fig-mapa height ${mh}`);

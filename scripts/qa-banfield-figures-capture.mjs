@@ -132,8 +132,8 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
 
 ## Asset verification (source crop)
 
-- \`asset-verify-fig-vitimas.png\` — grade 2×2 limpa (xEnd 0.285, antes da coluna de texto).
-- \`asset-verify-fig-mapa-main.png\` — Fairfax/DC com aspecto mobile (padding até ≤352/180).
+- \`asset-verify-fig-vitimas.png\` — grade 2×2 limpa (414×410, sem coluna de texto).
+- \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (≥180px @352px de largura).
 - \`asset-verify-fig-mapa-inset.png\` — inset Virgínia + legenda com coordenadas.
 - \`asset-verify-fig-mapa.png\` — composição wide desktop-only.
 - \`ASSET-MANIFEST.json\` — dimensões e SHA-256 dos \`.webp\` publicados.

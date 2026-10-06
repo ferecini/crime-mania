@@ -358,7 +358,7 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xStart: 0.03,
     xEnd: 0.285,
     yStart: 0.218,
-    yEnd: 0.33,
+    yEnd: 0.36,
   },
   {
     assetId: "fig-mapa-main",
@@ -373,7 +373,7 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xStart: 0.55,
     xEnd: 0.985,
     yStart: 0.36,
-    yEnd: 0.498,
+    yEnd: 0.51,
   },
   {
     assetId: "fig-mapa",
