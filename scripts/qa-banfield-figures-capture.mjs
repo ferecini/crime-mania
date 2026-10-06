@@ -65,6 +65,29 @@ function documentHasFigures(doc) {
   return { figures, vitimasOk, mapMainOk, mapInsetOk };
 }
 
+async function mapMainTimelineBleedScan(webpPath) {
+  const { data, info } = await sharp(webpPath).raw().toBuffer({ resolveWithObject: true });
+  const w = info.width ?? 0;
+  const h = info.height ?? 0;
+  const scanRows = Math.min(100, Math.floor(h * 0.25));
+  for (let y = h - 1; y >= h - scanRows; y--) {
+    let red = 0;
+    let dark = 0;
+    for (let x = 0; x < w; x++) {
+      const i = (y * w + x) * (info.channels ?? 3);
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      if (r > 150 && g < 90 && b < 90) red++;
+      if (r + g + b < 40) dark++;
+    }
+    if (red >= 10 && dark / w > 0.75) {
+      return { ok: false, row: y, red, darkRatio: dark / w };
+    }
+  }
+  return { ok: true };
+}
+
 async function writeAssetManifest() {
   const assetsDir = path.join(
     process.cwd(),
@@ -82,6 +105,7 @@ async function writeAssetManifest() {
       bytes: buf.length,
       sha256: crypto.createHash("sha256").update(buf).digest("hex"),
     };
+    await sharp(p).png().toFile(path.join(outDir, `asset-verify-${id}.png`));
   }
   fs.writeFileSync(path.join(outDir, "ASSET-MANIFEST.json"), JSON.stringify(manifest, null, 2));
   return manifest;
@@ -199,7 +223,8 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
     `| reader mostra fig-vitimas @390 | ${metrics.vitimasVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.vitimasNaturalWidth} |`,
     `| reader mostra fig-mapa-main @390 | ${metrics.mapMainVisible390 ? "PASS" : "FAIL"} | img h=${metrics.mapMainImgHeight390?.toFixed?.(1)}px |`,
     `| reader mostra fig-mapa-inset @390 | ${metrics.insetVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.insetNaturalWidth} |`,
-    `| fig-mapa-main img height @390 ≥180px | ${metrics.mapMainImgHeight390 >= 180 ? "PASS" : "FAIL"} | img w×h=${metrics.mapMainImgWidth390?.toFixed?.(1)}×${metrics.mapMainImgHeight390?.toFixed?.(1)} |`,
+    `| fig-mapa-main img height @390 ≥130px | ${metrics.mapMainImgHeight390 >= 130 ? "PASS" : "FAIL"} | img w×h=${metrics.mapMainImgWidth390?.toFixed?.(1)}×${metrics.mapMainImgHeight390?.toFixed?.(1)} |`,
+    `| fig-mapa-main sem bleed «03» (pixels) | ${metrics.mapMainPixelOk ? "PASS" : "FAIL"} | ${JSON.stringify(metrics.mapMainPixelScan)} |`,
     `| lightbox mapa img ≥180px h @390 | ${metrics.lightboxOk && (metrics.lightboxMainImgRect390?.height ?? 0) >= 180 ? "PASS" : "FAIL"} | ${JSON.stringify(metrics.lightboxMainImgRect390)} |`,
     `| map imgs visíveis @768 (DOM) | ${metrics.domMap768?.["fig-mapa-main"]?.visible && metrics.domMap768?.["fig-mapa-inset"]?.visible ? "PASS" : "PENDENTE INSPEÇÃO"} | ver dom-map-768.json |`,
     `| map imgs visíveis @1280 (DOM) | ${metrics.domMap1280?.["fig-mapa-main"]?.visible && metrics.domMap1280?.["fig-mapa-inset"]?.visible ? "PASS" : "PENDENTE INSPEÇÃO"} | ver dom-map-1280.json |`,
@@ -212,7 +237,7 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
 ## Asset verification (source crop)
 
 - \`asset-verify-fig-vitimas.png\` — grade 2×2 (414×410).
-- \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (908×465).
+- \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (908×350 após crop v7).
 - \`asset-verify-fig-mapa-inset.png\` — inset Virgínia + coordenadas (705×476).
 - \`ASSET-MANIFEST.json\` — dimensões e SHA-256 dos \`.webp\`.
 
@@ -348,6 +373,11 @@ async function figureMetrics(page, assetId) {
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
   const manifest = await writeAssetManifest();
+  const mapMainAssetPath = path.join(
+    process.cwd(),
+    "private/dossiers/documents/familia-banfield/assets/fig-mapa-main.webp",
+  );
+  const mapMainPixelScan = await mapMainTimelineBleedScan(mapMainAssetPath);
   const creds = readCreds();
   const commit = gitCommitSha();
 
@@ -401,6 +431,7 @@ async function main() {
   });
 
   const mapMain = await figureMetrics(page, "fig-mapa-main");
+  await captureMapSection(page, "390");
   await page.locator('[data-dossier-figure="fig-mapa-main"] img').screenshot({
     path: path.join(outDir, "map-main-390.png"),
   });
@@ -469,6 +500,9 @@ async function main() {
     domMap1280: dom1280,
     figureTestOk,
     buildOk: process.env.QA_BUILD_OK === "1",
+    mapMainPixelOk: mapMainPixelScan.ok,
+    mapMainPixelScan,
+    mapMainNatural: manifest["fig-mapa-main"],
   };
 
   fs.writeFileSync(

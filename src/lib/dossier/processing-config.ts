@@ -365,8 +365,8 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xStart: 0.02,
     xEnd: 0.58,
     yStart: 0.405,
-    /** Painel Fairfax/DC apenas — termina antes da linha / «03. LINHA DO TEMPO» (~908×465) */
-    yEnd: 0.566,
+    /** Painel Fairfax/DC — termina no limite inferior do mapa, antes da linha / «03» (~908×349) */
+    yEnd: 0.526,
   },
   {
     assetId: "fig-mapa-inset",

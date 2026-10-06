@@ -8,10 +8,10 @@
   },
   "fig-mapa-main": {
     "width": 908,
-    "height": 465,
-    "aspect": 1.953,
-    "bytes": 73242,
-    "sha256": "00e545cb0fbdc15259ea1dd25efb6bdab80c1d8c2d2267e940de6b3b00237e18"
+    "height": 350,
+    "aspect": 2.594,
+    "bytes": 73686,
+    "sha256": "eaaf6da97ac45ade6ade6d119f452f94f65daed1b274a7ec514f9debe46c0f34"
   },
   "fig-mapa-inset": {
     "width": 705,

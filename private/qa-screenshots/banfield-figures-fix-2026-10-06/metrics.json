@@ -11,20 +11,20 @@
   },
   "mapMainVisible390": true,
   "mapMainImgWidth390": 390,
-  "mapMainImgHeight390": 199.71875,
+  "mapMainImgHeight390": 150.328125,
   "mapMainImgRect390": {
     "x": 0,
-    "y": 322.5,
+    "y": 346.5,
     "width": 390,
-    "height": 199.71875,
+    "height": 150.328125,
     "naturalWidth": 908,
-    "naturalHeight": 465
+    "naturalHeight": 350
   },
   "insetVisible390": true,
   "insetNaturalWidth": 705,
   "insetImgRect390": {
     "x": 0,
-    "y": 268.21875,
+    "y": 268.828125,
     "width": 390,
     "height": 263.3125,
     "naturalWidth": 705,
@@ -33,7 +33,7 @@
   "lightboxOk": true,
   "lightboxMainImgRect390": {
     "width": 366,
-    "height": 187.421875
+    "height": 141.078125
   },
   "reader1280Ready": true,
   "domMap768": {
@@ -42,18 +42,18 @@
         "x": 48,
         "y": 417.9375,
         "width": 672,
-        "height": 344.140625,
+        "height": 259.015625,
         "top": 417.9375,
         "left": 48
       },
       "naturalWidth": 908,
-      "naturalHeight": 465,
+      "naturalHeight": 350,
       "computed": {
         "display": "block",
         "visibility": "visible",
         "opacity": "1",
         "width": "672px",
-        "height": "344.141px",
+        "height": "259.016px",
         "objectFit": "fill",
         "position": "static"
       },
@@ -62,10 +62,10 @@
     "fig-mapa-inset": {
       "rect": {
         "x": 48,
-        "y": 830.078125,
+        "y": 744.953125,
         "width": 672,
         "height": 453.71875,
-        "top": 830.078125,
+        "top": 744.953125,
         "left": 48
       },
       "naturalWidth": 705,
@@ -88,18 +88,18 @@
         "x": 380,
         "y": 389.875,
         "width": 392,
-        "height": 200.734375,
+        "height": 151.09375,
         "top": 389.875,
         "left": 380
       },
       "naturalWidth": 908,
-      "naturalHeight": 465,
+      "naturalHeight": 350,
       "computed": {
         "display": "block",
         "visibility": "visible",
         "opacity": "1",
         "width": "392px",
-        "height": "200.734px",
+        "height": "151.094px",
         "objectFit": "fill",
         "position": "static"
       },
@@ -129,5 +129,16 @@
     }
   },
   "figureTestOk": true,
-  "buildOk": true
+  "buildOk": true,
+  "mapMainPixelOk": true,
+  "mapMainPixelScan": {
+    "ok": true
+  },
+  "mapMainNatural": {
+    "width": 908,
+    "height": 350,
+    "aspect": 2.594,
+    "bytes": 73686,
+    "sha256": "eaaf6da97ac45ade6ade6d119f452f94f65daed1b274a7ec514f9debe46c0f34"
+  }
 }

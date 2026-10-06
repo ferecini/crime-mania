@@ -3,7 +3,7 @@
 ## Asset verification (source crop)
 
 - `asset-verify-fig-vitimas.png` — grade 2×2 (414×410).
-- `asset-verify-fig-mapa-main.png` — painel Fairfax/DC (908×465).
+- `asset-verify-fig-mapa-main.png` — painel Fairfax/DC (908×350 após crop v7).
 - `asset-verify-fig-mapa-inset.png` — inset Virgínia + coordenadas (705×476).
 - `ASSET-MANIFEST.json` — dimensões e SHA-256 dos `.webp`.
 
@@ -18,10 +18,10 @@
   },
   "fig-mapa-main": {
     "width": 908,
-    "height": 465,
-    "aspect": 1.953,
-    "bytes": 73242,
-    "sha256": "00e545cb0fbdc15259ea1dd25efb6bdab80c1d8c2d2267e940de6b3b00237e18"
+    "height": 350,
+    "aspect": 2.594,
+    "bytes": 73686,
+    "sha256": "eaaf6da97ac45ade6ade6d119f452f94f65daed1b274a7ec514f9debe46c0f34"
   },
   "fig-mapa-inset": {
     "width": 705,
@@ -74,10 +74,11 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 | tier2 document 200 | PASS | 200 |
 | tier2 gallery 5 items | PASS | 200 n=5 |
 | reader mostra fig-vitimas @390 | PASS | naturalWidth=414 |
-| reader mostra fig-mapa-main @390 | PASS | img h=199.7px |
+| reader mostra fig-mapa-main @390 | PASS | img h=150.3px |
 | reader mostra fig-mapa-inset @390 | PASS | naturalWidth=705 |
-| fig-mapa-main img height @390 ≥180px | PASS | img w×h=390.0×199.7 |
-| lightbox mapa img ≥180px h @390 | PASS | {"width":366,"height":187.421875} |
+| fig-mapa-main img height @390 ≥130px | PASS | img w×h=390.0×150.3 |
+| fig-mapa-main sem bleed «03» (pixels) | PASS | {"ok":true} |
+| lightbox mapa img ≥180px h @390 | FAIL | {"width":366,"height":141.078125} |
 | map imgs visíveis @768 (DOM) | PASS | ver dom-map-768.json |
 | map imgs visíveis @1280 (DOM) | PASS | ver dom-map-1280.json |
 | npm test:banfield-html-figures | PASS | |
@@ -85,8 +86,8 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 
 ## Preview deploy (não produção)
 
-- Base URL: http://localhost:3021
-- Commit: `21710c6` on branch `hotfix/banfield-figures-2026-10-06`
+- Base URL: http://127.0.0.1:3022
+- Commit: `885657d` on branch `hotfix/banfield-figures-2026-10-06`
 
 ## Produção
 

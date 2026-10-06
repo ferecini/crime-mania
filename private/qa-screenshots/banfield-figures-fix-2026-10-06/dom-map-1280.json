@@ -4,18 +4,18 @@
       "x": 380,
       "y": 389.875,
       "width": 392,
-      "height": 200.734375,
+      "height": 151.09375,
       "top": 389.875,
       "left": 380
     },
     "naturalWidth": 908,
-    "naturalHeight": 465,
+    "naturalHeight": 350,
     "computed": {
       "display": "block",
       "visibility": "visible",
       "opacity": "1",
       "width": "392px",
-      "height": "200.734px",
+      "height": "151.094px",
       "objectFit": "fill",
       "position": "static"
     },
