@@ -13,5 +13,5 @@
 # OWNER_UUID_AQUI
 # OWNER_UUID_B_AQUI
 #
-# QA Preview (opcional — já conhecido no código como qa-tier2):
-# 00000000-0000-4000-8000-010000000003
+# QA tier2 (Preview + Production): 00000000-0000-4000-8000-010000000003
+# Ver também: docs/ops/qa-vercel-production.md
