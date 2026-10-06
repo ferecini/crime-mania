@@ -1,7 +1,7 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 4,
+  "version": 5,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
@@ -196,6 +196,7 @@
           "type": "figure",
           "order": 2,
           "assetId": "fig-mapa-main",
+          "showWhen": "mobile-only",
           "alt": "Mapa satélite de Fairfax e Washington D.C.",
           "caption": "Fairfax e região metropolitana de Washington D.C.",
           "credit": "Material editorial Crime Mania"
@@ -205,6 +206,7 @@
           "type": "figure",
           "order": 3,
           "assetId": "fig-mapa-inset",
+          "showWhen": "mobile-only",
           "alt": "Inset de Virgínia e coordenadas de Fairfax.",
           "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
           "credit": "Material editorial Crime Mania"

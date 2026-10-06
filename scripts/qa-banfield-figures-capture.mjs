@@ -15,7 +15,7 @@ const outDir = path.join(
 );
 const slug = "familia-banfield";
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
-const EXPECTED_DOC_VERSION = Number(process.env.QA_DOC_VERSION ?? "4");
+const EXPECTED_DOC_VERSION = Number(process.env.QA_DOC_VERSION ?? "5");
 
 const ASSET_IDS = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset", "fig-mapa"];
 
@@ -162,22 +162,38 @@ async function httpChecks(baseUrl, creds) {
   return tests;
 }
 
-async function waitReaderReady(page) {
+async function gotoDossier(page, url) {
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      await page.goto(url, { waitUntil: "load", timeout: 120000 });
+      return;
+    } catch (err) {
+      if (attempt === 3) throw err;
+      await page.waitForTimeout(1500);
+    }
+  }
+}
+
+async function waitReaderReady(page, viewportWidth = 390) {
+  const mobileMaps = viewportWidth < 1024;
   await page.waitForSelector(".dossier-html-reader", { timeout: 90000 });
   await page.waitForFunction(
-    () => {
+    ({ mobileMaps: mobile }) => {
       const root = document.querySelector(".dossier-html-reader");
       if (!root) return false;
       const text = root.textContent ?? "";
       if (text.includes("Carregando dossiê")) return false;
       if (text.includes("Não foi possível carregar")) return false;
-      const required = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"];
+      const required = ["fig-vitimas"];
+      if (mobile) required.push("fig-mapa-main", "fig-mapa-inset");
+      else required.push("fig-mapa");
       for (const id of required) {
         const fig = root.querySelector(`[data-dossier-figure="${id}"] img`);
         if (!fig || !fig.complete || fig.naturalWidth <= 0) return false;
       }
       return true;
     },
+    { mobileMaps },
     { timeout: 90000 },
   );
 }
@@ -186,10 +202,10 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
   const rows = [
     ...httpTests.map((t) => `| ${t.name} | ${t.pass ? "PASS" : "FAIL"} | ${t.detail ?? ""} |`),
     `| reader mostra fig-vitimas @390 | ${metrics.vitimasVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.vitimasNaturalWidth} |`,
-    `| reader mostra fig-mapa-main @390 | ${metrics.mapMainVisible390 ? "PASS" : "FAIL"} | h=${metrics.mapMainHeight390?.toFixed?.(1)}px |`,
+    `| reader mostra fig-mapa-main @390 | ${metrics.mapMainVisible390 ? "PASS" : "FAIL"} | img h=${metrics.mapMainImgHeight390?.toFixed?.(1)}px |`,
     `| reader mostra fig-mapa-inset @390 | ${metrics.insetVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.insetNaturalWidth} |`,
-    `| fig-mapa-main height @390 ≥180px | ${metrics.mapMainHeight390 >= 180 ? "PASS" : "FAIL"} | w=${metrics.mapMainWidth390?.toFixed?.(1)} |`,
-    `| lightbox mapa carrega | ${metrics.lightboxOk ? "PASS" : "FAIL"} | dialog img ok |`,
+    `| fig-mapa-main img height @390 ≥180px | ${metrics.mapMainImgHeight390 >= 180 ? "PASS" : "FAIL"} | img w×h=${metrics.mapMainImgWidth390?.toFixed?.(1)}×${metrics.mapMainImgHeight390?.toFixed?.(1)} |`,
+    `| lightbox mapa img ≥180px h @390 | ${metrics.lightboxOk && (metrics.lightboxMainImgRect390?.height ?? 0) >= 180 ? "PASS" : "FAIL"} | ${JSON.stringify(metrics.lightboxMainImgRect390)} |`,
     `| reader @1280 sem loading | ${metrics.reader1280Ready ? "PASS" : "FAIL"} | |`,
     `| npm test:banfield-html-figures | ${metrics.figureTestOk ? "PASS" : "FAIL"} | |`,
     `| npm run build | ${metrics.buildOk ? "PASS" : "FAIL"} | |`,
@@ -212,7 +228,7 @@ ${JSON.stringify(manifest, null, 2)}
 ## Documento HTML (v${EXPECTED_DOC_VERSION})
 
 - Figura \`fig-vitimas\` na seção **Vítimas** (\`sections[].id === "vitimas"\`).
-- \`fig-mapa-main\` + \`fig-mapa-inset\` na seção **Mapa** (\`sections[].id === "mapa"\`), visíveis em mobile/tablet/desktop (sem \`showWhen\` nos painéis corrigidos).
+- \`fig-mapa-main\` + \`fig-mapa-inset\` na seção **Mapa** (mobile/tablet, \`lg:hidden\`); \`fig-mapa\` wide em desktop (\`lg+\`).
 - Bootstrap: \`npm run dossier:bootstrap-banfield-html\` → Blob \`v${EXPECTED_DOC_VERSION}\` + Postgres \`published\`.
 
 ## Automated tests
@@ -245,18 +261,35 @@ ${rows.join("\n")}
 `;
 }
 
+async function imgClientRect(page, assetId) {
+  return page.evaluate((id) => {
+    const img = document.querySelector(`[data-dossier-figure="${id}"] img`);
+    if (!img) return null;
+    const r = img.getBoundingClientRect();
+    return {
+      x: r.x,
+      y: r.y,
+      width: r.width,
+      height: r.height,
+      naturalWidth: img.naturalWidth,
+      naturalHeight: img.naturalHeight,
+    };
+  }, assetId);
+}
+
 async function figureMetrics(page, assetId) {
   const img = page.locator(`[data-dossier-figure="${assetId}"] img`).first();
   const count = await img.count();
-  if (count === 0) return { visible: false, naturalWidth: 0, box: null };
+  if (count === 0) return { visible: false, naturalWidth: 0, rect: null };
   await img.scrollIntoViewIfNeeded();
   const visible = await img.isVisible();
-  const naturalWidth = await img.evaluate((el) => el.naturalWidth);
-  const box =
-    assetId === "fig-mapa-main"
-      ? await page.locator(`[data-dossier-figure="${assetId}"] button`).first().boundingBox()
-      : await img.boundingBox();
-  return { visible, naturalWidth, box };
+  const rect = await imgClientRect(page, assetId);
+  return {
+    visible,
+    naturalWidth: rect?.naturalWidth ?? 0,
+    naturalHeight: rect?.naturalHeight ?? 0,
+    rect,
+  };
 }
 
 async function main() {
@@ -297,8 +330,8 @@ async function main() {
 
   for (const vp of viewports) {
     await page.setViewportSize({ width: vp.w, height: vp.h });
-    await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
-    await waitReaderReady(page);
+    await gotoDossier(page, dossierUrl);
+    await waitReaderReady(page, vp.w);
     await page.screenshot({
       path: path.join(outDir, `reader-${vp.tag}.png`),
       fullPage: true,
@@ -306,8 +339,8 @@ async function main() {
   }
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
-  await waitReaderReady(page);
+  await gotoDossier(page, dossierUrl);
+  await waitReaderReady(page, 390);
 
   const vitimas = await figureMetrics(page, "fig-vitimas");
   await page.locator('[data-dossier-figure="fig-vitimas"]').screenshot({
@@ -315,26 +348,34 @@ async function main() {
   });
 
   const mapMain = await figureMetrics(page, "fig-mapa-main");
-  await page.locator('[data-dossier-figure="fig-mapa-main"]').screenshot({
+  await page.locator('[data-dossier-figure="fig-mapa-main"] img').screenshot({
     path: path.join(outDir, "map-main-390.png"),
   });
 
   const inset = await figureMetrics(page, "fig-mapa-inset");
-  await page.locator('[data-dossier-figure="fig-mapa-inset"]').screenshot({
+  await page.locator('[data-dossier-figure="fig-mapa-inset"] img').screenshot({
     path: path.join(outDir, "map-inset-390.png"),
   });
 
   await page.locator('[data-dossier-figure="fig-mapa-main"] button').click();
   await page.waitForSelector('[role="dialog"] img', { timeout: 10000 });
   const lightboxOk = (await page.locator('[role="dialog"] img').count()) > 0;
+  const lightboxMainRect = lightboxOk
+    ? await page.evaluate(() => {
+        const img = document.querySelector('[role="dialog"] img');
+        if (!img) return null;
+        const r = img.getBoundingClientRect();
+        return { width: r.width, height: r.height };
+      })
+    : null;
   await page.screenshot({ path: path.join(outDir, "lightbox-map-390.png") });
   await page.keyboard.press("Escape");
 
   let reader1280Ready = false;
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
+  await gotoDossier(page, dossierUrl);
   try {
-    await waitReaderReady(page);
+    await waitReaderReady(page, 1280);
     reader1280Ready = true;
   } catch {
     reader1280Ready = false;
@@ -347,12 +388,16 @@ async function main() {
   const metrics = {
     vitimasVisible390: vitimas.visible && vitimas.naturalWidth > 0,
     vitimasNaturalWidth: vitimas.naturalWidth,
+    vitimasImgRect390: vitimas.rect,
     mapMainVisible390: mapMain.visible && mapMain.naturalWidth > 0,
-    mapMainWidth390: mapMain.box?.width ?? 0,
-    mapMainHeight390: mapMain.box?.height ?? 0,
+    mapMainImgWidth390: mapMain.rect?.width ?? 0,
+    mapMainImgHeight390: mapMain.rect?.height ?? 0,
+    mapMainImgRect390: mapMain.rect,
     insetVisible390: inset.visible && inset.naturalWidth > 0,
     insetNaturalWidth: inset.naturalWidth,
+    insetImgRect390: inset.rect,
     lightboxOk,
+    lightboxMainImgRect390: lightboxMainRect,
     reader1280Ready,
     figureTestOk,
     buildOk: process.env.QA_BUILD_OK === "1",

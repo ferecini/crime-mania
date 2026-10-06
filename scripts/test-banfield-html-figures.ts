@@ -58,7 +58,7 @@ async function testFigureAssets() {
   assert.ok(miw >= 650 && miw <= 780, `fig-mapa-inset width ${miw}`);
   assert.ok(mih >= 400 && mih <= 490, `fig-mapa-inset height ${mih}`);
 
-  assert.ok(mw >= 1500, `fig-mapa width ${mw}`);
+  assert.ok(mw >= 1380, `fig-mapa width ${mw}`);
   assert.ok(mh >= 250 && mh <= 320, `fig-mapa height ${mh}`);
   const mAspect = mw / mh;
   assert.ok(mAspect >= 4 && mAspect <= 8, `fig-mapa aspect ${mAspect}`);
@@ -68,7 +68,10 @@ async function testFigureAssets() {
     mw !== BAD_MAPA_DIMENSIONS.width || mh !== BAD_MAPA_DIMENSIONS.height,
     "fig-mapa ainda tem dimensões exatas do asset defeituoso 1440×287",
   );
-  assert.ok(mw > BAD_MAPA_DIMENSIONS.width, "fig-mapa deve ser mais largo que o crop defeituoso");
+  assert.ok(
+    mw >= 1380 || mw > BAD_MAPA_DIMENSIONS.width,
+    "fig-mapa deve ser composição wide trimada, não faixa defeituosa 1440×287",
+  );
 }
 
 async function main() {

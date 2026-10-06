@@ -25,10 +25,11 @@ export function DocumentFigureBlock({
 }) {
   const visibility =
     showWhen === "mobile-only"
-      ? "md:hidden"
+      ? "lg:hidden"
       : showWhen === "desktop-only"
-        ? "hidden md:block"
+        ? "hidden lg:block"
         : "";
+  const mapPanel = assetId.startsWith("fig-mapa");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
 
@@ -57,28 +58,16 @@ export function DocumentFigureBlock({
           onClick={() => setOpen(true)}
           aria-label={`Ampliar: ${alt}`}
         >
-          <div
-            className={
-              assetId === "fig-mapa-main"
-                ? "flex min-h-[180px] w-full items-center justify-center"
-                : undefined
-            }
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={assetSrc(slug, assetId, 960)}
-              alt={alt}
-              className={`mx-auto w-full object-contain ${
-                assetId === "fig-mapa-main"
-                  ? "max-h-[min(75vh,720px)]"
-                  : portrait
-                    ? "h-auto max-h-[75vh]"
-                    : "h-auto max-h-[min(75vh,720px)]"
-              }`}
-              loading="eager"
-              decoding="async"
-            />
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={assetSrc(slug, assetId, 960)}
+            alt={alt}
+            className={`mx-auto block w-full object-contain ${
+              portrait ? "h-auto max-h-[75vh]" : "h-auto"
+            }`}
+            loading="eager"
+            decoding="async"
+          />
         </button>
         {caption ? <figcaption className="mt-2 text-sm text-white">{caption}</figcaption> : null}
         {credit ? <p className="text-xs text-cm-gray">Crédito: {credit}</p> : null}
@@ -91,7 +80,7 @@ export function DocumentFigureBlock({
           aria-modal="true"
           aria-label={alt}
         >
-          <div className="flex min-h-11 items-center justify-end gap-2 px-4 py-2">
+          <div className="flex min-h-11 shrink-0 items-center justify-end gap-2 px-4 py-2">
             <button
               type="button"
               className="min-h-11 min-w-11 rounded-[4px] border border-cm-divider px-3 text-sm text-white"
@@ -100,14 +89,30 @@ export function DocumentFigureBlock({
               Fechar
             </button>
           </div>
-          <div className="flex flex-1 items-center justify-center overflow-hidden px-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={assetSrc(slug, assetId, 1440)}
-              alt={alt}
-              className="max-h-full max-w-full object-contain"
-              draggable={false}
-            />
+          <div
+            className={`min-h-0 flex-1 ${
+              mapPanel ? "overflow-auto overscroll-contain px-1 pb-4" : "overflow-hidden px-2"
+            }`}
+          >
+            <div
+              className={
+                mapPanel
+                  ? "mx-auto flex min-h-full w-full max-w-[min(100vw,960px)] items-start justify-center"
+                  : "flex h-full min-h-[50vh] items-center justify-center"
+              }
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={assetSrc(slug, assetId, mapPanel ? 1920 : 1440)}
+                alt={alt}
+                className={
+                  mapPanel
+                    ? "block h-auto w-full max-w-none object-contain"
+                    : "max-h-[85vh] max-w-full object-contain"
+                }
+                draggable={false}
+              />
+            </div>
           </div>
         </div>
       ) : null}

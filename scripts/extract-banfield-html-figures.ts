@@ -35,6 +35,17 @@ function rectFromCrop(pageWidth: number, pageHeight: number, crop: HtmlFigureCro
   };
 }
 
+async function pipelineFromCrop(pagePng: Buffer, crop: HtmlFigureCrop) {
+  const page = sharp(pagePng);
+  const meta = await page.metadata();
+  const rect = rectFromCrop(meta.width ?? 1, meta.height ?? 1, crop);
+  let buf = await sharp(pagePng).extract(rect).png().toBuffer();
+  if (crop.trimBorder) {
+    buf = await sharp(buf).trim({ threshold: 18 }).png().toBuffer();
+  }
+  return buf;
+}
+
 async function main() {
   const sourcePath = path.join(process.cwd(), sourceRel);
   if (!fs.existsSync(sourcePath)) {
@@ -43,36 +54,12 @@ async function main() {
   }
   fs.mkdirSync(outDir, { recursive: true });
 
-  const page = sharp(sourcePath);
-  const meta = await page.metadata();
-  const pageWidth = meta.width ?? 1;
-  const pageHeight = meta.height ?? 1;
   const pagePng = fs.readFileSync(sourcePath);
 
   for (const crop of BANFIELD_HTML_FIGURE_CROPS) {
-    const rect = rectFromCrop(pageWidth, pageHeight, crop);
     const outPath = path.join(outDir, `${crop.assetId}.webp`);
-    let pipeline = sharp(pagePng).extract(rect);
-    if (crop.padToMaxAspect) {
-      const extracted = await pipeline.png().toBuffer();
-      const em = await sharp(extracted).metadata();
-      const ew = em.width ?? 1;
-      const eh = em.height ?? 1;
-      const aspect = ew / eh;
-      if (aspect > crop.padToMaxAspect) {
-        const targetH = Math.ceil(ew / crop.padToMaxAspect);
-        const padTop = Math.floor((targetH - eh) / 2);
-        const padBottom = targetH - eh - padTop;
-        pipeline = sharp(extracted).extend({
-          top: padTop,
-          bottom: padBottom,
-          background: { r: 0, g: 0, b: 0 },
-        });
-      } else {
-        pipeline = sharp(extracted);
-      }
-    }
-    const webp = await pipeline.webp({ quality: 90, effort: 4 }).toBuffer();
+    const pngBuf = await pipelineFromCrop(pagePng, crop);
+    const webp = await sharp(pngBuf).webp({ quality: 90, effort: 4 }).toBuffer();
     fs.writeFileSync(outPath, webp);
     const outMeta = await sharp(webp).metadata();
     const hash = crypto.createHash("sha256").update(webp).digest("hex");

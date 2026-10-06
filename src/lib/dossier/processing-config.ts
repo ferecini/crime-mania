@@ -348,8 +348,8 @@ export type HtmlFigureCrop = {
   xEnd: number;
   yStart: number;
   yEnd: number;
-  /** Pad with black to at most this width/height ratio (mobile legibility). */
-  padToMaxAspect?: number;
+  /** Remove near-black borders after extract (tight content bounds). */
+  trimBorder?: boolean;
 };
 
 export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
@@ -365,9 +365,8 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xStart: 0.02,
     xEnd: 0.58,
     yStart: 0.405,
-    yEnd: 0.5,
-    /** ~322px content width @390 viewport → rendered height ≥180px */
-    padToMaxAspect: 352 / 180,
+    /** Full Fairfax/DC panel height (~465px @1620w source); no letterbox padding */
+    yEnd: 0.59,
   },
   {
     assetId: "fig-mapa-inset",
@@ -382,6 +381,7 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xEnd: 0.992,
     yStart: 0.38,
     yEnd: 0.482,
+    trimBorder: true,
   },
 ];
 
