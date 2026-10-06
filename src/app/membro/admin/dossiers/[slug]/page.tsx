@@ -35,7 +35,7 @@ export default async function MemberAdminDossierPage({
       <DossierHtmlReviewPanel slug={slug} title={dossier.title} />
       <details className="rounded border border-cm-divider p-4">
         <summary className="cursor-pointer text-sm text-cm-gray">
-          Recortes legados (rollback — não usar como leitor principal)
+          Recortes legados (modo antigo — não usar como leitor principal)
         </summary>
         <div className="mt-4">
           <DossierReviewPanel slug={slug} title={dossier.title} />

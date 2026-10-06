@@ -3,6 +3,7 @@ import { getDossierRecord } from "@/data/dossiers";
 import { assertSameOrigin, requireDossierAdmin } from "@/lib/dossier/admin-api";
 import { createDossierJob, getLatestDossierVersion, writeAdminAudit } from "@/lib/dossier/db";
 import { createDossierStorage } from "@/lib/dossier/storage";
+import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors";
 import { assertAllowedSlug, validatePdfBuffer, validatePdfWithPdfJs } from "@/lib/dossier/validate-pdf";
 
 export async function POST(request: Request) {
@@ -47,7 +48,9 @@ export async function POST(request: Request) {
     await validatePdfWithPdfJs(buf);
   } catch (e) {
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "PDF inválido." },
+      {
+        error: humanizeDossierProcessingError(e instanceof Error ? e.message : "PDF inválido."),
+      },
       { status: 400 },
     );
   }
@@ -75,6 +78,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     jobId: job.id,
-    message: "PDF armazenado. O worker processará o job em background.",
+    message: "PDF enviado. A fila processará o arquivo em segundo plano (GitHub Actions ou botão abaixo).",
   });
 }

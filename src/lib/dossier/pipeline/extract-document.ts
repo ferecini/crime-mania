@@ -1,4 +1,4 @@
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { loadPdfDocument } from "@/lib/dossier/pdfjs-server";
 import sharp from "sharp";
 import { getDossierRecord } from "@/data/dossiers";
 import type {
@@ -76,7 +76,7 @@ function classifyLine(line: { text: string; fontSize: number }, bodySize: number
 
 async function collectRuns(pdfBuffer: Buffer): Promise<{ runs: TextRun[]; pageCount: number }> {
   await validatePdfWithPdfJs(pdfBuffer);
-  const doc = await getDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true }).promise;
+  const doc = await loadPdfDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true });
   const pageCount = Math.min(doc.numPages, DOSSIER_DOCUMENT_LIMITS.maxPagesExtract);
   const runs: TextRun[] = [];
 
@@ -118,7 +118,7 @@ async function persistExtractedImages(
   const warnings: string[] = [];
   if (!opts.storage || !opts.upsertAsset) return { blocks: imageBlocks, warnings };
 
-  const doc = await getDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true }).promise;
+  const doc = await loadPdfDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true });
   const root = `dossiers/documents/${opts.slug}/v${opts.version}/extracted`;
 
   for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {

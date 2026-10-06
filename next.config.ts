@@ -2,6 +2,10 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["@napi-rs/canvas", "pdfjs-dist", "sharp"],
+  outputFileTracingIncludes: {
+    "/api/admin/dossier/upload": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+    "/api/admin/dossier/worker": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
+  },
   async redirects() {
     return [
       {

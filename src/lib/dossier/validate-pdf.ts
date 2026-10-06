@@ -36,9 +36,9 @@ export function validatePdfBuffer(buf: Buffer): { sha256: string } {
 }
 
 export async function validatePdfWithPdfJs(buf: Buffer): Promise<{ pageCount: number }> {
-  const { getDocument } = await import("pdfjs-dist/legacy/build/pdf.mjs");
+  const { loadPdfDocument } = await import("@/lib/dossier/pdfjs-server");
   const timeoutMs = 30_000;
-  const docPromise = getDocument({ data: new Uint8Array(buf), useSystemFonts: true }).promise;
+  const docPromise = loadPdfDocument({ data: new Uint8Array(buf), useSystemFonts: true });
   const doc = await Promise.race([
     docPromise,
     new Promise<never>((_, reject) =>

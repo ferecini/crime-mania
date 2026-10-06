@@ -1,3 +1,4 @@
+import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors";
 import { createDossierStorage } from "@/lib/dossier/storage";
 import { processPdfToManifest } from "@/lib/dossier/pipeline/process-pdf";
 import { extractDocumentFromPdf } from "@/lib/dossier/pipeline/extract-document";
@@ -46,7 +47,7 @@ export async function runDossierJob(job: DossierJobRecord): Promise<void> {
 
     await updateDossierJob(job.id, { status: "needs_review", progress: "done" });
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
+    const message = humanizeDossierProcessingError(err instanceof Error ? err.message : String(err));
     await updateDossierJob(job.id, { status: "failed", error: message, progress: "error" });
     throw err;
   }

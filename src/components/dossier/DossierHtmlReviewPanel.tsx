@@ -7,6 +7,8 @@ import {
   type DocumentVersionSummary,
 } from "@/components/dossier/DossierDocumentEditor";
 import { Button } from "@/components/ui/Button";
+import { dossierJobProgressLabel, dossierJobStatusLabel } from "@/lib/dossier/job-labels";
+import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors";
 
 type JobSummary = {
   id: string;
@@ -125,7 +127,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro");
       setJob({ id: data.jobId, status: "uploaded", version: 0 });
-      alert(data.message ?? "Upload OK — aguarde o worker processar o job.");
+      alert(data.message ?? "PDF enviado. Aguarde o processamento na fila.");
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload.");
@@ -139,10 +141,13 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
     try {
       const res = await fetch("/api/admin/dossier/worker", { method: "POST" });
       const data = await res.json();
-      if (!res.ok && res.status !== 401) throw new Error(data.error ?? "Worker falhou.");
+      if (!res.ok) throw new Error(data.error ?? data.message ?? "Falha ao processar a fila.");
+      if (data.processed === false) {
+        setError(data.message ?? "Nenhuma tarefa pendente na fila.");
+      }
       await load();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Worker indisponível neste ambiente.");
+      setError(e instanceof Error ? e.message : "Processamento indisponível neste ambiente.");
     }
   }
 
@@ -158,35 +163,38 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
         <p className="mt-2 text-sm text-cm-gray">
           {document
             ? `Status: ${document.status} · v${document.version} · ${blockCount} blocos · ${document.meta.charCount} caracteres${document.meta.ocrUsed ? " · OCR" : ""}`
-            : "Sem rascunho HTML — faça upload de PDF ou bootstrap editorial."}
+            : "Sem rascunho HTML — envie um PDF ou use o bootstrap editorial (Banfield)."}
         </p>
         {job ? (
           <p className="mt-1 text-xs text-cm-gray">
-            Job: {job.status}
-            {job.progress ? ` (${job.progress})` : ""}
-            {job.error ? ` — ${job.error}` : ""}
+            Fila: {dossierJobStatusLabel(job.status)}
+            {job.progress ? ` (${dossierJobProgressLabel(job.progress)})` : ""}
+            {job.error ? ` — ${humanizeDossierProcessingError(job.error)}` : ""}
           </p>
         ) : null}
       </header>
 
       <div className="rounded border border-cm-divider p-4">
-        <h2 className="text-sm font-semibold text-white">Upload PDF → extração → revisão</h2>
+        <h2 className="text-sm font-semibold text-white">Enviar PDF → extração → revisão</h2>
         <p className="mt-1 text-xs text-cm-gray">
-          Blob privado + fila Postgres. O worker extrai texto/imagens (OCR manual se necessário). Não publica
-          automaticamente.
+          Armazenamento privado + fila no banco. O processador extrai texto e imagens (OCR manual se necessário). Não
+          publica automaticamente.
         </p>
-        <input
-          type="file"
-          accept="application/pdf"
-          className="mt-3 block min-h-11 w-full text-sm"
-          disabled={uploading}
-          onChange={(e) => {
-            const f = e.target.files?.[0];
-            if (f) uploadPdf(f);
-          }}
-        />
+        <label className="mt-3 flex min-h-11 cursor-pointer flex-col gap-1 text-sm">
+          <span className="font-medium text-white">Arquivo PDF</span>
+          <input
+            type="file"
+            accept="application/pdf,.pdf"
+            className="block w-full text-sm text-cm-gray file:mr-3 file:rounded file:border-0 file:bg-cm-red file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-cm-red/90"
+            disabled={uploading}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) uploadPdf(f);
+            }}
+          />
+        </label>
         <Button type="button" variant="secondary" className="mt-3 min-h-11" onClick={() => triggerWorkerOnce()}>
-          Processar próximo job (dev)
+          Processar próximo da fila
         </Button>
       </div>
 
@@ -198,7 +206,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
 
       {!document ? (
         <div className="rounded border border-dashed border-cm-divider p-4 text-sm text-cm-gray">
-          Aguardando processamento ou bootstrap editorial.
+          Aguardando processamento do PDF ou carga editorial manual.
         </div>
       ) : (
         <DossierDocumentEditor

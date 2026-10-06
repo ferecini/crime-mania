@@ -1,6 +1,6 @@
 import crypto from "node:crypto";
 import { createCanvas } from "@napi-rs/canvas";
-import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import { loadPdfDocument } from "@/lib/dossier/pdfjs-server";
 import sharp from "sharp";
 import { getDossierRecord } from "@/data/dossiers";
 import {
@@ -20,7 +20,7 @@ function cropsForSlug(slug: string): EditorialCrop[] {
 
 async function renderPagePng(pdfBuf: Buffer, scale: number) {
   await validatePdfWithPdfJs(pdfBuf);
-  const doc = await getDocument({ data: new Uint8Array(pdfBuf), useSystemFonts: true }).promise;
+  const doc = await loadPdfDocument({ data: new Uint8Array(pdfBuf), useSystemFonts: true });
   const page = await doc.getPage(1);
   const viewport = page.getViewport({ scale });
   const canvas = createCanvas(viewport.width, viewport.height);
