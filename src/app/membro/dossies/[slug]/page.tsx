@@ -4,7 +4,6 @@ import { DossierGalleryCarousel } from "@/components/dossier/DossierGalleryCarou
 import { DossierDownloadPdfLink } from "@/components/dossier/DossierDownloadPdfLink";
 import { SemanticDossierReader } from "@/components/dossier/SemanticDossierReader";
 import { ResponsiveDossierReader } from "@/components/dossier/ResponsiveDossierReader";
-import { legacyCropReaderEnabled } from "@/lib/dossier/access";
 import { readMemberDocument, resolvePublishedFormat } from "@/lib/dossier/document-store";
 import { readProcessedManifest } from "@/lib/dossier/manifest-store";
 import { DossierTextSummary } from "@/components/dossier/DossierTextSummary";
@@ -31,16 +30,17 @@ export default async function DossierDetailPage({
   const summaryAccess = evaluateAccess(session, "dossierSummary");
   const jurisAccess = evaluateAccess(session, "dossierJuris");
   const canViewSummary = summaryAccess.allowed;
+  const processedManifest = await readProcessedManifest(slug);
+  const useCropReader = Boolean(
+    processedManifest?.status === "ready" && processedManifest.blocks.length > 0,
+  );
   const publishedFormat = await resolvePublishedFormat(slug);
   const htmlDocument = await readMemberDocument(slug);
   const useHtmlReader =
+    !useCropReader &&
     publishedFormat === "html" &&
     htmlDocument?.status === "ready" &&
     htmlDocument.sections.some((s) => s.blocks.length > 0);
-  const processedManifest = await readProcessedManifest(slug);
-  const useLegacyCropReader =
-    legacyCropReaderEnabled() &&
-    Boolean(processedManifest?.status === "ready" && processedManifest.blocks.length > 0);
   const documentProcessing =
     publishedFormat === "html" &&
     htmlDocument &&
@@ -85,16 +85,16 @@ export default async function DossierDetailPage({
         <PaywallCard state={summaryAccess} />
       ) : (
         <>
-          {useHtmlReader ? (
+          {useCropReader ? (
             <>
-              <SemanticDossierReader slug={dossier.slug} />
+              <ResponsiveDossierReader slug={dossier.slug} />
               {dossier.documentFile ? (
                 <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
               ) : null}
             </>
-          ) : useLegacyCropReader ? (
+          ) : useHtmlReader ? (
             <>
-              <ResponsiveDossierReader slug={dossier.slug} />
+              <SemanticDossierReader slug={dossier.slug} />
               {dossier.documentFile ? (
                 <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
               ) : null}

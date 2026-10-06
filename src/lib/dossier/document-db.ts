@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { neon } from "@neondatabase/serverless";
 import type {
   DossierDocument,
@@ -25,10 +26,60 @@ export async function saveDraftDocument(slug: string, doc: DossierDocument): Pro
   `;
 }
 
+export async function appendDocumentVersionSnapshot(
+  slug: string,
+  doc: DossierDocument,
+  actorId?: string,
+): Promise<void> {
+  const sql = neon(sqlUrl());
+  const clean = sanitizeDocument(doc);
+  await sql`
+    INSERT INTO dossier_document_versions (id, slug, version, snapshot, actor_id)
+    VALUES (${randomUUID()}, ${slug}, ${clean.version}, ${JSON.stringify(clean)}::jsonb, ${actorId ?? null})
+  `;
+}
+
+export async function listDocumentVersionSnapshots(
+  slug: string,
+  limit = 12,
+): Promise<{ id: string; version: number; publishedAt: string }[]> {
+  const sql = neon(sqlUrl());
+  const rows = await sql`
+    SELECT id, version, published_at
+    FROM dossier_document_versions
+    WHERE slug = ${slug}
+    ORDER BY published_at DESC
+    LIMIT ${limit}
+  `;
+  return rows.map((r) => {
+    const row = r as Record<string, unknown>;
+    return {
+      id: row.id as string,
+      version: row.version as number,
+      publishedAt: (row.published_at as Date).toISOString(),
+    };
+  });
+}
+
+export async function readDocumentVersionSnapshot(
+  slug: string,
+  versionId: string,
+): Promise<DossierDocument | null> {
+  const sql = neon(sqlUrl());
+  const rows = await sql`
+    SELECT snapshot FROM dossier_document_versions
+    WHERE slug = ${slug} AND id = ${versionId}
+    LIMIT 1
+  `;
+  if (!rows[0]?.snapshot) return null;
+  return rows[0].snapshot as DossierDocument;
+}
+
 export async function publishDocument(
   slug: string,
   doc: DossierDocument,
   format: DossierPublishedFormat = "html",
+  actorId?: string,
 ): Promise<void> {
   const sql = neon(sqlUrl());
   const clean = sanitizeDocument({
@@ -36,6 +87,11 @@ export async function publishDocument(
     status: "ready",
     publishedAt: new Date().toISOString().slice(0, 10),
   });
+  try {
+    await appendDocumentVersionSnapshot(slug, clean, actorId);
+  } catch {
+    /* version table optional until migration 005 */
+  }
   await sql`
     INSERT INTO dossier_documents (slug, draft, published, published_format, version, updated_at)
     VALUES (

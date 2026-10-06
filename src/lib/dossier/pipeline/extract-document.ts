@@ -1,9 +1,18 @@
 import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+import sharp from "sharp";
 import { getDossierRecord } from "@/data/dossiers";
-import type { DossierDocument, DossierDocumentSection, DocumentBlock } from "@/lib/dossier/document-types";
+import type {
+  DossierDocument,
+  DossierDocumentSection,
+  DocumentBlock,
+  DossierDocumentAssetRecord,
+} from "@/lib/dossier/document-types";
 import { DOSSIER_DOCUMENT_LIMITS } from "@/lib/dossier/document-limits";
 import { validatePdfWithPdfJs } from "@/lib/dossier/validate-pdf";
 import { sanitizeDocument } from "@/lib/dossier/document-sanitize";
+import type { DossierStorage } from "@/lib/dossier/storage";
+import { extractEmbeddedImagesFromPage } from "@/lib/dossier/pipeline/extract-embedded-images";
+import { ocrUnavailableWarning, tryOcrPdfPages } from "@/lib/dossier/pipeline/ocr-fallback";
 
 type TextRun = {
   str: string;
@@ -11,6 +20,15 @@ type TextRun = {
   x: number;
   y: number;
   page: number;
+};
+
+export type ExtractDocumentOptions = {
+  slug: string;
+  pdfBuffer: Buffer;
+  pdfStorageKey: string;
+  version: number;
+  storage?: DossierStorage;
+  upsertAsset?: (record: DossierDocumentAssetRecord) => Promise<void>;
 };
 
 function median(values: number[]): number {
@@ -81,12 +99,68 @@ async function collectRuns(pdfBuffer: Buffer): Promise<{ runs: TextRun[]; pageCo
   return { runs, pageCount };
 }
 
-export async function extractDocumentFromPdf(input: {
-  slug: string;
-  pdfBuffer: Buffer;
-  pdfStorageKey: string;
-  version: number;
-}): Promise<DossierDocument> {
+function blockTextLength(blocks: DocumentBlock[]): number {
+  let n = 0;
+  for (const b of blocks) {
+    if ("text" in b && typeof b.text === "string") n += b.text.length;
+    if (b.type === "list") n += b.items.join(" ").length;
+    if (b.type === "timeline") n += b.entries.map((e) => e.body).join("").length;
+  }
+  return n;
+}
+
+async function persistExtractedImages(
+  opts: ExtractDocumentOptions,
+  pageCount: number,
+  pdfBuffer: Buffer,
+): Promise<{ blocks: DocumentBlock[]; warnings: string[] }> {
+  const imageBlocks: DocumentBlock[] = [];
+  const warnings: string[] = [];
+  if (!opts.storage || !opts.upsertAsset) return { blocks: imageBlocks, warnings };
+
+  const doc = await getDocument({ data: new Uint8Array(pdfBuffer), useSystemFonts: true }).promise;
+  const root = `dossiers/documents/${opts.slug}/v${opts.version}/extracted`;
+
+  for (let pageNum = 1; pageNum <= pageCount; pageNum += 1) {
+    const page = await doc.getPage(pageNum);
+    const images = await extractEmbeddedImagesFromPage(page, pageNum, opts.slug);
+    for (const img of images) {
+      let webp: Buffer;
+      try {
+        webp = await sharp(img.bytes).webp({ quality: 82 }).toBuffer();
+      } catch {
+        warnings.push(`Imagem p.${pageNum} ignorada (formato não suportado).`);
+        continue;
+      }
+      const storageKey = `${root}/${img.id}.webp`;
+      await opts.storage.put(storageKey, webp, "image/webp");
+      await opts.upsertAsset({
+        id: img.id,
+        slug: opts.slug,
+        storageKey,
+        mimeType: "image/webp",
+        byteSize: webp.length,
+        altText: `Figura extraída do PDF (página ${pageNum})`,
+      });
+      imageBlocks.push({
+        id: `blk-${img.id}`,
+        type: "figure",
+        order: 0,
+        assetId: img.id,
+        alt: `Figura extraída do PDF (página ${pageNum})`,
+        caption: `Imagem incorporada — página ${pageNum}`,
+        warnings: ["Revisar legenda e crédito após extração automática."],
+      });
+    }
+  }
+
+  if (imageBlocks.length) {
+    warnings.push(`${imageBlocks.length} imagem(ns) incorporada(s) extraída(s) — revisar alt/caption.`);
+  }
+  return { blocks: imageBlocks, warnings };
+}
+
+export async function extractDocumentFromPdf(input: ExtractDocumentOptions): Promise<DossierDocument> {
   const dossier = getDossierRecord(input.slug);
   if (!dossier) throw new Error("Dossiê desconhecido.");
   if (input.pdfBuffer.length > DOSSIER_DOCUMENT_LIMITS.maxPdfBytes) {
@@ -107,11 +181,37 @@ export async function extractDocumentFromPdf(input: {
   }
 
   const warnings: string[] = [];
+  let ocrUsed = false;
+
   if (!blocks.length) {
-    warnings.push("Nenhuma camada de texto detectada — OCR manual necessário.");
+    const ocrText = await tryOcrPdfPages(input.pdfBuffer, pageCount);
+    if (ocrText?.trim()) {
+      blocks.push({
+        id: "ocr-1",
+        type: "paragraph",
+        order: 1,
+        text: ocrText.trim(),
+        warnings: ["Texto via OCR — revisar fidelidade."],
+      });
+      ocrUsed = true;
+      warnings.push("OCR aplicado — revisão editorial obrigatória.");
+    } else {
+      warnings.push(ocrUnavailableWarning());
+    }
   }
+
   if (pageCount > 1) {
     warnings.push(`Extraídas ${pageCount} páginas; revisar ordem de leitura e títulos.`);
+  }
+
+  const { blocks: imageBlocks, warnings: imgWarnings } = await persistExtractedImages(
+    input,
+    pageCount,
+    input.pdfBuffer,
+  );
+  warnings.push(...imgWarnings);
+  for (const ib of imageBlocks) {
+    blocks.push({ ...ib, order: order++ });
   }
 
   const section: DossierDocumentSection = {
@@ -121,16 +221,19 @@ export async function extractDocumentFromPdf(input: {
     blocks,
   };
 
+  const charCount = blockTextLength(blocks);
+  const status = blocks.length ? "needs_review" : "failed";
+
   const doc: DossierDocument = sanitizeDocument({
     slug: input.slug,
     title: dossier.title,
     version: input.version,
-    status: blocks.length ? "needs_review" : "failed",
+    status,
     sourcePdfStorageKey: input.pdfStorageKey,
     sections: [section],
     meta: {
-      charCount: blocks.reduce((n, b) => n + ("text" in b && typeof b.text === "string" ? b.text.length : 0), 0),
-      ocrUsed: false,
+      charCount,
+      ocrUsed,
       extractionWarnings: warnings,
       pageCount,
     },

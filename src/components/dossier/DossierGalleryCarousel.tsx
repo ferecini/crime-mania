@@ -98,8 +98,6 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
   }
 
   const current = items[index];
-  const prev = items[(index - 1 + items.length) % items.length];
-  const next = items[(index + 1) % items.length];
   const isPortrait =
     Boolean(current.width && current.height && current.height > current.width);
 
@@ -166,9 +164,9 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
         </button>
       </div>
 
-      {/* Desktop: main ~80% width, optional neighbor previews */}
+      {/* Desktop: main image ≥70% content column, arrows overlaid (no side neighbors) */}
       <div
-        className="relative hidden md:flex md:items-center md:justify-center md:gap-3"
+        className="relative mx-auto hidden w-full max-w-4xl md:block"
         onTouchStart={(e) => {
           touchStartX.current = e.changedTouches[0]?.clientX ?? null;
         }}
@@ -184,50 +182,30 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
       >
         <button
           type="button"
+          onClick={() => setLightbox(true)}
+          className="relative block w-full min-w-0 overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageSrc(slug, current.id, 1200)}
+            alt={current.alt}
+            className="mx-auto block max-h-[75vh] w-full min-w-[70%] max-w-full object-contain"
+            draggable={false}
+            onError={() => setLoadError("Não foi possível carregar esta imagem.")}
+          />
+        </button>
+        <button
+          type="button"
           onClick={() => go(-1)}
-          className="inline-flex h-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border border-cm-divider text-white hover:bg-white/5"
+          className="absolute left-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/55 text-lg text-white backdrop-blur-sm"
           aria-label="Imagem anterior"
         >
           ←
         </button>
-        <div className="flex min-w-0 flex-1 items-center justify-center gap-3">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            className="relative hidden aspect-[4/5] w-[12%] max-w-[7rem] shrink-0 overflow-hidden rounded opacity-50 lg:block"
-            aria-hidden
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageSrc(slug, prev.id)} alt="" className="h-full w-full object-cover" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setLightbox(true)}
-            className="relative min-w-0 flex-[1_1_78%] basis-[78%] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20 md:max-w-[85%]"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageSrc(slug, current.id, 960)}
-              alt={current.alt}
-              className="mx-auto block max-h-[75vh] w-full max-w-full object-contain"
-              draggable={false}
-              onError={() => setLoadError("Não foi possível carregar esta imagem.")}
-            />
-          </button>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            className="relative hidden aspect-[4/5] w-[12%] max-w-[7rem] shrink-0 overflow-hidden rounded opacity-50 lg:block"
-            aria-hidden
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageSrc(slug, next.id)} alt="" className="h-full w-full object-cover" />
-          </button>
-        </div>
         <button
           type="button"
           onClick={() => go(1)}
-          className="inline-flex h-11 min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full border border-cm-divider text-white hover:bg-white/5"
+          className="absolute right-2 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/55 text-lg text-white backdrop-blur-sm"
           aria-label="Próxima imagem"
         >
           →

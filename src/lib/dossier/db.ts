@@ -144,6 +144,15 @@ export async function readPublishedManifest(slug: string): Promise<ProcessedDoss
   return null;
 }
 
+export async function getLatestDossierJobForSlug(slug: string): Promise<DossierJobRecord | null> {
+  const sql = neon(sqlUrl());
+  const rows = await sql`
+    SELECT * FROM dossier_jobs WHERE slug = ${slug} ORDER BY created_at DESC LIMIT 1
+  `;
+  if (!rows[0]) return null;
+  return mapJob(rows[0] as Record<string, unknown>);
+}
+
 export async function writeAdminAudit(input: {
   actorId: string;
   action: string;

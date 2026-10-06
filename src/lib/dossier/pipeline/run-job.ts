@@ -2,7 +2,7 @@ import { createDossierStorage } from "@/lib/dossier/storage";
 import { processPdfToManifest } from "@/lib/dossier/pipeline/process-pdf";
 import { extractDocumentFromPdf } from "@/lib/dossier/pipeline/extract-document";
 import { saveDraftManifest, updateDossierJob } from "@/lib/dossier/db";
-import { saveDraftDocument } from "@/lib/dossier/document-db";
+import { saveDraftDocument, upsertDocumentAsset } from "@/lib/dossier/document-db";
 import type { DossierJobRecord } from "@/lib/dossier/jobs-types";
 
 export async function runDossierJob(job: DossierJobRecord): Promise<void> {
@@ -32,6 +32,8 @@ export async function runDossierJob(job: DossierJobRecord): Promise<void> {
         pdfBuffer: pdf,
         pdfStorageKey: job.sourcePdfStorageKey,
         version: job.version,
+        storage,
+        upsertAsset: (record) => upsertDocumentAsset(record),
       });
       await saveDraftDocument(job.slug, document);
     } catch (htmlErr) {
