@@ -2,64 +2,43 @@
 
 ## Asset verification (source crop)
 
-- `asset-verify-fig-vitimas.png` — grade 2×2 limpa (414×410, labels Christine/Joseph/Brendan/Juliana completos; sem coluna de texto).
-- `asset-verify-fig-mapa-main.png` — painel Fairfax/DC (908×465, inalterado).
-- `asset-verify-fig-mapa-inset.png` — inset Virgínia + coordenadas 38.9589° N / 77.3538° W no asset (705×433).
-- `asset-verify-fig-mapa.png` — composição wide desktop-only (1582×275).
-- `ASSET-MANIFEST.json` — dimensões e SHA-256 dos `.webp` publicados.
-
-```json
-{
-  "fig-vitimas": {
-    "width": 414,
-    "height": 410,
-    "aspect": 1.01,
-    "bytes": 33144,
-    "sha256": "98419580f172080a3f2f0bb2fd8ea715e61251a41c395e7b80dc686089c954e3"
-  },
-  "fig-mapa-main": {
-    "width": 908,
-    "height": 465,
-    "aspect": 1.953,
-    "bytes": 55680,
-    "sha256": "7a0d7a6e97e2ab132397de98a24413e203ac58472c132e3ada252332490e70f8"
-  },
-  "fig-mapa-inset": {
-    "width": 705,
-    "height": 433,
-    "aspect": 1.628,
-    "bytes": 29420,
-    "sha256": "8432490f4b01fc7ea78ca209d053e243c17b89233dae34d91fd7063eb757ab74"
-  },
-  "fig-mapa": {
-    "width": 1582,
-    "height": 275,
-    "aspect": 5.753,
-    "bytes": 79216,
-    "sha256": "372ff2a6e55118d9b1f40772d57c90079d7f54e271dc61d60e972c3d117d481a"
-  }
-}
-```
-
-## Coords handling
-
-- **Escolha:** estender crop do inset (`yEnd` 0.51) para incluir as coordenadas no PNG; caption JSON alinhada (`38,9589° N, 77,3538° O`).
+- `asset-verify-fig-vitimas.png` — grade 2×2 limpa (414×410; xEnd 0.285; sem coluna «01. RESUMO DO»).
+- `asset-verify-fig-mapa-main.png` — Fairfax/DC (908×508 após padding; aspect 1.79 → ~180px @322px content width em 390).
+- `asset-verify-fig-mapa-inset.png` — inset Virgínia + coordenadas completas (705×476; yEnd 0.525).
+- `asset-verify-fig-mapa.png` — faixa wide desktop (1594×294).
+- `ASSET-MANIFEST.json` — dimensões e SHA-256 abaixo.
 
 ## Automated tests
 
-- `npm run test:banfield-html-figures` — PASS (`055efc9`).
-- `npm run dossier:bootstrap-banfield-html` — documento **v3** publicado (Blob + Postgres com `.env.local`).
+| Check | Result | Notes |
+| --- | --- | --- |
+| `npm run test:banfield-html-figures` | PASS | vitimas + map main/inset/desktop |
+| `npm run build` | PASS | Next 15.5.26 |
+| `npm run dossier:bootstrap-banfield-html` | PASS | documento **v4** → Blob `v4` + Postgres |
 
-## Reader screenshots (390 / 430 / 768 / 1280 + lightbox)
+## Reader / API QA (tier1, localhost `:3020` dev + `:3035` prod start)
 
-Pendente neste ambiente: `npx playwright install chromium` + `QA_COMMIT_SHA=055efc9 node scripts/qa-banfield-figures-capture.mjs https://crime-mania-2wzdd1e3k-investwise.vercel.app` (install Chromium demorou/travou no sandbox).
+| Check | Result | Notes |
+| --- | --- | --- |
+| tier1 login + reader ready | PASS | dev `:3020`, Playwright + `PLAYWRIGHT_CHANNEL=chrome` |
+| fig-vitimas visível @390 | PASS | naturalWidth 414; screenshot `vitimas-390.png` |
+| fig-mapa-main @390 height ≥180px | PASS | wrapper `min-h-[180px]` + asset 908×508; button box ≥180px |
+| fig-mapa-inset visível @390 | PASS | naturalWidth 705; `map-inset-390.png` |
+| lightbox mapa | PASS | `lightbox-map-390.png` |
+| reader 390/430/768/1280 | PASS | `reader-*.png` (commit `8fc9bdb` + refresh local) |
+| free document 403 | PASS | API localhost |
+| tier1 document v4 + fig blocks | PASS | seções `vitimas` / `mapa` |
+| tier1/tier2 gallery 5 items | PASS | manifest API |
+| Preview Vercel API (sem bypass) | FAIL | 401 Deployment Protection — usar SSO browser ou `VERCEL_AUTOMATION_BYPASS_SECRET` |
+
+Capturas: `private/qa-screenshots/banfield-figures-fix-2026-10-06/` (`reader-*`, `vitimas-390`, `map-main-390`, `map-inset-390`, `lightbox-map-390`).
 
 ## Preview deploy (não produção)
 
-- https://crime-mania-2wzdd1e3k-investwise.vercel.app/dossiers/familia-banfield
-- Commit: `055efc9` on branch `hotfix/banfield-figures-2026-10-06`
+- Branch preview: https://crime-mania-git-hotfix-banfield-figures-2026-10-06-investwise.vercel.app/dossiers/familia-banfield
+- PR: https://github.com/ferecini/crime-mania/pull/9
+- **Produção permanece** `1cc75c4` até OK explícito no chat (sem promote).
 
 ## Produção
 
-- **Deploy produção atual (GitHub):** `1cc75c4` — anterior a este hotfix.
-- **Ação:** preview only; **não aprovado para promote produção** até validação visual do usuário.
+- Não promover este hotfix até validação visual da proprietária.

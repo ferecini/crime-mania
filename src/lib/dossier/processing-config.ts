@@ -366,7 +366,8 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xEnd: 0.58,
     yStart: 0.405,
     yEnd: 0.5,
-    padToMaxAspect: 352 / 180,
+    /** ~322px content width @390 viewport → rendered height ≥180px */
+    padToMaxAspect: 322 / 180,
   },
   {
     assetId: "fig-mapa-inset",

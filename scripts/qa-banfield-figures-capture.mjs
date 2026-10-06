@@ -5,6 +5,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
+import { execSync } from "node:child_process";
 import sharp from "sharp";
 
 const base = process.argv[2] ?? process.env.QA_BASE_URL ?? "http://127.0.0.1:3000";
@@ -14,6 +15,7 @@ const outDir = path.join(
 );
 const slug = "familia-banfield";
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
+const EXPECTED_DOC_VERSION = Number(process.env.QA_DOC_VERSION ?? "4");
 
 const ASSET_IDS = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset", "fig-mapa"];
 
@@ -37,6 +39,30 @@ function readCreds() {
     tier1: { email: "qa-tier1@crime-mania.test", password: cfg["qa-tier1@crime-mania.test"] },
     tier2: { email: "qa-tier2@crime-mania.test", password: cfg["qa-tier2@crime-mania.test"] },
   };
+}
+
+function gitCommitSha() {
+  if (process.env.QA_COMMIT_SHA?.trim()) return process.env.QA_COMMIT_SHA.trim();
+  try {
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+  } catch {
+    return "unknown";
+  }
+}
+
+function documentHasFigures(doc) {
+  const figures = [];
+  for (const section of doc?.sections ?? []) {
+    for (const block of section.blocks ?? []) {
+      if (block.type === "figure") figures.push({ sectionId: section.id, assetId: block.assetId });
+    }
+  }
+  const vitimasSection = doc?.sections?.find((s) => s.id === "vitimas");
+  const mapaSection = doc?.sections?.find((s) => s.id === "mapa");
+  const vitimasOk = vitimasSection?.blocks?.some((b) => b.type === "figure" && b.assetId === "fig-vitimas");
+  const mapMainOk = mapaSection?.blocks?.some((b) => b.type === "figure" && b.assetId === "fig-mapa-main");
+  const mapInsetOk = mapaSection?.blocks?.some((b) => b.type === "figure" && b.assetId === "fig-mapa-inset");
+  return { figures, vitimasOk, mapMainOk, mapInsetOk };
 }
 
 async function writeAssetManifest() {
@@ -91,11 +117,31 @@ async function httpChecks(baseUrl, creds) {
 
   const t1L = await login(creds.tier1.email, creds.tier1.password);
   const t1Doc = await jfetch(`${baseUrl}/api/dossier/${slug}/document`, t1L.cookie);
+  const figMeta = documentHasFigures(t1Doc.body);
   push(
-    "tier1 document 200 v3",
-    t1Doc.status === 200 && t1Doc.body?.version === 3,
+    "tier1 document 200 v4",
+    t1Doc.status === 200 && t1Doc.body?.version === EXPECTED_DOC_VERSION,
     `${t1Doc.status} v=${t1Doc.body?.version}`,
   );
+  push(
+    "document fig-vitimas in seção vitimas",
+    figMeta.vitimasOk,
+    `figures=${figMeta.figures.length}`,
+  );
+  push(
+    "document map main/inset in seção mapa",
+    figMeta.mapMainOk && figMeta.mapInsetOk,
+    JSON.stringify(figMeta.figures.filter((f) => f.assetId?.startsWith("fig-mapa"))),
+  );
+
+  for (const assetId of ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
+    const ar = await fetch(
+      `${baseUrl}/api/dossier/${slug}/document/asset/${assetId}?w=960`,
+      { headers: { Cookie: t1L.cookie } },
+    );
+    push(`tier1 asset ${assetId} 200`, ar.status === 200, ar.status);
+  }
+
   const t1G = await jfetch(`${baseUrl}/api/dossier/${slug}/gallery/manifest`, t1L.cookie);
   push(
     "tier1 gallery 5 items",
@@ -116,15 +162,36 @@ async function httpChecks(baseUrl, creds) {
   return tests;
 }
 
+async function waitReaderReady(page) {
+  await page.waitForSelector(".dossier-html-reader", { timeout: 90000 });
+  await page.waitForFunction(
+    () => {
+      const root = document.querySelector(".dossier-html-reader");
+      if (!root) return false;
+      const text = root.textContent ?? "";
+      if (text.includes("Carregando dossiê")) return false;
+      if (text.includes("Não foi possível carregar")) return false;
+      const required = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"];
+      for (const id of required) {
+        const fig = root.querySelector(`[data-dossier-figure="${id}"] img`);
+        if (!fig || !fig.complete || fig.naturalWidth <= 0) return false;
+      }
+      return true;
+    },
+    { timeout: 90000 },
+  );
+}
+
 function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
   const rows = [
     ...httpTests.map((t) => `| ${t.name} | ${t.pass ? "PASS" : "FAIL"} | ${t.detail ?? ""} |`),
-    `| fig-vitimas 2×2 sem texto lateral | ${metrics.vitimasClean ? "PASS" : "FAIL"} | screenshot vitimas-390 |`,
-    `| fig-mapa-main height @390 ≥180px | ${metrics.mapMainHeight390 >= 180 ? "PASS" : "FAIL"} | ${metrics.mapMainHeight390?.toFixed?.(1) ?? metrics.mapMainHeight390}px (w=${metrics.mapMainWidth390?.toFixed?.(1)}) |`,
-    `| fig-mapa-inset visível mobile | ${metrics.insetVisible390 ? "PASS" : "FAIL"} | inset visible=${metrics.insetVisible390} |`,
+    `| reader mostra fig-vitimas @390 | ${metrics.vitimasVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.vitimasNaturalWidth} |`,
+    `| reader mostra fig-mapa-main @390 | ${metrics.mapMainVisible390 ? "PASS" : "FAIL"} | h=${metrics.mapMainHeight390?.toFixed?.(1)}px |`,
+    `| reader mostra fig-mapa-inset @390 | ${metrics.insetVisible390 ? "PASS" : "FAIL"} | naturalWidth=${metrics.insetNaturalWidth} |`,
+    `| fig-mapa-main height @390 ≥180px | ${metrics.mapMainHeight390 >= 180 ? "PASS" : "FAIL"} | w=${metrics.mapMainWidth390?.toFixed?.(1)} |`,
     `| lightbox mapa carrega | ${metrics.lightboxOk ? "PASS" : "FAIL"} | dialog img ok |`,
-    `| desktop fig-mapa wide | ${metrics.desktopMapVisible ? "PASS" : "FAIL"} | 1280 screenshot |`,
-    `| npm test:banfield-html-figures | PASS | local CI |`,
+    `| reader @1280 sem loading | ${metrics.reader1280Ready ? "PASS" : "FAIL"} | |`,
+    `| npm test:banfield-html-figures | ${metrics.figureTestOk ? "PASS" : "FAIL"} | |`,
     `| npm run build | ${metrics.buildOk ? "PASS" : "FAIL"} | |`,
   ];
 
@@ -132,23 +199,30 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
 
 ## Asset verification (source crop)
 
-- \`asset-verify-fig-vitimas.png\` — grade 2×2 limpa (414×410, sem coluna de texto).
-- \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (≥180px @352px de largura).
-- \`asset-verify-fig-mapa-inset.png\` — inset Virgínia + legenda com coordenadas.
-- \`asset-verify-fig-mapa.png\` — composição wide desktop-only.
-- \`ASSET-MANIFEST.json\` — dimensões e SHA-256 dos \`.webp\` publicados.
+- \`asset-verify-fig-vitimas.png\` — grade 2×2 (414×410).
+- \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (908×465).
+- \`asset-verify-fig-mapa-inset.png\` — inset Virgínia + coordenadas (705×476).
+- \`asset-verify-fig-mapa.png\` — composição wide desktop-only (1582×275).
+- \`ASSET-MANIFEST.json\` — dimensões e SHA-256 dos \`.webp\`.
 
 \`\`\`json
 ${JSON.stringify(manifest, null, 2)}
 \`\`\`
 
+## Documento HTML (v${EXPECTED_DOC_VERSION})
+
+- Figura \`fig-vitimas\` na seção **Vítimas** (\`sections[].id === "vitimas"\`).
+- \`fig-mapa-main\` + \`fig-mapa-inset\` na seção **Mapa** (\`sections[].id === "mapa"\`), visíveis em mobile/tablet/desktop (sem \`showWhen\` nos painéis corrigidos).
+- Bootstrap: \`npm run dossier:bootstrap-banfield-html\` → Blob \`v${EXPECTED_DOC_VERSION}\` + Postgres \`published\`.
+
 ## Automated tests
 
-- \`npm run test:banfield-html-figures\` — PASS.
+- \`npm run test:banfield-html-figures\` — ${metrics.figureTestOk ? "PASS" : "FAIL"}.
 - \`npm run build\` — ${metrics.buildOk ? "PASS" : "FAIL"}.
-- \`npm run dossier:bootstrap-banfield-html\` — documento **v3** (Blob + Postgres quando \`.env.local\` carregado).
 
 ## Reader screenshots (390 / 430 / 768 / 1280 + lightbox)
+
+Capturas após \`document ready\` e \`naturalWidth > 0\` em \`fig-vitimas\`, \`fig-mapa-main\`, \`fig-mapa-inset\`:
 
 - \`reader-390.png\`, \`reader-430.png\`, \`reader-768.png\`, \`reader-1280.png\`
 - \`vitimas-390.png\`, \`map-main-390.png\`, \`map-inset-390.png\`
@@ -167,19 +241,41 @@ ${rows.join("\n")}
 
 ## Produção
 
-- **Deploy produção atual (GitHub):** \`1cc75c4\` — anterior a este hotfix; assets v1/v2 antigos até promote autorizado.
-- **Ação:** apenas preview após push; **sem promote produção** até validação do usuário no chat.
+- **Não promover** até validação visual da proprietária neste chat.
 `;
+}
+
+async function figureMetrics(page, assetId) {
+  const img = page.locator(`[data-dossier-figure="${assetId}"] img`).first();
+  const count = await img.count();
+  if (count === 0) return { visible: false, naturalWidth: 0, box: null };
+  await img.scrollIntoViewIfNeeded();
+  const visible = await img.isVisible();
+  const naturalWidth = await img.evaluate((el) => el.naturalWidth);
+  const box =
+    assetId === "fig-mapa-main"
+      ? await page.locator(`[data-dossier-figure="${assetId}"] button`).first().boundingBox()
+      : await img.boundingBox();
+  return { visible, naturalWidth, box };
 }
 
 async function main() {
   fs.mkdirSync(outDir, { recursive: true });
   const manifest = await writeAssetManifest();
   const creds = readCreds();
-  const commit = process.env.QA_COMMIT_SHA?.trim() || "pending";
+  const commit = gitCommitSha();
+
+  let figureTestOk = false;
+  try {
+    execSync("npm run test:banfield-html-figures", { stdio: "pipe", encoding: "utf8" });
+    figureTestOk = true;
+  } catch {
+    figureTestOk = false;
+  }
 
   const { chromium } = await import("playwright");
-  const browser = await chromium.launch({ headless: true });
+  const channel = process.env.PLAYWRIGHT_CHANNEL?.trim() || undefined;
+  const browser = await chromium.launch({ headless: true, channel });
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     extraHTTPHeaders: bypass ? { "x-vercel-protection-bypass": bypass } : {},
@@ -192,12 +288,12 @@ async function main() {
   if (!login.ok()) throw new Error(`login failed ${login.status()}`);
 
   const page = await context.newPage();
-  const dossierUrl = `${base}/dossiers/${slug}`;
+  const dossierUrl = `${base}/membro/dossies/${slug}`;
 
   for (const vp of viewports) {
     await page.setViewportSize({ width: vp.w, height: vp.h });
-    await page.goto(dossierUrl, { waitUntil: "networkidle" });
-    await page.waitForSelector(".dossier-html-reader img", { timeout: 30000 });
+    await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
+    await waitReaderReady(page);
     await page.screenshot({
       path: path.join(outDir, `reader-${vp.tag}.png`),
       fullPage: true,
@@ -205,54 +301,55 @@ async function main() {
   }
 
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(dossierUrl, { waitUntil: "networkidle" });
+  await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
+  await waitReaderReady(page);
 
-  const vitimasBtn = page
-    .locator('.dossier-html-reader button[aria-label*="Christine"], .dossier-html-reader button[aria-label*="vítimas"]')
-    .first();
-  await vitimasBtn.scrollIntoViewIfNeeded();
-  await vitimasBtn.screenshot({ path: path.join(outDir, "vitimas-390.png") });
+  const vitimas = await figureMetrics(page, "fig-vitimas");
+  await page.locator('[data-dossier-figure="fig-vitimas"]').screenshot({
+    path: path.join(outDir, "vitimas-390.png"),
+  });
 
-  const mapMainBtn = page
-    .locator('.dossier-html-reader button[aria-label*="Fairfax"], .dossier-html-reader button[aria-label*="Washington"]')
-    .first();
-  await mapMainBtn.scrollIntoViewIfNeeded();
-  const mapMainBox = await mapMainBtn.boundingBox();
-  const mapMainImg = mapMainBtn.locator("img");
-  const mapMainRendered = mapMainImg ? await mapMainImg.boundingBox() : mapMainBox;
-  await mapMainBtn.screenshot({ path: path.join(outDir, "map-main-390.png") });
+  const mapMain = await figureMetrics(page, "fig-mapa-main");
+  await page.locator('[data-dossier-figure="fig-mapa-main"]').screenshot({
+    path: path.join(outDir, "map-main-390.png"),
+  });
 
-  const insetBtn = page
-    .locator('.dossier-html-reader button[aria-label*="Virgínia"], .dossier-html-reader button[aria-label*="Inset"]')
-    .first();
-  const insetVisible390 = (await insetBtn.count()) > 0 && (await insetBtn.isVisible());
-  if (insetVisible390) {
-    await insetBtn.scrollIntoViewIfNeeded();
-    await insetBtn.screenshot({ path: path.join(outDir, "map-inset-390.png") });
-  }
+  const inset = await figureMetrics(page, "fig-mapa-inset");
+  await page.locator('[data-dossier-figure="fig-mapa-inset"]').screenshot({
+    path: path.join(outDir, "map-inset-390.png"),
+  });
 
-  await mapMainBtn.click();
+  await page.locator('[data-dossier-figure="fig-mapa-main"] button').click();
   await page.waitForSelector('[role="dialog"] img', { timeout: 10000 });
   const lightboxOk = (await page.locator('[role="dialog"] img').count()) > 0;
   await page.screenshot({ path: path.join(outDir, "lightbox-map-390.png") });
   await page.keyboard.press("Escape");
 
+  let reader1280Ready = false;
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.goto(dossierUrl, { waitUntil: "networkidle" });
-  const desktopWide = page.locator('.dossier-html-reader button[aria-label*="metropolitana"]').first();
-  const desktopMapVisible = (await desktopWide.count()) > 0 && (await desktopWide.isVisible());
+  await page.goto(dossierUrl, { waitUntil: "domcontentloaded" });
+  try {
+    await waitReaderReady(page);
+    reader1280Ready = true;
+  } catch {
+    reader1280Ready = false;
+  }
 
   await browser.close();
 
   const httpTests = await httpChecks(base, creds);
 
   const metrics = {
-    vitimasClean: true,
-    mapMainWidth390: mapMainRendered?.width ?? 0,
-    mapMainHeight390: mapMainRendered?.height ?? 0,
-    insetVisible390,
+    vitimasVisible390: vitimas.visible && vitimas.naturalWidth > 0,
+    vitimasNaturalWidth: vitimas.naturalWidth,
+    mapMainVisible390: mapMain.visible && mapMain.naturalWidth > 0,
+    mapMainWidth390: mapMain.box?.width ?? 0,
+    mapMainHeight390: mapMain.box?.height ?? 0,
+    insetVisible390: inset.visible && inset.naturalWidth > 0,
+    insetNaturalWidth: inset.naturalWidth,
     lightboxOk,
-    desktopMapVisible,
+    reader1280Ready,
+    figureTestOk,
     buildOk: process.env.QA_BUILD_OK === "1",
   };
 

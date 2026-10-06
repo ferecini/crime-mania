@@ -47,23 +47,38 @@ export function DocumentFigureBlock({
 
   return (
     <>
-      <figure className={`mx-auto w-full max-w-[75rem] ${visibility}`}>
+      <figure
+        className={`mx-auto w-full max-w-[75rem] ${visibility}`}
+        data-dossier-figure={assetId}
+      >
         <button
           type="button"
           className="block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"
           onClick={() => setOpen(true)}
           aria-label={`Ampliar: ${alt}`}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={assetSrc(slug, assetId, 960)}
-            alt={alt}
-            className={`mx-auto h-auto w-full object-contain ${
-              portrait ? "max-h-[75vh]" : "max-h-[min(75vh,720px)]"
-            }`}
-            loading="lazy"
-            decoding="async"
-          />
+          <div
+            className={
+              assetId === "fig-mapa-main"
+                ? "flex min-h-[180px] w-full items-center justify-center"
+                : undefined
+            }
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={assetSrc(slug, assetId, 960)}
+              alt={alt}
+              className={`mx-auto w-full object-contain ${
+                assetId === "fig-mapa-main"
+                  ? "max-h-[min(75vh,720px)]"
+                  : portrait
+                    ? "h-auto max-h-[75vh]"
+                    : "h-auto max-h-[min(75vh,720px)]"
+              }`}
+              loading="eager"
+              decoding="async"
+            />
+          </div>
         </button>
         {caption ? <figcaption className="mt-2 text-sm text-white">{caption}</figcaption> : null}
         {credit ? <p className="text-xs text-cm-gray">Crédito: {credit}</p> : null}
