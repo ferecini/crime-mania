@@ -8,6 +8,9 @@ export function humanizeDossierProcessingError(raw: string): string {
   if (/Cannot find module/i.test(msg)) {
     return "Dependência de PDF ausente no ambiente de produção. Contate suporte técnico.";
   }
+  if (/\.resolve is not a function/i.test(msg)) {
+    return "Motor PDF não pôde iniciar no servidor. Aguarde o deploy mais recente ou use o processador automático (GitHub Actions).";
+  }
   if (/Timeout ao ler PDF/i.test(msg)) return msg;
   if (/PDF criptografado/i.test(msg)) return msg;
   if (/excede/i.test(msg)) return msg;

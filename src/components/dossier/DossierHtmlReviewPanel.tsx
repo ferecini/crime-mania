@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { DossierDocument } from "@/lib/dossier/document-types";
 import {
   DossierDocumentEditor,
@@ -26,6 +26,8 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [selectedPdfName, setSelectedPdfName] = useState<string | null>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -180,19 +182,37 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
           Armazenamento privado + fila no banco. O processador extrai texto e imagens (OCR manual se necessário). Não
           publica automaticamente.
         </p>
-        <label className="mt-3 flex min-h-11 cursor-pointer flex-col gap-1 text-sm">
+        <div className="mt-3 space-y-2 text-sm">
           <span className="font-medium text-white">Arquivo PDF</span>
           <input
+            ref={pdfInputRef}
             type="file"
             accept="application/pdf,.pdf"
-            className="block w-full text-sm text-cm-gray file:mr-3 file:rounded file:border-0 file:bg-cm-red file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-cm-red/90"
+            className="sr-only"
             disabled={uploading}
             onChange={(e) => {
               const f = e.target.files?.[0];
+              setSelectedPdfName(f?.name ?? null);
               if (f) uploadPdf(f);
             }}
           />
-        </label>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11"
+              disabled={uploading}
+              onClick={() => pdfInputRef.current?.click()}
+            >
+              {uploading ? "Enviando…" : "Escolher PDF"}
+            </Button>
+            {selectedPdfName ? (
+              <span className="text-cm-gray">{selectedPdfName}</span>
+            ) : (
+              <span className="text-cm-gray">Nenhum arquivo selecionado</span>
+            )}
+          </div>
+        </div>
         <Button type="button" variant="secondary" className="mt-3 min-h-11" onClick={() => triggerWorkerOnce()}>
           Processar próximo da fila
         </Button>
