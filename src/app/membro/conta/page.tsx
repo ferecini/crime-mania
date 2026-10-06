@@ -1,6 +1,6 @@
 import { AccountPreferredNameForm } from "@/components/member/AccountPreferredNameForm";
 import { getSession } from "@/lib/auth/session";
-import { getUserById, preferredNameForForm } from "@/lib/auth/users-store";
+import { getEffectiveUserById, preferredNameForForm } from "@/lib/auth/users-store";
 import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
 
 export const metadata = { title: "Minha conta" };
@@ -9,7 +9,7 @@ export default async function AccountPage() {
   const session = await getSession();
   if (!session) return null;
 
-  const stored = getUserById(session.id);
+  const stored = getEffectiveUserById(session.id, session);
   const tierLabel =
     session.tier === "tier2"
       ? "Tier 2 ativo"

@@ -8,7 +8,7 @@ import {
   suggestedPreferredName,
 } from "../src/lib/auth/display-name";
 import { migrateUserPreferredName } from "../src/lib/auth/preferred-name-migration";
-import type { StoredUser } from "../src/lib/auth/users-store";
+import { mergeStoredUserWithSession, type StoredUser } from "../src/lib/auth/users-store";
 
 function legacyGoogle(full: string): StoredUser {
   return {
@@ -64,5 +64,24 @@ const newGoogle: StoredUser = {
   needsPreferredNameConfirm: true,
 };
 assertGreeting(newGoogle, "Angelo");
+
+const qaSeed: StoredUser = {
+  id: "00000000-0000-4000-8000-010000000004",
+  email: "qa-admin@crime-mania.test",
+  legalName: "QA Admin editorial",
+  preferredName: "QA Admin editorial",
+  preferredNameConfirmedAt: "2020-01-01T00:00:00.000Z",
+  displayName: "QA",
+  passwordHash: "x",
+  tier: "tier2",
+  accountType: "standard",
+  isDemo: false,
+  isTestUser: true,
+};
+const merged = mergeStoredUserWithSession(qaSeed, {
+  preferredName: "Maria",
+  preferredNameConfirmedAt: "2026-10-06T20:00:00.000Z",
+});
+assert.equal(resolveGreetingName(merged), "Maria");
 
 console.log("preferred-name: all scenarios OK");

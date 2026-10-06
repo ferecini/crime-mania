@@ -119,6 +119,40 @@ export function getUserById(id: string): StoredUser | undefined {
   return user ? touchUser(user) : undefined;
 }
 
+/** Store + overlay do JWT (nome confirmado em ambientes sem persistência de arquivo). */
+export function mergeStoredUserWithSession(
+  stored: StoredUser,
+  session: {
+    preferredName?: string;
+    preferredNameConfirmedAt?: string;
+  },
+): StoredUser {
+  const jwtName = session.preferredName?.trim();
+  const jwtAt = session.preferredNameConfirmedAt?.trim();
+  if (!jwtName || !jwtAt) return stored;
+
+  const storedAt = stored.preferredNameConfirmedAt?.trim();
+  const jwtMs = Date.parse(jwtAt);
+  const storedMs = storedAt ? Date.parse(storedAt) : 0;
+  if (!Number.isFinite(jwtMs) || jwtMs < storedMs) return stored;
+
+  return touchUser({
+    ...stored,
+    preferredName: jwtName,
+    preferredNameConfirmedAt: jwtAt,
+    needsPreferredNameConfirm: false,
+  });
+}
+
+export function getEffectiveUserById(
+  id: string,
+  session: { preferredName?: string; preferredNameConfirmedAt?: string } | null,
+): StoredUser | undefined {
+  const stored = getUserById(id);
+  if (!stored || !session) return stored;
+  return mergeStoredUserWithSession(stored, session);
+}
+
 /** Alteração de tier pelo usuário (checkout simulado) — bloqueada para contas de teste. */
 export function setUserTier(userId: string, tier: SubscriptionTier): void {
   hydrateUsersStore();
@@ -290,6 +324,8 @@ export function sessionPayloadFromUser(user: StoredUser) {
     isTestUser: Boolean(user.isTestUser),
     needsPreferredName: !confirmed,
     needsPreferredNameConfirm: !confirmed,
+    preferredName: confirmed ? user.preferredName : undefined,
+    preferredNameConfirmedAt: confirmed ? user.preferredNameConfirmedAt : undefined,
   };
 }
 

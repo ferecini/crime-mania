@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { PreferredNameForm } from "@/components/auth/PreferredNameForm";
 import { getSession } from "@/lib/auth/session";
-import { getUserById } from "@/lib/auth/users-store";
+import { getEffectiveUserById } from "@/lib/auth/users-store";
 import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
 import { preferredNameForForm } from "@/lib/auth/users-store";
 
@@ -15,7 +15,7 @@ export default async function PreferredNameOnboardingPage({
   const session = await getSession();
   if (!session) redirect("/entrar?next=/membro/onboarding/nome");
 
-  const user = getUserById(session.id);
+  const user = getEffectiveUserById(session.id, session);
   if (user && isPreferredNameConfirmed(user)) {
     redirect("/membro");
   }

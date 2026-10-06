@@ -16,6 +16,9 @@ export interface SessionUser {
   sessionVersion?: number;
   needsPreferredName?: boolean;
   needsPreferredNameConfirm?: boolean;
+  /** Nome confirmado na sessão (persiste em JWT quando o store não grava em disco). */
+  preferredName?: string;
+  preferredNameConfirmedAt?: string;
 }
 
 /** Incrementar em deploy para invalidar tokens antigos (ex.: sessões demo legadas). */
@@ -85,9 +88,9 @@ export async function getSession(): Promise<SessionUser | null> {
   }
 
   const { hydrateUsersStore } = await import("@/lib/auth/users-store-hydrate");
-  const { getUserById, sessionPayloadFromUser } = await import("@/lib/auth/users-store");
+  const { getEffectiveUserById, sessionPayloadFromUser } = await import("@/lib/auth/users-store");
   hydrateUsersStore();
-  const stored = getUserById(user.id);
+  const stored = getEffectiveUserById(user.id, user);
   if (stored) {
     const fresh = sessionPayloadFromUser(stored);
     return {
@@ -96,6 +99,8 @@ export async function getSession(): Promise<SessionUser | null> {
       tier: fresh.tier,
       needsPreferredName: fresh.needsPreferredName,
       needsPreferredNameConfirm: fresh.needsPreferredNameConfirm,
+      preferredName: stored.preferredName,
+      preferredNameConfirmedAt: stored.preferredNameConfirmedAt,
     };
   }
 
