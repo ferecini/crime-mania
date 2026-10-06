@@ -78,6 +78,6 @@ export async function POST(request: Request) {
   return NextResponse.json({
     ok: true,
     jobId: job.id,
-    message: "PDF enviado. A fila processará o arquivo em segundo plano (GitHub Actions ou botão abaixo).",
+    message: "PDF enviado. Processamento automático na fila.",
   });
 }

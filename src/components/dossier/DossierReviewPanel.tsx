@@ -17,6 +17,7 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [recropping, setRecropping] = useState<string | null>(null);
   const [viewport, setViewport] = useState<"desktop" | "mobile">("desktop");
 
@@ -105,6 +106,7 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
   async function uploadPdf(file: File) {
     setUploading(true);
     setError(null);
+    setUploadMessage(null);
     try {
       const fd = new FormData();
       fd.set("slug", slug);
@@ -112,8 +114,9 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
       const res = await fetch("/api/admin/dossier/upload", { method: "POST", body: fd });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro");
-      alert(data.message ?? "Upload OK — aguarde o worker.");
+      setUploadMessage("PDF enviado. Processamento automático na fila.");
       await load();
+      void fetch("/api/admin/dossier/worker", { method: "POST" }).then(() => load()).catch(() => {});
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload.");
     } finally {
@@ -263,6 +266,12 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
         </button>
       </div>
 
+      {uploadMessage ? (
+        <p className="text-sm text-emerald-400" role="status">
+          {uploadMessage}
+        </p>
+      ) : null}
+
       {error && (
         <p className="text-sm text-cm-red-light" role="alert">
           {error}
@@ -270,7 +279,7 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
       )}
 
       {!manifest ? (
-        <p className="text-sm text-cm-gray">Aguardando processamento do worker ou upload.</p>
+        <p className="text-sm text-cm-gray">Aguardando processamento automático ou envio de PDF.</p>
       ) : (
         <>
           <ol className="space-y-6" style={{ maxWidth: viewport === "mobile" ? 390 : undefined }}>

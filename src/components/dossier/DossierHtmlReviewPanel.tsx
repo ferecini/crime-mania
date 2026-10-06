@@ -24,6 +24,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
   const [job, setJob] = useState<JobSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [selectedPdfName, setSelectedPdfName] = useState<string | null>(null);
@@ -121,6 +122,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
   async function uploadPdf(file: File) {
     setUploading(true);
     setError(null);
+    setUploadMessage(null);
     try {
       const fd = new FormData();
       fd.set("slug", slug);
@@ -129,27 +131,19 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erro");
       setJob({ id: data.jobId, status: "uploaded", version: 0 });
-      alert(data.message ?? "PDF enviado. Aguarde o processamento na fila.");
+      setUploadMessage(
+        "PDF enviado. O processamento começa em seguida — acompanhe o status na fila abaixo.",
+      );
       await load();
+      void fetch("/api/admin/dossier/worker", { method: "POST" })
+        .then(() => load())
+        .catch(() => {
+          /* fila GitHub Actions (~10 min) se o processador imediato falhar */
+        });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha no upload.");
     } finally {
       setUploading(false);
-    }
-  }
-
-  async function triggerWorkerOnce() {
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/dossier/worker", { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? data.message ?? "Falha ao processar a fila.");
-      if (data.processed === false) {
-        setError(data.message ?? "Nenhuma tarefa pendente na fila.");
-      }
-      await load();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Processamento indisponível neste ambiente.");
     }
   }
 
@@ -179,8 +173,8 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
       <div className="rounded border border-cm-divider p-4">
         <h2 className="text-sm font-semibold text-white">Enviar PDF → extração → revisão</h2>
         <p className="mt-1 text-xs text-cm-gray">
-          Armazenamento privado + fila no banco. O processador extrai texto e imagens (OCR manual se necessário). Não
-          publica automaticamente.
+          Armazenamento privado + fila no banco. Após o envio, o processamento é automático (texto e imagens; OCR manual
+          se necessário). Não publica automaticamente.
         </p>
         <div className="mt-3 space-y-2 text-sm">
           <span className="font-medium text-white">Arquivo PDF</span>
@@ -213,10 +207,13 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
             )}
           </div>
         </div>
-        <Button type="button" variant="secondary" className="mt-3 min-h-11" onClick={() => triggerWorkerOnce()}>
-          Processar próximo da fila
-        </Button>
       </div>
+
+      {uploadMessage ? (
+        <p className="text-sm text-emerald-400" role="status">
+          {uploadMessage}
+        </p>
+      ) : null}
 
       {error ? (
         <p className="text-sm text-cm-red-light" role="alert">
