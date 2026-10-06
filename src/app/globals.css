@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
+/* Webfont oficial: adicionar WOFF2 licenciado em public/fonts/ e incluir url() abaixo. */
 @font-face {
   font-family: "Panton Rust Extra Bold Base";
   src: local("Panton Rust Extra Bold Base"), local("PantonRustExtraBold-Base");
-  font-weight: 800;
   font-style: normal;
+  font-weight: 800;
   font-display: swap;
 }
 
@@ -21,7 +22,13 @@
   --cm-divider: rgba(255, 255, 255, 0.1);
   --cm-radius-editorial: 4px;
   --cm-radius-control: 10px;
-  --font-display: "Panton Rust Extra Bold Base", "Arial Black", sans-serif;
+  /* Open Sans 800 = fallback temporário (não é Panton); ver .font-display */
+  --font-display:
+    "Panton Rust Extra Bold Base",
+    var(--font-open-sans),
+    "Open Sans",
+    Arial,
+    sans-serif;
   --font-body: var(--font-open-sans), "Open Sans", system-ui, sans-serif;
 }
 
@@ -64,6 +71,8 @@ body {
 
 .font-display {
   font-family: var(--font-display);
+  font-weight: 800;
+  font-style: normal;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
