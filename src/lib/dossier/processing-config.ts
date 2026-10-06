@@ -341,6 +341,32 @@ export const BANFIELD_EDITORIAL_CROPS: EditorialCrop[] = [
   ...BANFIELD_DESKTOP_CROPS,
 ];
 
+/** Cortes limpos para figuras do dossiê HTML (sem títulos de seção nem parágrafos). Fonte: v2/source-page.png @ 1620×2879. */
+export type HtmlFigureCrop = {
+  assetId: string;
+  xStart: number;
+  xEnd: number;
+  yStart: number;
+  yEnd: number;
+};
+
+export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
+  {
+    assetId: "fig-vitimas",
+    xStart: 0.032,
+    xEnd: 0.327,
+    yStart: 0.208,
+    yEnd: 0.336,
+  },
+  {
+    assetId: "fig-mapa",
+    xStart: 0.012,
+    xEnd: 0.988,
+    yStart: 0.405,
+    yEnd: 0.5,
+  },
+];
+
 export const DOSSIER_PROCESSING_LIMITS = {
   maxPdfBytes: 25 * 1024 * 1024,
   maxPages: 20,

@@ -50,9 +50,18 @@
           "order": 1,
           "title": "Vítimas e local",
           "items": [
-            { "label": "Vítimas", "value": "Christine Banfield e Joseph Ryan" },
-            { "label": "Local", "value": "Fairfax, Virgínia, EUA" },
-            { "label": "Data", "value": "24 de fevereiro de 2023" }
+            {
+              "label": "Vítimas",
+              "value": "Christine Banfield e Joseph Ryan"
+            },
+            {
+              "label": "Local",
+              "value": "Fairfax, Virgínia, EUA"
+            },
+            {
+              "label": "Data",
+              "value": "24 de fevereiro de 2023"
+            }
           ]
         },
         {

@@ -1,0 +1,16 @@
+{
+  "fig-vitimas": {
+    "width": 479,
+    "height": 370,
+    "aspect": 1.295,
+    "bytes": 32954,
+    "sha256": "f4f4bd2dda299778a3aaf41e19d382965763c089054a20f19b121e2685b9d83a"
+  },
+  "fig-mapa": {
+    "width": 1582,
+    "height": 275,
+    "aspect": 5.753,
+    "bytes": 79216,
+    "sha256": "372ff2a6e55118d9b1f40772d57c90079d7f54e271dc61d60e972c3d117d481a"
+  }
+}
