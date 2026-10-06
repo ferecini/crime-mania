@@ -10,8 +10,10 @@ export function cropRectFromFractions(
   const h = Math.floor(pageHeight);
   const x0 = Math.min(w - 1, Math.max(0, Math.floor((crop.xStart ?? 0) * w)));
   const x1 = Math.min(w, Math.max(x0 + 1, Math.ceil((crop.xEnd ?? 1) * w)));
-  const y0 = Math.min(h - 1, Math.max(0, Math.floor(crop.yStart * h)));
-  const y1 = Math.min(h, Math.max(y0 + 1, Math.floor(crop.yEnd * h)));
+  const isColumn = (crop.xStart ?? 0) > 0 || (crop.xEnd ?? 1) < 1;
+  const topBleedPx = isColumn ? 4 : 0;
+  const y0 = Math.min(h - 1, Math.max(0, Math.floor(crop.yStart * h) - topBleedPx));
+  const y1 = Math.min(h, Math.max(y0 + 1, Math.ceil(crop.yEnd * h)));
   return {
     left: x0,
     top: y0,
