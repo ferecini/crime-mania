@@ -2,7 +2,8 @@ import { redirect } from "next/navigation";
 import { PreferredNameForm } from "@/components/auth/PreferredNameForm";
 import { getSession } from "@/lib/auth/session";
 import { getUserById } from "@/lib/auth/users-store";
-import { firstNameFromFullName } from "@/lib/auth/display-name";
+import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
+import { preferredNameForForm } from "@/lib/auth/users-store";
 
 export const metadata = { title: "Como podemos te chamar?" };
 
@@ -15,12 +16,12 @@ export default async function PreferredNameOnboardingPage({
   if (!session) redirect("/entrar?next=/membro/onboarding/nome");
 
   const user = getUserById(session.id);
-  if (user?.preferredName && !user.needsPreferredNameConfirm) {
+  if (user && isPreferredNameConfirmed(user)) {
     redirect("/membro");
   }
 
   const { next = "/membro" } = await searchParams;
-  const suggestion = firstNameFromFullName(user?.legalName ?? session.displayName);
+  const suggestion = user ? preferredNameForForm(user) : session.displayName;
 
   return (
     <div className="mx-auto max-w-md space-y-6">

@@ -18,7 +18,7 @@ export interface SessionUser {
 }
 
 /** Incrementar em deploy para invalidar tokens antigos (ex.: sessões demo legadas). */
-export const SESSION_VERSION = Number(process.env.CM_SESSION_VERSION ?? "2");
+export const SESSION_VERSION = Number(process.env.CM_SESSION_VERSION ?? "3");
 
 /** ID reservado — nunca válido em produção. */
 export const DEMO_USER_ID = "00000000-0000-4000-8000-crime00000001";
@@ -93,6 +93,14 @@ export async function getSession(): Promise<SessionUser | null> {
       tier: fresh.tier,
       needsPreferredName: fresh.needsPreferredName,
       needsPreferredNameConfirm: fresh.needsPreferredNameConfirm,
+    };
+  }
+
+  const { firstNameFromFullName } = await import("@/lib/auth/display-name");
+  if (user.needsPreferredNameConfirm || user.needsPreferredName) {
+    return {
+      ...user,
+      displayName: firstNameFromFullName(user.displayName),
     };
   }
   return user;
