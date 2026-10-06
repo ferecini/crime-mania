@@ -7,8 +7,8 @@
  * Uso:
  *   node scripts/sync-editorial-vercel-env.mjs preview
  *   node scripts/sync-editorial-vercel-env.mjs production
- *   node scripts/sync-editorial-vercel-env.mjs preview --append-qa-tier2
- *   node scripts/sync-editorial-vercel-env.mjs production --append-qa-admin
+ *   node scripts/sync-editorial-vercel-env.mjs production
+ *   (Opcional bootstrap: --append-qa-admin ou --append-qa-tier2 — tier2 NÃO deve ser admin em prod.)
  */
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
