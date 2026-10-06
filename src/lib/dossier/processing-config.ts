@@ -385,3 +385,9 @@ export const DOSSIER_PROCESSING_LIMITS = {
   formats: ["webp", "avif"] as const,
   maxBlockSourceHeightPx: 1400,
 };
+
+/** Cortes do leitor legado por recortes; null = pipeline só HTML. */
+export function editorialCropsForSlug(slug: string): EditorialCrop[] | null {
+  if (slug === "familia-banfield") return BANFIELD_EDITORIAL_CROPS;
+  return null;
+}

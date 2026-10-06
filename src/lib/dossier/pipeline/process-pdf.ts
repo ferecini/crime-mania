@@ -4,8 +4,8 @@ import { loadPdfDocument } from "@/lib/dossier/pdfjs-server";
 import sharp from "sharp";
 import { getDossierRecord } from "@/data/dossiers";
 import {
-  BANFIELD_EDITORIAL_CROPS,
   DOSSIER_PROCESSING_LIMITS,
+  editorialCropsForSlug,
   type EditorialCrop,
 } from "@/lib/dossier/processing-config";
 import type { DossierBlock, ProcessedDossierManifest } from "@/lib/dossier/types";
@@ -14,8 +14,11 @@ import { validatePdfWithPdfJs } from "@/lib/dossier/validate-pdf";
 import { extractCropPng } from "@/lib/dossier/pipeline/crop-utils";
 
 function cropsForSlug(slug: string): EditorialCrop[] {
-  if (slug === "familia-banfield") return BANFIELD_EDITORIAL_CROPS;
-  throw new Error(`Cortes editoriais não definidos para ${slug}.`);
+  const crops = editorialCropsForSlug(slug);
+  if (!crops?.length) {
+    throw new Error(`Cortes editoriais não definidos para ${slug}.`);
+  }
+  return crops;
 }
 
 async function renderPagePng(pdfBuf: Buffer, scale: number) {

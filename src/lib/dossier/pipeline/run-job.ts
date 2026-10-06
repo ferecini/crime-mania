@@ -2,6 +2,7 @@ import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors"
 import { createDossierStorage } from "@/lib/dossier/storage";
 import { processPdfToManifest } from "@/lib/dossier/pipeline/process-pdf";
 import { extractDocumentFromPdf } from "@/lib/dossier/pipeline/extract-document";
+import { editorialCropsForSlug } from "@/lib/dossier/processing-config";
 import { saveDraftManifest, updateDossierJob } from "@/lib/dossier/db";
 import { saveDraftDocument, upsertDocumentAsset } from "@/lib/dossier/document-db";
 import type { DossierJobRecord } from "@/lib/dossier/jobs-types";
@@ -16,15 +17,19 @@ export async function runDossierJob(job: DossierJobRecord): Promise<void> {
   }
 
   try {
-    await updateDossierJob(job.id, { progress: "render" });
-    const manifest = await processPdfToManifest({
-      slug: job.slug,
-      pdfBuffer: pdf,
-      pdfStorageKey: job.sourcePdfStorageKey,
-      version: job.version,
-      storage,
-    });
-    await saveDraftManifest(job.slug, manifest);
+    const legacyCrops = editorialCropsForSlug(job.slug);
+    if (legacyCrops) {
+      await updateDossierJob(job.id, { progress: "render" });
+      const manifest = await processPdfToManifest({
+        slug: job.slug,
+        pdfBuffer: pdf,
+        pdfStorageKey: job.sourcePdfStorageKey,
+        version: job.version,
+        storage,
+        editorialCrops: legacyCrops,
+      });
+      await saveDraftManifest(job.slug, manifest);
+    }
 
     await updateDossierJob(job.id, { progress: "extract_html" });
     try {
