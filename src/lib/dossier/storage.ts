@@ -55,7 +55,13 @@ export async function createDossierStorage(): Promise<DossierStorage> {
     return {
       async put(key, data, contentType) {
         const k = assertKey(key);
-        await put(k, data, { access: "private", token, contentType, addRandomSuffix: false });
+        await put(k, data, {
+          access: "private",
+          token,
+          contentType,
+          addRandomSuffix: false,
+          allowOverwrite: true,
+        });
       },
       async get(key) {
         const k = assertKey(key);
