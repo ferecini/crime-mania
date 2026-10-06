@@ -6,8 +6,9 @@ import {
   SPOTIFY_SHOW_URL,
   YOUTUBE_CHANNEL_URL,
 } from "@/data/episodes";
+import type { PublicMemberSession } from "@/components/layout/SiteHeader";
 
-export function SiteFooter() {
+export function SiteFooter({ memberSession = null }: { memberSession?: PublicMemberSession | null }) {
   return (
     <footer className="border-t border-cm-divider bg-black px-[1.125rem] py-14 md:px-6 lg:px-[4.5rem]">
       <div className="cm-container grid gap-12 md:grid-cols-3">
@@ -43,9 +44,15 @@ export function SiteFooter() {
               </Link>
             </li>
             <li>
-              <Link href="/entrar" className="text-white/80 hover:text-white">
-                Entrar
-              </Link>
+              {memberSession ? (
+                <Link href="/membro" className="text-white/80 hover:text-white">
+                  Minha área
+                </Link>
+              ) : (
+                <Link href="/entrar" className="text-white/80 hover:text-white">
+                  Entrar
+                </Link>
+              )}
             </li>
           </ul>
         </div>

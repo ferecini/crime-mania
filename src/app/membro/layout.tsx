@@ -69,7 +69,9 @@ export default async function MemberLayout({
           <main className="min-w-0 pb-20 lg:pb-0">{children}</main>
         </div>
         <MemberBottomNav />
-        <SiteFooter />
+        <SiteFooter
+          memberSession={{ displayName: session.displayName, email: session.email }}
+        />
       </div>
     </MediaPlaybackProvider>
   );

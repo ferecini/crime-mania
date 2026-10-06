@@ -1,10 +1,14 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { AuthForms } from "@/components/auth/AuthForms";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { getSession } from "@/lib/auth/session";
 
 export const metadata = { title: "Entrar" };
 
-export default function LoginPage() {
+export default async function LoginPage() {
+  const session = await getSession();
+  if (session) redirect("/membro");
   return (
     <div className="cm-block min-h-0 cm-hero-bg py-24">
       <div className="cm-container max-w-lg">

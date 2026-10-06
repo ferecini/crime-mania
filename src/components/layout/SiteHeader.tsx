@@ -12,7 +12,12 @@ const NAV = [
   { href: "/episodios", label: "Episódios", match: (p: string) => p.startsWith("/episodios") },
 ] as const;
 
-export function SiteHeader() {
+export type PublicMemberSession = {
+  displayName: string;
+  email: string;
+};
+
+export function SiteHeader({ memberSession = null }: { memberSession?: PublicMemberSession | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -97,15 +102,28 @@ export function SiteHeader() {
         </nav>
 
         <div className="ml-auto hidden items-center gap-5 md:flex md:gap-6">
-          <Link
-            href="/entrar"
-            className="cm-text-link inline-flex min-h-11 items-center text-base font-semibold text-cm-gray hover:text-white"
-          >
-            Entrar
-          </Link>
-          <ButtonLink href="/planos" className="min-h-11 min-w-[7.5rem]">
-            Faça parte
-          </ButtonLink>
+          {memberSession ? (
+            <>
+              <span className="max-w-[12rem] truncate text-sm text-cm-gray">
+                Olá, <span className="font-medium text-white">{memberSession.displayName}</span>
+              </span>
+              <ButtonLink href="/membro" className="min-h-11 min-w-[7.5rem]">
+                Minha área
+              </ButtonLink>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/entrar"
+                className="cm-text-link inline-flex min-h-11 items-center text-base font-semibold text-cm-gray hover:text-white"
+              >
+                Entrar
+              </Link>
+              <ButtonLink href="/planos" className="min-h-11 min-w-[7.5rem]">
+                Faça parte
+              </ButtonLink>
+            </>
+          )}
         </div>
       </div>
 
@@ -133,16 +151,24 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <ButtonLink href="/planos" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
-            Faça parte
-          </ButtonLink>
-          <Link
-            href="/entrar"
-            onClick={() => setOpen(false)}
-            className="cm-text-link mt-4 inline-flex min-h-12 items-center justify-center text-sm font-semibold"
-          >
-            Entrar →
-          </Link>
+          {memberSession ? (
+            <ButtonLink href="/membro" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
+              Minha área
+            </ButtonLink>
+          ) : (
+            <>
+              <ButtonLink href="/planos" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
+                Faça parte
+              </ButtonLink>
+              <Link
+                href="/entrar"
+                onClick={() => setOpen(false)}
+                className="cm-text-link mt-4 inline-flex min-h-12 items-center justify-center text-sm font-semibold"
+              >
+                Entrar →
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>
