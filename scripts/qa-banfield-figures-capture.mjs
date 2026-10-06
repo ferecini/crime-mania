@@ -281,13 +281,18 @@ async function main() {
     extraHTTPHeaders: bypass ? { "x-vercel-protection-bypass": bypass } : {},
   });
 
-  const login = await context.request.post(`${base}/api/auth/login`, {
+  const page = await context.newPage();
+  const login = await page.request.post(`${base}/api/auth/login`, {
     headers: { "Content-Type": "application/json" },
     data: { email: creds.tier1.email, password: creds.tier1.password },
   });
   if (!login.ok()) throw new Error(`login failed ${login.status()}`);
+  if (base.startsWith("http://")) {
+    console.warn(
+      "QA base is HTTP: use `next dev` locally or HTTPS Preview (secure session cookies).",
+    );
+  }
 
-  const page = await context.newPage();
   const dossierUrl = `${base}/membro/dossies/${slug}`;
 
   for (const vp of viewports) {

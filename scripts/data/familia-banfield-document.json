@@ -1,7 +1,7 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 3,
+  "version": 4,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
@@ -56,18 +56,9 @@
           ]
         },
         {
-          "id": "img-vitimas",
-          "type": "figure",
-          "order": 2,
-          "assetId": "fig-vitimas",
-          "alt": "Fotos das vítimas Christine Banfield e Joseph Ryan.",
-          "caption": "Christine Banfield e Joseph Ryan.",
-          "credit": "Material editorial Crime Mania"
-        },
-        {
           "id": "callout-teaser",
           "type": "callout",
-          "order": 3,
+          "order": 2,
           "variant": "accent",
           "title": "O que parecia ser uma invasão",
           "text": "Escondia uma história muito mais complexa envolvendo relacionamento extraconjugal, perfil falso em site de fetiches e simulação de invasão."
@@ -75,8 +66,31 @@
       ]
     },
     {
-      "id": "versoes",
+      "id": "vitimas",
       "order": 3,
+      "title": "Vítimas",
+      "blocks": [
+        {
+          "id": "h-vitimas",
+          "type": "heading",
+          "order": 1,
+          "level": 2,
+          "text": "Vítimas"
+        },
+        {
+          "id": "img-vitimas",
+          "type": "figure",
+          "order": 2,
+          "assetId": "fig-vitimas",
+          "alt": "Fotos das vítimas Christine Banfield, Joseph Ryan, Brendan Banfield e Juliana Magalhães.",
+          "caption": "Christine Banfield, Joseph Ryan, Brendan Banfield e Juliana Magalhães.",
+          "credit": "Material editorial Crime Mania"
+        }
+      ]
+    },
+    {
+      "id": "versoes",
+      "order": 4,
       "title": "Versões da acusação e defesa",
       "blocks": [
         {
@@ -122,7 +136,7 @@
     },
     {
       "id": "timeline",
-      "order": 4,
+      "order": 5,
       "title": "Linha do tempo",
       "blocks": [
         {
@@ -162,13 +176,26 @@
               "body": "Brendan condenado à prisão perpétua. Juliana recebe 10 anos após acordo e testemunho contra Brendan."
             }
           ]
+        }
+      ]
+    },
+    {
+      "id": "mapa",
+      "order": 6,
+      "title": "Mapa",
+      "blocks": [
+        {
+          "id": "h-mapa",
+          "type": "heading",
+          "order": 1,
+          "level": 2,
+          "text": "Mapa"
         },
         {
           "id": "img-mapa-main",
           "type": "figure",
           "order": 2,
           "assetId": "fig-mapa-main",
-          "showWhen": "mobile-only",
           "alt": "Mapa satélite de Fairfax e Washington D.C.",
           "caption": "Fairfax e região metropolitana de Washington D.C.",
           "credit": "Material editorial Crime Mania"
@@ -178,7 +205,6 @@
           "type": "figure",
           "order": 3,
           "assetId": "fig-mapa-inset",
-          "showWhen": "mobile-only",
           "alt": "Inset de Virgínia e coordenadas de Fairfax.",
           "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
           "credit": "Material editorial Crime Mania"
@@ -197,7 +223,7 @@
     },
     {
       "id": "teorias",
-      "order": 5,
+      "order": 7,
       "title": "Teorias do dossiê",
       "blocks": [
         {
