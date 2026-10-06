@@ -53,11 +53,11 @@ export function SiteHeader() {
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-[background,border] duration-300 ${headerBg}`}>
-      <div className="cm-container flex h-[3.75rem] items-center justify-between gap-3 md:h-[4.25rem]">
+      <div className="cm-container flex h-[3.75rem] items-center gap-4 md:h-[4.25rem] md:gap-6">
         <button
           ref={menuButtonRef}
           type="button"
-          className="inline-flex h-11 w-11 items-center justify-center rounded-[4px] border border-cm-divider text-white md:hidden"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] border border-cm-divider text-white md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
@@ -70,7 +70,20 @@ export function SiteHeader() {
           </span>
         </button>
 
-        <nav className="hidden items-center gap-10 md:flex md:flex-1" aria-label="Principal">
+        <Link
+          href="/#top"
+          className="relative h-[34px] w-[5.25rem] shrink-0 opacity-95 hover:opacity-100 md:h-11 md:w-[6.5rem]"
+        >
+          <Image
+            src="/logo-crime-mania.jpg"
+            alt="Crime Mania"
+            fill
+            className="object-contain object-left"
+            priority
+          />
+        </Link>
+
+        <nav className="hidden min-w-0 flex-1 items-center gap-6 md:flex lg:gap-8 xl:gap-10" aria-label="Principal">
           {NAV.map((item) => (
             <Link
               key={item.href}
@@ -83,33 +96,17 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        <div className="hidden items-center gap-6 md:flex">
-          <Link href="/entrar" className="cm-text-link text-sm font-semibold text-cm-gray hover:text-white">
+        <div className="ml-auto hidden items-center gap-5 md:flex md:gap-6">
+          <Link
+            href="/entrar"
+            className="cm-text-link inline-flex min-h-11 items-center text-base font-semibold text-cm-gray hover:text-white"
+          >
             Entrar
           </Link>
-          <ButtonLink href="/membro/planos" className="min-w-[7.5rem]">
+          <ButtonLink href="/planos" className="min-h-11 min-w-[7.5rem]">
             Faça parte
           </ButtonLink>
-          <Link href="/#top" className="relative h-10 w-[5.5rem] shrink-0 opacity-95 hover:opacity-100 md:h-11 md:w-[6.25rem]">
-            <Image
-              src="/logo-crime-mania.jpg"
-              alt="Crime Mania"
-              fill
-              className="object-contain object-right"
-              priority
-            />
-          </Link>
         </div>
-
-        <Link href="/#top" className="relative ml-auto h-[34px] w-[4.75rem] shrink-0 md:hidden">
-          <Image
-            src="/logo-crime-mania.jpg"
-            alt="Crime Mania"
-            fill
-            className="object-contain object-right"
-            priority
-          />
-        </Link>
       </div>
 
       <div
@@ -136,7 +133,7 @@ export function SiteHeader() {
               {item.label}
             </Link>
           ))}
-          <ButtonLink href="/membro/planos" className="mt-6 w-full text-center" onClick={() => setOpen(false)}>
+          <ButtonLink href="/planos" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
             Faça parte
           </ButtonLink>
           <Link

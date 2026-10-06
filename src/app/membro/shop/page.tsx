@@ -4,8 +4,6 @@ import { getSession } from "@/lib/auth/session";
 import { tierHasFeature } from "@/lib/plans";
 import { SHOP_PRODUCTS, memberDiscountLabel } from "@/data/products";
 import { ProductVisual } from "@/components/shop/ProductVisual";
-import { memberSectionArtwork } from "@/lib/visual/category-artwork";
-
 export const metadata = { title: "Shop · Membros" };
 
 export default async function MemberShopPage() {
@@ -17,15 +15,14 @@ export default async function MemberShopPage() {
     <div className="space-y-6">
       <MemberSectionHeader
         title="Shop para membros"
-        description="Merchandising oficial — pré-venda com benefícios para assinantes."
-        imageSrc={memberSectionArtwork.shop}
+        description="Shop oficial — pré-venda com benefícios para assinantes."
       />
       {discount ? (
         <p className="cm-panel border-cm-red/30 bg-cm-red/5 p-4 text-sm text-white">{discount}</p>
       ) : (
         <p className="text-sm text-cm-gray">
           Assinantes Tier 1 e Tier 2 terão desconto e prioridade quando a loja abrir.{" "}
-          <Link href="/membro/planos" className="text-cm-red hover:underline">
+          <Link href="/planos" className="text-cm-red hover:underline">
             Ver planos
           </Link>
         </p>

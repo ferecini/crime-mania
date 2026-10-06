@@ -56,7 +56,7 @@ export function SubscribeButtons() {
             <p className="mt-2 text-xs leading-relaxed text-cm-gray">{plan.priceNote}</p>
             <p className="mt-3 text-xs text-cm-gray">{plan.billingDetail}</p>
             <ul className="mt-4 flex-1 space-y-1.5 text-xs text-cm-gray">
-              {PLAN_HIGHLIGHTS[plan.id].map((item) => (
+              {(PLAN_HIGHLIGHTS[plan.id] ?? []).map((item) => (
                 <li key={item} className="flex gap-2">
                   <span className="text-cm-red-light">✓</span>
                   <span>{item}</span>

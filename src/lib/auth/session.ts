@@ -13,6 +13,8 @@ export interface SessionUser {
   accountType?: AccountType;
   isDemo?: boolean;
   sessionVersion?: number;
+  needsPreferredName?: boolean;
+  needsPreferredNameConfirm?: boolean;
 }
 
 /** Incrementar em deploy para invalidar tokens antigos (ex.: sessões demo legadas). */
@@ -78,14 +80,20 @@ export async function getSession(): Promise<SessionUser | null> {
   if (!token) return null;
   const user = await verifySessionToken(token);
   if (!user) {
-    cookieStore.delete(COOKIE_NAME);
     return null;
   }
 
-  const { getUserById } = await import("@/lib/auth/users-store");
+  const { getUserById, sessionPayloadFromUser } = await import("@/lib/auth/users-store");
   const stored = getUserById(user.id);
-  if (stored && stored.tier !== user.tier) {
-    return { ...user, tier: stored.tier };
+  if (stored) {
+    const fresh = sessionPayloadFromUser(stored);
+    return {
+      ...user,
+      displayName: fresh.displayName,
+      tier: fresh.tier,
+      needsPreferredName: fresh.needsPreferredName,
+      needsPreferredNameConfirm: fresh.needsPreferredNameConfirm,
+    };
   }
   return user;
 }

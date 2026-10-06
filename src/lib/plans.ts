@@ -19,7 +19,7 @@ export interface Plan {
 export const PLANS: Plan[] = [
   {
     id: "tier1-monthly",
-    name: "Tier 1",
+    name: "Tier 1 — Acesso básico",
     tier: "tier1",
     billing: "monthly",
     priceLabel: "Lançamento em breve",
@@ -29,7 +29,7 @@ export const PLANS: Plan[] = [
   },
   {
     id: "tier2-monthly",
-    name: "Tier 2",
+    name: "Tier 2 — Acesso premium",
     tier: "tier2",
     billing: "monthly",
     priceLabel: "Lançamento em breve",
@@ -41,12 +41,12 @@ export const PLANS: Plan[] = [
   },
   {
     id: "tier2-annual",
-    name: "Tier 2 Anual",
+    name: "Tier 2 — Acesso total",
     tier: "tier2",
     billing: "annual",
     priceLabel: "Lançamento em breve",
     priceNote: "Mesmos benefícios do Tier 2 · ciclo anual",
-    billingDetail: "Economia prevista em relação ao mensal — valores no anúncio oficial.",
+    billingDetail: "Cobrança anual — valores serão publicados no anúncio oficial.",
     cancelPolicy: "Renovação anual com aviso prévio conforme termos do lançamento.",
   },
 ];
@@ -177,21 +177,66 @@ export function minTierForFeature(feature: FeatureKey): SubscriptionTier {
   return "tier2";
 }
 
+/** Tabela comercial resumida (UI) — permissões reais permanecem em FEATURE_MATRIX. */
+export const PLAN_COMPARISON_ROWS = [
+  {
+    label: "Dossiê",
+    tier1: true,
+    tier2: true,
+  },
+  {
+    label: "Conteúdos exclusivos",
+    tier1: false,
+    tier2: true,
+  },
+  {
+    label: "Sugira um caso",
+    tier1: false,
+    tier2: true,
+  },
+  {
+    label: "Acesso antecipado aos episódios",
+    tier1: false,
+    tier2: true,
+  },
+  {
+    label: "Fórum de discussão",
+    tier1: true,
+    tier2: true,
+  },
+  {
+    label: "15% de desconto e prioridade nos lançamentos de produtos",
+    tier1: true,
+    tier2: true,
+  },
+  {
+    label: "Acesso a todo nosso arquivo de episódios extras já publicados",
+    tier1: false,
+    tier2: true,
+  },
+] as const;
+
+export const PLAN_COMPARISON_COLUMNS = [
+  { key: "tier1" as const, label: "Tier 1 — Acesso básico" },
+  { key: "tier2Premium" as const, label: "Tier 2 — Acesso premium" },
+  { key: "tier2Total" as const, label: "Tier 2 — Acesso total" },
+];
+
 /** Benefícios-chave por plano (mobile). */
 export const PLAN_HIGHLIGHTS: Record<PlanId, string[]> = {
   "tier1-monthly": [
-    "Dossiês completos (exceto Juris)",
-    "Fórum geral",
-    "15% off no shop + prioridade",
+    "Dossiê",
+    "Fórum de discussão",
+    "15% de desconto e prioridade no shop",
   ],
   "tier2-monthly": [
-    "Tudo do Tier 1",
-    "Arquivo e conteúdo exclusivo",
-    "Crime Mania Juris + sugestão de casos",
+    "Conteúdos exclusivos e arquivo de extras",
+    "Sugira um caso e acesso antecipado",
+    "Crime Mania Juris",
   ],
   "tier2-annual": [
-    "Mesmos benefícios do Tier 2 mensal",
-    "Ciclo anual de cobrança",
-    "Ideal para ouvir o catálogo premium o ano todo",
+    "Mesmos direitos do Tier 2 mensal",
+    "Cobrança anual — Acesso total",
+    "Conteúdos exclusivos, fórum e shop com benefício",
   ],
 };

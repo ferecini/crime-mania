@@ -5,10 +5,10 @@ Implementação base alinhada aos documentos **REQUISITOS SITE**, **Documento me
 ## O que está pronto
 
 - **Área pública**: quatro blocos (convite, O Crime Mania, merchandising, episódios), cabeçalho fixo com logo à direita, menu mobile, paleta e Open Sans.
-- **Episódios**: catálogo e páginas com embed Spotify por episódio (IDs reais do feed RSS).
+- **Episódios**: catálogo sincronizado com o **RSS oficial** (`PODCAST_RSS_URL`, padrão Anchor), ISR ~30 min (`EPISODE_REVALIDATE_SECONDS`), fallback em `episodes.generated.json` se o feed falhar; complementos Spotify/Apple/YouTube em `episode-supplements.json`. Sincronização manual: `POST /api/admin/sync-episodes` com `CM_ADMIN_SYNC_SECRET`.
 - **Shop**: caneca e camiseta (placeholders de checkout).
 - **Conta**: cadastro, login e stub Google; sessão via cookie HTTP-only.
-- **Membros**: navegação (Dossiês, Arquivo, Exclusivo, Juris, Comunidade, Shop, Busca, Conta, Planos), paywall por tier e tabela de benefícios.
+- **Membros**: menu reordenado (Início, Episódios, Dossiês/Banfield, CM Juris, Comunidade + Fórum/Sugira, Arquivo, Shop), busca no cabeçalho, `preferredName` no cadastro/Google, PDF dossiê via `/api/media/dossier/[slug]`, paywall por tier.
 - **Planos**: simulação de assinatura (substituir por gateway + webhooks).
 
 ## Identidade

@@ -1,25 +1,24 @@
 import { EpisodeListItem } from "@/components/episodes/EpisodeListItem";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { PUBLIC_EPISODES } from "@/data/episodes";
-
+import { getPublicEpisodes } from "@/data/episodes";
 export const metadata = { title: "Episódios" };
+export const revalidate = 1800;
 
-export default function EpisodesCatalogPage() {
-  const [featured, ...rest] = PUBLIC_EPISODES;
+export default async function EpisodesCatalogPage() {
+  const episodes = await getPublicEpisodes();
+  const [featured, ...rest] = episodes;
 
   return (
     <div className="cm-block min-h-0 pt-28">
       <div className="cm-container">
-        <SectionHeader
-          kicker="Catálogo"
-          title="Episódios"
-          description="Arquivo editorial em áudio — cada caso com player único e links oficiais."
-        />
+        <SectionHeader title="Episódios" description="Ouça aqui ou nas plataformas." />
 
-        <div className="mt-12 border-b border-cm-divider pb-12">
-          <EpisodeListItem episode={featured} index={0} variant="featured" />
-        </div>
+        {featured && (
+          <div className="mt-12 border-b border-cm-divider pb-12">
+            <EpisodeListItem episode={featured} index={0} variant="featured" />
+          </div>
+        )}
 
         <div className="mt-10 lg:hidden">
           {rest.map((episode, i) => (
@@ -33,7 +32,7 @@ export default function EpisodesCatalogPage() {
           ))}
         </div>
 
-        <ButtonLink href="/membro/planos" className="mt-12">
+        <ButtonLink href="/planos" className="mt-12">
           Faça parte
         </ButtonLink>
       </div>

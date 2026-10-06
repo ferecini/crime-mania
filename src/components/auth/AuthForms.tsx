@@ -38,7 +38,7 @@ export function AuthForms() {
     const payload = {
       email: String(fd.get("email") ?? ""),
       password: String(fd.get("password") ?? ""),
-      displayName: String(fd.get("displayName") ?? ""),
+      preferredName: String(fd.get("preferredName") ?? ""),
     };
     const endpoint = mode === "login" ? "/api/auth/login" : "/api/auth/register";
     const body =
@@ -115,11 +115,13 @@ export function AuthForms() {
         <form onSubmit={submitEmail} className="space-y-4">
           {mode === "register" && (
             <label className="block text-sm">
-              <span className="mb-1.5 block text-cm-gray">Nome de exibição</span>
+              <span className="mb-1.5 block text-cm-gray">Como você gostaria de ser chamado?</span>
               <input
-                name="displayName"
+                name="preferredName"
                 required
-                minLength={2}
+                minLength={1}
+                maxLength={80}
+                autoComplete="nickname"
                 className="cm-input"
               />
             </label>
@@ -156,8 +158,8 @@ export function AuthForms() {
         </form>
       </div>
       <p className="mt-4 text-center text-xs leading-relaxed text-cm-gray">
-        Criar conta é gratuito e libera a área de membros. Episódios públicos continuam abertos.
-        Dossiês, Arquivo e conteúdo premium exigem assinatura — escolha um plano depois de entrar.
+        Acesse nossos conteúdos exclusivos, comunidade e mais informações sobre o universo do true
+        crime.
       </p>
     </div>
   );

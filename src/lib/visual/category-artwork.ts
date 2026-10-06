@@ -35,33 +35,17 @@ export function getCategoryArtworkSrc(category: string): string {
   return categoryArtwork[getVisualCategoryKey(category)];
 }
 
-/** Capa oficial do RSS substitui o fundo; caso genérico usa arte por categoria. */
+/** Capa do episódio (RSS/plataformas). Evita artes locais com elementos decorativos embutidos. */
 export function resolveEpisodeBackgroundSrc(
   episode: Pick<PublicEpisode, "category" | "coverImage">,
 ): string {
+  void episode.category;
   const cover = episode.coverImage?.trim() ?? "";
-  const isGeneric =
-    !cover ||
-    cover === PODCAST_COVER_GENERIC ||
-    cover.includes("podcast_uploaded_nologo");
-  const isEpisodeArt = cover.includes("podcast_uploaded_episode");
-  if (isEpisodeArt && !isGeneric) return cover;
-  return getCategoryArtworkSrc(episode.category);
+  if (cover && !cover.includes("podcast_uploaded_nologo")) {
+    return cover;
+  }
+  return PODCAST_COVER_GENERIC;
 }
-
-export const memberSectionArtwork = {
-  dossies: "/images/visual-kit/membros/dossies.png",
-  arquivo: "/images/visual-kit/membros/arquivo.png",
-  exclusivo: "/images/visual-kit/membros/exclusivo.png",
-  juris: "/images/visual-kit/membros/juris.png",
-  comunidade: "/images/visual-kit/membros/comunidade.png",
-  shop: "/images/visual-kit/membros/shop.png",
-} as const;
-
-export const heroArtwork = {
-  desktop: "/images/visual-kit/hero/hero-desktop.png",
-  mobile: "/images/visual-kit/hero/hero-mobile.png",
-} as const;
 
 export const aboutPlaceholder =
   "/images/visual-kit/sobre/apresentadora-placeholder.png";
@@ -71,7 +55,7 @@ export const shopProductArtwork = {
   shirt: "/images/visual-kit/shop/camiseta.png",
 } as const;
 
-/** Variação sutil entre cards consecutivos (escala, recorte, detalhe vermelho). */
+/** Variação sutil entre cards consecutivos (escala e recorte). */
 export function getEpisodeCoverVariation(index: number) {
   const i = Math.abs(index) % 6;
   const scales = [1, 1.02, 1.04, 1.01, 1.06, 1.03];
@@ -83,10 +67,8 @@ export function getEpisodeCoverVariation(index: number) {
     "70% 50%",
     "35% 45%",
   ] as const;
-  const accentX = ["8%", "92%", "12%", "88%", "50%", "24%"][i];
   return {
     scale: scales[i],
     objectPosition: positions[i],
-    accentStyle: { left: accentX },
   };
 }

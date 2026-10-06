@@ -13,8 +13,7 @@ export const metadata: Metadata = {
     default: "Crime Mania",
     template: "%s · Crime Mania",
   },
-  description:
-    "Histórias verdadeiras para maníacos de true crime — investigação, curiosidade e jornalismo pop sofisticado.",
+  description: "Histórias verdadeiras para maníacos por true crime.",
   metadataBase: new URL("https://www.crimemania.com.br"),
 };
 

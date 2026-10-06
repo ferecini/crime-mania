@@ -1,15 +1,26 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import rawSnapshot from "@/data/episodes.generated.json";
 import { EpisodeCover } from "@/components/episodes/EpisodeCover";
 import { EpisodePlayer } from "@/components/media/EpisodePlayer";
 import { ButtonLink } from "@/components/ui/Button";
-import { formatEpisodeNumber, getEpisodeBySlug, PUBLIC_EPISODES, SITE_URL } from "@/data/episodes";
+import {
+  episodePublicTitle,
+  formatEpisodeNumber,
+  getArchivedEpisodeBySlug,
+  getEpisodeBySlug,
+  getPublicEpisodes,
+  SITE_URL,
+} from "@/data/episodes";
 import { formatDateBR } from "@/lib/format";
 import { resolveEpisodeBackgroundSrc } from "@/lib/visual/category-artwork";
 
+export const revalidate = 1800;
+export const dynamicParams = true;
+
 export function generateStaticParams() {
-  return PUBLIC_EPISODES.map((episode) => ({ slug: episode.slug }));
+  return rawSnapshot.map((episode) => ({ slug: episode.slug }));
 }
 
 export async function generateMetadata({
@@ -18,9 +29,9 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const episode = getEpisodeBySlug(slug);
+  const episode = (await getEpisodeBySlug(slug)) ?? (await getArchivedEpisodeBySlug(slug));
   if (!episode) return { title: "Episódio" };
-  const title = `${episode.category}: ${episode.title}`;
+  const title = episodePublicTitle(episode);
   const ogImage = resolveEpisodeBackgroundSrc(episode);
   return {
     title,
@@ -28,7 +39,7 @@ export async function generateMetadata({
     openGraph: {
       title,
       description: episode.summary,
-      images: [{ url: ogImage, alt: episode.title }],
+      images: [{ url: ogImage, alt: title }],
       type: "article",
     },
     twitter: {
@@ -46,10 +57,12 @@ export default async function EpisodeDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const episode = getEpisodeBySlug(slug);
-  if (!episode) notFound();
+  const episode = (await getEpisodeBySlug(slug)) ?? (await getArchivedEpisodeBySlug(slug));
+  if (!episode || episode.status === "archived") notFound();
 
+  const episodes = await getPublicEpisodes();
   const epLabel = formatEpisodeNumber(episode.number);
+  const publicTitle = episodePublicTitle(episode);
   const pageUrl = `${SITE_URL.replace(/\/$/, "")}/episodios/${episode.slug}`;
   const jsonLd: Record<string, unknown>[] = [
     {
@@ -70,7 +83,7 @@ export default async function EpisodeDetailPage({
     jsonLd.push({
       "@context": "https://schema.org",
       "@type": "VideoObject",
-      name: `Vídeo — ${episode.title}`,
+      name: `Vídeo — ${episodePublicTitle(episode)}`,
       description: episode.summary,
       thumbnailUrl: resolveEpisodeBackgroundSrc(episode),
       uploadDate: episode.publishedAt || undefined,
@@ -79,7 +92,7 @@ export default async function EpisodeDetailPage({
     });
   }
 
-  const episodeIndex = PUBLIC_EPISODES.findIndex((e) => e.slug === slug);
+  const episodeIndex = episodes.findIndex((e) => e.slug === slug);
 
   return (
     <div className="cm-block min-h-0 pt-28">
@@ -109,8 +122,8 @@ export default async function EpisodeDetailPage({
           {epLabel && (
             <p className="mt-1 text-[10px] uppercase tracking-widest text-cm-gray">Ep. {epLabel}</p>
           )}
-          <h1 className="font-display mt-3 text-3xl leading-tight text-white md:text-4xl">
-            {episode.title}
+          <h1 className="cm-episode-title mt-3 text-3xl leading-tight text-white md:text-4xl">
+            {publicTitle}
           </h1>
           <p className="mt-3 text-sm text-cm-gray">
             {episode.duration !== "—" ? `${episode.duration} · ` : ""}
@@ -128,11 +141,11 @@ export default async function EpisodeDetailPage({
           <div>
             <p className="font-display text-xs tracking-[0.25em] text-cm-red">Membros</p>
             <p className="mt-2 max-w-md text-sm text-cm-gray">
-              Assine para desbloquear dossiês, Arquivo e Juris com material complementar aos
-              episódios públicos.
+              Acesse nossos conteúdos exclusivos, debates e mais informações sobre o universo do true
+              crime.
             </p>
           </div>
-          <ButtonLink href="/membro/planos" className="mt-4 shrink-0 sm:mt-0">
+          <ButtonLink href="/planos" className="mt-4 shrink-0 sm:mt-0">
             Conheça os planos
           </ButtonLink>
         </div>

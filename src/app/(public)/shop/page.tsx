@@ -10,8 +10,7 @@ export default function ShopPage() {
     <div className="cm-block min-h-0 py-24">
       <div className="cm-container">
         <SectionHeader
-          kicker="Merchandising"
-          title="Shop Crime Mania"
+          title="Shop"
           description="Pré-venda em preparação. Assinantes Tier 1 e 2 terão 15% de desconto e prioridade quando o checkout abrir."
         />
         <div className="mt-10 grid gap-6 md:grid-cols-2">

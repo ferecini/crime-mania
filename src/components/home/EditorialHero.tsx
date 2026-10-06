@@ -1,65 +1,39 @@
-import Link from "next/link";
 import { ButtonLink } from "@/components/ui/Button";
-import { heroArtwork } from "@/lib/visual/category-artwork";
 import { EditorialImage } from "@/components/visual/EditorialImage";
+import { aboutPlaceholder } from "@/lib/visual/category-artwork";
 
 export function EditorialHero() {
   return (
-    <section id="top" className="relative min-h-[78svh] max-h-[88svh] overflow-hidden bg-cm-bg">
-      <div className="absolute inset-0 md:hidden">
-        <EditorialImage
-          src={heroArtwork.mobile}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center"
-        />
-      </div>
-      <div className="absolute inset-0 hidden md:block">
-        <EditorialImage
-          src={heroArtwork.desktop}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-[72%_center]"
-        />
-      </div>
-      <div
-        className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-transparent md:from-black md:via-black/55 md:to-transparent"
-        aria-hidden
-      />
-      <div
-        className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black to-transparent"
-        aria-hidden
-      />
-
-      <div className="cm-container relative flex min-h-[78svh] max-h-[88svh] flex-col justify-end pb-10 pt-28 md:justify-center md:pb-16 md:pt-32">
-        <div className="max-w-xl md:max-w-lg lg:max-w-xl">
-          <p className="font-display text-xs tracking-[0.4em] text-cm-red md:text-sm">
-            True crime editorial
-          </p>
-          <h1 className="font-display mt-5 max-w-[12ch] text-[2rem] leading-[1.05] text-white sm:text-5xl lg:text-[3.25rem]">
+    <section id="top" className="relative bg-cm-bg pt-[4.75rem] md:pt-[5.25rem]">
+      <div className="cm-container grid min-h-[calc(100svh-4.75rem)] max-w-[77.5rem] gap-10 py-10 md:min-h-[calc(100svh-5.25rem)] md:py-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)] lg:items-center lg:gap-14">
+        <div className="flex flex-col justify-center order-1">
+          <h1 className="font-display text-[2rem] leading-[1.05] text-white sm:text-5xl lg:text-[3.25rem]">
             Oi, Crime Maníacos…
           </h1>
-          <p className="mt-5 text-lg text-white/90 md:text-xl">
-            Vamos seguir falando sobre true crime?
+          <p className="mt-5 text-lg font-semibold text-white/95 md:text-xl">
+            Vamos seguir conversando sobre true crime?
           </p>
-          <p className="mt-4 max-w-md text-base leading-relaxed text-cm-gray md:text-lg">
-            Quer conteúdos exclusivos, acesso aos nossos debates e mais informações sobre o
-            universo do true crime?
+          <p className="mt-4 max-w-xl text-base font-semibold leading-relaxed text-cm-gray md:text-lg">
+            Aqui a conversa continua. Acesse nossos conteúdos exclusivos, comunidade e mais
+            informações sobre o universo do true crime.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <ButtonLink href="/membro/planos">Faça parte</ButtonLink>
-            <Link
-              href="/entrar"
-              className="cm-text-link inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-white"
-            >
-              Entrar
-              <span aria-hidden>→</span>
-            </Link>
+          <div className="mt-8">
+            <ButtonLink href="/planos" className="min-h-11">
+              Faça parte
+            </ButtonLink>
           </div>
+        </div>
+
+        <div className="relative order-2 mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[4px] lg:mx-0 lg:max-w-none lg:justify-self-end">
+          <EditorialImage
+            src={aboutPlaceholder}
+            alt="Foto provisória de estúdio — retrato oficial da Rafa em breve"
+            fill
+            priority
+            sizes="(max-width: 1024px) 90vw, 480px"
+            className="object-cover object-[70%_center]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" aria-hidden />
         </div>
       </div>
     </section>

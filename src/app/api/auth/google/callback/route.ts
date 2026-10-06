@@ -9,7 +9,7 @@ import {
   readGoogleOAuthCookie,
   sanitizeNextPath,
 } from "@/lib/auth/google-oauth-cookie";
-import { findOrCreateUserFromGoogle } from "@/lib/auth/users-store";
+import { findOrCreateUserFromGoogle, sessionPayloadFromUser } from "@/lib/auth/users-store";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
 
 function redirectWithError(request: Request, code: string): NextResponse {
@@ -59,16 +59,14 @@ export async function GET(request: Request) {
     }
 
     const token = await createSessionToken({
-      id: user.id,
-      email: user.email,
-      displayName: user.displayName,
-      tier: user.tier,
+      ...sessionPayloadFromUser(user),
       provider: "google",
-      accountType: user.accountType,
-      isDemo: user.isDemo,
     });
 
-    const destination = sanitizeNextPath(stored.next);
+    let destination = sanitizeNextPath(stored.next);
+    if (!user.preferredName?.trim() || user.needsPreferredNameConfirm) {
+      destination = `/membro/onboarding/nome?next=${encodeURIComponent(destination)}`;
+    }
     const response = NextResponse.redirect(new URL(destination, request.url));
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,

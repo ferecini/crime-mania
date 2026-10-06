@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PublicEpisode } from "@/data/episodes";
-import { formatEpisodeNumber } from "@/data/episodes";
+import { episodePublicTitle, formatEpisodeNumber } from "@/data/episodes";
 import { ListenAlsoLinks } from "@/components/media/ListenAlsoLinks";
 import { NativeAudioPlayer, type NativeAudioPlayerHandle } from "@/components/media/NativeAudioPlayer";
 import { spotifyOpenEpisodeUrl } from "@/lib/media/spotify";
@@ -13,6 +13,7 @@ interface EpisodePlayerProps {
   episode: Pick<
     PublicEpisode,
     | "title"
+    | "displayTitle"
     | "category"
     | "number"
     | "duration"
@@ -51,6 +52,7 @@ function MediaSkeleton() {
 }
 
 export function EpisodePlayer({ episode }: EpisodePlayerProps) {
+  const publicTitle = episodePublicTitle(episode);
   const hasVideo = Boolean(episode.youtubeVideoId);
   const [surface, setSurface] = useState<MediaSurface>("listen");
   const [embedOk, setEmbedOk] = useState<boolean | null>(null);
@@ -159,7 +161,7 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
         <div key={`yt-${episode.youtubeVideoId}`} className="cm-panel overflow-hidden p-0">
           <div className="aspect-video min-h-[200px] bg-black sm:min-h-[240px]">
             <iframe
-              title={`Vídeo — ${episode.title}`}
+              title={`Vídeo — ${publicTitle}`}
               src={`https://www.youtube-nocookie.com/embed/${episode.youtubeVideoId}`}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
@@ -195,7 +197,7 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
               </div>
             )}
             <iframe
-              title={`Spotify — ${episode.title}`}
+              title={`Spotify — ${publicTitle}`}
               src={embedSrc}
               width="100%"
               height="232"
@@ -215,7 +217,7 @@ export function EpisodePlayer({ episode }: EpisodePlayerProps) {
             <NativeAudioPlayer
               ref={nativeRef}
               src={episode.audioUrl}
-              title={episode.title}
+              title={publicTitle}
               subtitle={subtitle}
             />
           ) : (

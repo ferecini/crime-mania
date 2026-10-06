@@ -68,6 +68,14 @@ body {
   text-transform: uppercase;
 }
 
+/** Títulos oficiais de episódio — mesma grafia das plataformas (sem uppercase). */
+.cm-episode-title {
+  font-family: var(--font-body);
+  text-transform: none;
+  letter-spacing: normal;
+  font-weight: 600;
+}
+
 ::selection {
   background: color-mix(in srgb, var(--cm-red) 45%, transparent);
 }
@@ -155,10 +163,16 @@ body {
 .cm-nav-link {
   position: relative;
   padding-bottom: 0.35rem;
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 1rem;
+  font-weight: 600;
   color: var(--cm-gray);
   transition: color 0.22s ease;
+}
+
+@media (min-width: 1280px) {
+  .cm-nav-link {
+    font-size: 1.0625rem;
+  }
 }
 
 .cm-nav-link:hover {

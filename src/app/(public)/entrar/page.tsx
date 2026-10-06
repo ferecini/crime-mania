@@ -12,7 +12,7 @@ export default function LoginPage() {
           align="center"
           kicker="Conta"
           title="Entrar ou criar conta"
-          description="Acesse dossiês, comunidade e conteúdos exclusivos. Escolha seu plano depois de entrar."
+          description="Acesse nossos conteúdos exclusivos, comunidade e mais informações sobre o universo do true crime."
         />
         <div className="mt-10">
           <Suspense fallback={<p className="text-center text-cm-gray">Carregando…</p>}>
