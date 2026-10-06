@@ -10,30 +10,30 @@
     "naturalHeight": 410
   },
   "mapMainVisible390": true,
-  "mapMainImgWidth390": 322,
-  "mapMainImgHeight390": 189.359375,
+  "mapMainImgWidth390": 390,
+  "mapMainImgHeight390": 199.71875,
   "mapMainImgRect390": {
-    "x": 34,
-    "y": 327.5,
-    "width": 322,
-    "height": 189.359375,
+    "x": 0,
+    "y": 322.5,
+    "width": 390,
+    "height": 199.71875,
     "naturalWidth": 908,
-    "naturalHeight": 534
+    "naturalHeight": 465
   },
   "insetVisible390": true,
   "insetNaturalWidth": 705,
   "insetImgRect390": {
-    "x": 34,
-    "y": 600.859375,
-    "width": 322,
-    "height": 217.40625,
+    "x": 0,
+    "y": 268.21875,
+    "width": 390,
+    "height": 263.3125,
     "naturalWidth": 705,
     "naturalHeight": 476
   },
   "lightboxOk": true,
   "lightboxMainImgRect390": {
-    "width": 382,
-    "height": 224.65625
+    "width": 374,
+    "height": 191.515625
   },
   "reader1280Ready": true,
   "figureTestOk": true,

@@ -12,14 +12,12 @@ const assetsDir = path.join(
   "assets",
 );
 
-/** fig-mapa defeituoso anterior: 1440×287, crop da faixa d03 (resumo + «02. MAPA»). */
-const BAD_MAPA_DIMENSIONS = { width: 1440, height: 287 };
-
-const MOBILE_MAP_MIN_HEIGHT_AT_352 = 180;
-const MOBILE_VIEWPORT_WIDTH = 352;
+const MOBILE_MAP_MIN_HEIGHT_AT_358 = 180;
+/** Largura útil ~358px com bleed -mx-4 @390 viewport */
+const MOBILE_CONTENT_WIDTH = 358;
 
 async function testFigureAssets() {
-  for (const id of ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset", "fig-mapa"]) {
+  for (const id of ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
     const p = path.join(assetsDir, `${id}.webp`);
     assert.ok(fs.existsSync(p), `${id}.webp deve existir`);
   }
@@ -27,51 +25,30 @@ async function testFigureAssets() {
   const vitimasPath = path.join(assetsDir, "fig-vitimas.webp");
   const mapaMainPath = path.join(assetsDir, "fig-mapa-main.webp");
   const mapaInsetPath = path.join(assetsDir, "fig-mapa-inset.webp");
-  const mapaPath = path.join(assetsDir, "fig-mapa.webp");
 
   const vitimas = await sharp(vitimasPath).metadata();
   const mapaMain = await sharp(mapaMainPath).metadata();
   const mapaInset = await sharp(mapaInsetPath).metadata();
-  const mapa = await sharp(mapaPath).metadata();
   const vw = vitimas.width ?? 0;
   const vh = vitimas.height ?? 0;
   const mmw = mapaMain.width ?? 0;
   const mmh = mapaMain.height ?? 0;
   const miw = mapaInset.width ?? 0;
   const mih = mapaInset.height ?? 0;
-  const mw = mapa.width ?? 0;
-  const mh = mapa.height ?? 0;
 
   assert.ok(vw >= 400 && vw <= 430, `fig-vitimas width ${vw}`);
   assert.ok(vh >= 395 && vh <= 425, `fig-vitimas height ${vh}`);
-  const vAspect = vw / vh;
-  assert.ok(vAspect >= 0.95 && vAspect <= 1.1, `fig-vitimas aspect ${vAspect}`);
 
-  const mainAspect = mmw / mmh;
-  const mainRenderedH = MOBILE_VIEWPORT_WIDTH / mainAspect;
+  assert.ok(mmw >= 880 && mmw <= 930, `fig-mapa-main width ${mmw}`);
+  assert.ok(mmh >= 450 && mmh <= 480, `fig-mapa-main height ${mmh}`);
+  const mainRenderedH = MOBILE_CONTENT_WIDTH / (mmw / mmh);
   assert.ok(
-    mainRenderedH >= MOBILE_MAP_MIN_HEIGHT_AT_352 - 0.5,
-    `fig-mapa-main rendered height @352px = ${mainRenderedH.toFixed(1)} (need ≥${MOBILE_MAP_MIN_HEIGHT_AT_352})`,
+    mainRenderedH >= MOBILE_MAP_MIN_HEIGHT_AT_358 - 0.5,
+    `fig-mapa-main rendered height @${MOBILE_CONTENT_WIDTH}px = ${mainRenderedH.toFixed(1)} (need ≥${MOBILE_MAP_MIN_HEIGHT_AT_358})`,
   );
-  assert.ok(mainAspect <= 352 / MOBILE_MAP_MIN_HEIGHT_AT_352 + 0.02, `fig-mapa-main aspect ${mainAspect}`);
 
   assert.ok(miw >= 650 && miw <= 780, `fig-mapa-inset width ${miw}`);
   assert.ok(mih >= 400 && mih <= 490, `fig-mapa-inset height ${mih}`);
-
-  assert.ok(mw >= 1380, `fig-mapa width ${mw}`);
-  assert.ok(mh >= 250 && mh <= 320, `fig-mapa height ${mh}`);
-  const mAspect = mw / mh;
-  assert.ok(mAspect >= 4 && mAspect <= 8, `fig-mapa aspect ${mAspect}`);
-  assert.ok(mAspect < 9, "fig-mapa não deve ser faixa extrema (>9:1)");
-
-  assert.ok(
-    mw !== BAD_MAPA_DIMENSIONS.width || mh !== BAD_MAPA_DIMENSIONS.height,
-    "fig-mapa ainda tem dimensões exatas do asset defeituoso 1440×287",
-  );
-  assert.ok(
-    mw >= 1380 || mw > BAD_MAPA_DIMENSIONS.width,
-    "fig-mapa deve ser composição wide trimada, não faixa defeituosa 1440×287",
-  );
 }
 
 async function main() {

@@ -15,9 +15,9 @@ const outDir = path.join(
 );
 const slug = "familia-banfield";
 const bypass = process.env.VERCEL_AUTOMATION_BYPASS_SECRET?.trim();
-const EXPECTED_DOC_VERSION = Number(process.env.QA_DOC_VERSION ?? "5");
+const EXPECTED_DOC_VERSION = Number(process.env.QA_DOC_VERSION ?? "6");
 
-const ASSET_IDS = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset", "fig-mapa"];
+const ASSET_IDS = ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"];
 
 const viewports = [
   { w: 390, h: 844, tag: "390" },
@@ -174,26 +174,21 @@ async function gotoDossier(page, url) {
   }
 }
 
-async function waitReaderReady(page, viewportWidth = 390) {
-  const mobileMaps = viewportWidth < 1024;
+async function waitReaderReady(page) {
   await page.waitForSelector(".dossier-html-reader", { timeout: 90000 });
   await page.waitForFunction(
-    ({ mobileMaps: mobile }) => {
+    () => {
       const root = document.querySelector(".dossier-html-reader");
       if (!root) return false;
       const text = root.textContent ?? "";
       if (text.includes("Carregando dossiê")) return false;
       if (text.includes("Não foi possível carregar")) return false;
-      const required = ["fig-vitimas"];
-      if (mobile) required.push("fig-mapa-main", "fig-mapa-inset");
-      else required.push("fig-mapa");
-      for (const id of required) {
+      for (const id of ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
         const fig = root.querySelector(`[data-dossier-figure="${id}"] img`);
         if (!fig || !fig.complete || fig.naturalWidth <= 0) return false;
       }
       return true;
     },
-    { mobileMaps },
     { timeout: 90000 },
   );
 }
@@ -218,7 +213,6 @@ function buildQaReport({ baseUrl, manifest, metrics, httpTests, commit }) {
 - \`asset-verify-fig-vitimas.png\` — grade 2×2 (414×410).
 - \`asset-verify-fig-mapa-main.png\` — painel Fairfax/DC (908×465).
 - \`asset-verify-fig-mapa-inset.png\` — inset Virgínia + coordenadas (705×476).
-- \`asset-verify-fig-mapa.png\` — composição wide desktop-only (1582×275).
 - \`ASSET-MANIFEST.json\` — dimensões e SHA-256 dos \`.webp\`.
 
 \`\`\`json
@@ -228,7 +222,7 @@ ${JSON.stringify(manifest, null, 2)}
 ## Documento HTML (v${EXPECTED_DOC_VERSION})
 
 - Figura \`fig-vitimas\` na seção **Vítimas** (\`sections[].id === "vitimas"\`).
-- \`fig-mapa-main\` + \`fig-mapa-inset\` na seção **Mapa** (mobile/tablet, \`lg:hidden\`); \`fig-mapa\` wide em desktop (\`lg+\`).
+- \`fig-mapa-main\` + \`fig-mapa-inset\` na seção **Mapa** em todos os breakpoints (grid 1 col mobile, 2 cols desktop); sem \`fig-mapa\` wide.
 - Bootstrap: \`npm run dossier:bootstrap-banfield-html\` → Blob \`v${EXPECTED_DOC_VERSION}\` + Postgres \`published\`.
 
 ## Automated tests
@@ -331,7 +325,7 @@ async function main() {
   for (const vp of viewports) {
     await page.setViewportSize({ width: vp.w, height: vp.h });
     await gotoDossier(page, dossierUrl);
-    await waitReaderReady(page, vp.w);
+    await waitReaderReady(page);
     await page.screenshot({
       path: path.join(outDir, `reader-${vp.tag}.png`),
       fullPage: true,
@@ -340,7 +334,7 @@ async function main() {
 
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoDossier(page, dossierUrl);
-  await waitReaderReady(page, 390);
+  await waitReaderReady(page);
 
   const vitimas = await figureMetrics(page, "fig-vitimas");
   await page.locator('[data-dossier-figure="fig-vitimas"]').screenshot({
@@ -352,6 +346,11 @@ async function main() {
     path: path.join(outDir, "map-main-390.png"),
   });
 
+  await page.evaluate(() => {
+    const el = document.querySelector('[data-dossier-figure="fig-mapa-inset"]');
+    el?.scrollIntoView({ block: "center", inline: "nearest" });
+  });
+  await page.waitForTimeout(400);
   const inset = await figureMetrics(page, "fig-mapa-inset");
   await page.locator('[data-dossier-figure="fig-mapa-inset"] img').screenshot({
     path: path.join(outDir, "map-inset-390.png"),
@@ -375,7 +374,7 @@ async function main() {
   await page.setViewportSize({ width: 1280, height: 900 });
   await gotoDossier(page, dossierUrl);
   try {
-    await waitReaderReady(page, 1280);
+    await waitReaderReady(page);
     reader1280Ready = true;
   } catch {
     reader1280Ready = false;

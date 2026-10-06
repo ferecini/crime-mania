@@ -13,7 +13,7 @@ export function DocumentFigureBlock({
   caption,
   credit,
   portrait,
-  showWhen,
+  mapPanelLayout,
 }: {
   slug: string;
   assetId: string;
@@ -21,14 +21,8 @@ export function DocumentFigureBlock({
   caption?: string;
   credit?: string;
   portrait?: boolean;
-  showWhen?: "mobile-only" | "desktop-only";
+  mapPanelLayout?: boolean;
 }) {
-  const visibility =
-    showWhen === "mobile-only"
-      ? "lg:hidden"
-      : showWhen === "desktop-only"
-        ? "hidden lg:block"
-        : "";
   const mapPanel = assetId.startsWith("fig-mapa");
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
@@ -46,10 +40,15 @@ export function DocumentFigureBlock({
     };
   }, [open, close]);
 
+  const bleed =
+    mapPanelLayout && mapPanel
+      ? "relative left-1/2 w-screen max-w-[100vw] -translate-x-1/2 lg:left-auto lg:w-full lg:max-w-none lg:translate-x-0"
+      : "";
+
   return (
     <>
       <figure
-        className={`mx-auto w-full max-w-[75rem] ${visibility}`}
+        className={`mx-auto w-full ${mapPanelLayout ? "max-w-none" : "max-w-[75rem]"} ${bleed}`}
         data-dossier-figure={assetId}
       >
         <button
@@ -91,13 +90,13 @@ export function DocumentFigureBlock({
           </div>
           <div
             className={`min-h-0 flex-1 ${
-              mapPanel ? "overflow-auto overscroll-contain px-1 pb-4" : "overflow-hidden px-2"
+              mapPanel ? "overflow-auto overscroll-contain px-2 pb-6" : "overflow-hidden px-2"
             }`}
           >
             <div
               className={
                 mapPanel
-                  ? "mx-auto flex min-h-full w-full max-w-[min(100vw,960px)] items-start justify-center"
+                  ? "mx-auto w-full max-w-[min(100vw,960px)]"
                   : "flex h-full min-h-[50vh] items-center justify-center"
               }
             >

@@ -5,7 +5,6 @@
 - `asset-verify-fig-vitimas.png` — grade 2×2 (414×410).
 - `asset-verify-fig-mapa-main.png` — painel Fairfax/DC (908×465).
 - `asset-verify-fig-mapa-inset.png` — inset Virgínia + coordenadas (705×476).
-- `asset-verify-fig-mapa.png` — composição wide desktop-only (1582×275).
 - `ASSET-MANIFEST.json` — dimensões e SHA-256 dos `.webp`.
 
 ```json
@@ -19,10 +18,10 @@
   },
   "fig-mapa-main": {
     "width": 908,
-    "height": 534,
-    "aspect": 1.7,
-    "bytes": 76272,
-    "sha256": "f1d2100700c3e253ffa9daeb971d9edef74ce431fe1ad0cabbedb9961f2fe2cf"
+    "height": 465,
+    "aspect": 1.953,
+    "bytes": 73242,
+    "sha256": "00e545cb0fbdc15259ea1dd25efb6bdab80c1d8c2d2267e940de6b3b00237e18"
   },
   "fig-mapa-inset": {
     "width": 705,
@@ -30,22 +29,15 @@
     "aspect": 1.481,
     "bytes": 33206,
     "sha256": "491cecfdf85083663eb4202eba0bba10bc38fff872b51eed8a12d3d5c6d2e15a"
-  },
-  "fig-mapa": {
-    "width": 1410,
-    "height": 263,
-    "aspect": 5.361,
-    "bytes": 65516,
-    "sha256": "9ad10289881efd9eed739033d8baf9775583916909c6390007f767edbb5622be"
   }
 }
 ```
 
-## Documento HTML (v5)
+## Documento HTML (v6)
 
 - Figura `fig-vitimas` na seção **Vítimas** (`sections[].id === "vitimas"`).
-- `fig-mapa-main` + `fig-mapa-inset` na seção **Mapa** (mobile/tablet, `lg:hidden`); `fig-mapa` wide em desktop (`lg+`).
-- Bootstrap: `npm run dossier:bootstrap-banfield-html` → Blob `v5` + Postgres `published`.
+- `fig-mapa-main` + `fig-mapa-inset` na seção **Mapa** em todos os breakpoints (grid 1 col mobile, 2 cols desktop); sem `fig-mapa` wide.
+- Bootstrap: `npm run dossier:bootstrap-banfield-html` → Blob `v6` + Postgres `published`.
 
 ## Automated tests
 
@@ -67,9 +59,9 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 | free login | PASS | 200 |
 | free document 403 | PASS | 403 |
 | free gallery 403 | PASS | 403 |
-| tier1 document 200 v4 | PASS | 200 v=5 |
-| document fig-vitimas in seção vitimas | PASS | figures=4 |
-| document map main/inset in seção mapa | PASS | [{"sectionId":"mapa","assetId":"fig-mapa-main"},{"sectionId":"mapa","assetId":"fig-mapa-inset"},{"sectionId":"mapa","assetId":"fig-mapa"}] |
+| tier1 document 200 v4 | PASS | 200 v=6 |
+| document fig-vitimas in seção vitimas | PASS | figures=3 |
+| document map main/inset in seção mapa | PASS | [{"sectionId":"mapa","assetId":"fig-mapa-main"},{"sectionId":"mapa","assetId":"fig-mapa-inset"}] |
 | tier1 asset fig-vitimas 200 | PASS | 200 |
 | tier1 asset fig-mapa-main 200 | PASS | 200 |
 | tier1 asset fig-mapa-inset 200 | PASS | 200 |
@@ -77,10 +69,10 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 | tier2 document 200 | PASS | 200 |
 | tier2 gallery 5 items | PASS | 200 n=5 |
 | reader mostra fig-vitimas @390 | PASS | naturalWidth=414 |
-| reader mostra fig-mapa-main @390 | PASS | img h=189.4px |
+| reader mostra fig-mapa-main @390 | PASS | img h=199.7px |
 | reader mostra fig-mapa-inset @390 | PASS | naturalWidth=705 |
-| fig-mapa-main img height @390 ≥180px | PASS | img w×h=322.0×189.4 |
-| lightbox mapa img ≥180px h @390 | PASS | {"width":382,"height":224.65625} |
+| fig-mapa-main img height @390 ≥180px | PASS | img w×h=390.0×199.7 |
+| lightbox mapa img ≥180px h @390 | PASS | {"width":374,"height":191.515625} |
 | reader @1280 sem loading | PASS | |
 | npm test:banfield-html-figures | PASS | |
 | npm run build | PASS | |
@@ -88,7 +80,7 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 ## Preview deploy (não produção)
 
 - Base URL: http://localhost:3021
-- Commit: `1442a2c` on branch `hotfix/banfield-figures-2026-10-06`
+- Commit: `afec939` on branch `hotfix/banfield-figures-2026-10-06`
 
 ## Produção
 

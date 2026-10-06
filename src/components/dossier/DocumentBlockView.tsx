@@ -1,7 +1,15 @@
 import type { DocumentBlock } from "@/lib/dossier/document-types";
 import { DocumentFigureBlock } from "@/components/dossier/DocumentFigureBlock";
 
-export function DocumentBlockView({ slug, block }: { slug: string; block: DocumentBlock }) {
+export function DocumentBlockView({
+  slug,
+  block,
+  mapPanelLayout,
+}: {
+  slug: string;
+  block: DocumentBlock;
+  mapPanelLayout?: boolean;
+}) {
   switch (block.type) {
     case "heading": {
       const Tag = block.level === 1 ? "h2" : block.level === 2 ? "h3" : "h4";
@@ -134,7 +142,7 @@ export function DocumentBlockView({ slug, block }: { slug: string; block: Docume
           caption={"caption" in block ? block.caption : undefined}
           credit={block.credit}
           portrait={portrait}
-          showWhen={block.type === "figure" ? block.showWhen : undefined}
+          mapPanelLayout={mapPanelLayout}
         />
       );
     }

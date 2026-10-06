@@ -365,8 +365,8 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xStart: 0.02,
     xEnd: 0.58,
     yStart: 0.405,
-    /** Full Fairfax/DC panel height (~465px @1620w source); no letterbox padding */
-    yEnd: 0.59,
+    /** Painel Fairfax/DC apenas — termina antes da linha / «03. LINHA DO TEMPO» (~908×465) */
+    yEnd: 0.566,
   },
   {
     assetId: "fig-mapa-inset",
@@ -374,14 +374,6 @@ export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
     xEnd: 0.985,
     yStart: 0.36,
     yEnd: 0.525,
-  },
-  {
-    assetId: "fig-mapa",
-    xStart: 0.009,
-    xEnd: 0.992,
-    yStart: 0.38,
-    yEnd: 0.482,
-    trimBorder: true,
   },
 ];
 

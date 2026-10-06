@@ -30,11 +30,6 @@ const ASSETS: { id: string; localRel: string; alt: string }[] = [
     localRel: "private/dossiers/documents/familia-banfield/assets/fig-mapa-inset.webp",
     alt: "Inset de Virgínia e coordenadas de Fairfax.",
   },
-  {
-    id: "fig-mapa",
-    localRel: "private/dossiers/documents/familia-banfield/assets/fig-mapa.webp",
-    alt: "Mapa de Fairfax e região metropolitana de Washington D.C.",
-  },
 ];
 
 function loadDocument(): DossierDocument {

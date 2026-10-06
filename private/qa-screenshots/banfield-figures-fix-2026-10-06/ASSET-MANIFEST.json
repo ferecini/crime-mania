@@ -8,10 +8,10 @@
   },
   "fig-mapa-main": {
     "width": 908,
-    "height": 534,
-    "aspect": 1.7,
-    "bytes": 76272,
-    "sha256": "f1d2100700c3e253ffa9daeb971d9edef74ce431fe1ad0cabbedb9961f2fe2cf"
+    "height": 465,
+    "aspect": 1.953,
+    "bytes": 73242,
+    "sha256": "00e545cb0fbdc15259ea1dd25efb6bdab80c1d8c2d2267e940de6b3b00237e18"
   },
   "fig-mapa-inset": {
     "width": 705,
@@ -19,12 +19,5 @@
     "aspect": 1.481,
     "bytes": 33206,
     "sha256": "491cecfdf85083663eb4202eba0bba10bc38fff872b51eed8a12d3d5c6d2e15a"
-  },
-  "fig-mapa": {
-    "width": 1410,
-    "height": 263,
-    "aspect": 5.361,
-    "bytes": 65516,
-    "sha256": "9ad10289881efd9eed739033d8baf9775583916909c6390007f767edbb5622be"
   }
 }
