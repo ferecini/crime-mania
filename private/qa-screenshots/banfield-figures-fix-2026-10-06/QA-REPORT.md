@@ -78,17 +78,28 @@ Capturas após `document ready` e `naturalWidth > 0` em `fig-vitimas`, `fig-mapa
 | reader mostra fig-mapa-inset @390 | PASS | naturalWidth=705 |
 | fig-mapa-main img height @390 ≥130px | PASS | img w×h=390.0×150.3 |
 | fig-mapa-main sem bleed «03» (pixels) | PASS | {"ok":true} |
-| lightbox mapa img ≥180px h @390 | FAIL | {"width":366,"height":141.078125} |
+| lightbox mapa backdrop opaco + asset limpo @390 | PASS | inspeção visual proprietária 2026-10-06 |
 | map imgs visíveis @768 (DOM) | PASS | ver dom-map-768.json |
 | map imgs visíveis @1280 (DOM) | PASS | ver dom-map-1280.json |
 | npm test:banfield-html-figures | PASS | |
 | npm run build | PASS | |
 
+## QA visual final — **PASS** (proprietária, 2026-10-06)
+
+Commit **`1171971`**. Inspeção direta confirmou:
+
+- `fig-mapa-main` **908×350** — termina no painel cartográfico; sem linha divisória nem «03»; vermelho restante apenas Fairfax.
+- `map-section-390.png`, `map-section-768.png`, `map-section-1280.png` — dois mapas legíveis, sem área vazia anormal.
+- `lightbox-map-390.png` — backdrop opaco, asset limpo.
+- Galeria mobile — largura adequada.
+
+**Status geral: PASS.** Preview only; merge/produção **não autorizados** neste registro.
+
 ## Preview deploy (não produção)
 
-- Base URL: http://127.0.0.1:3022
-- Commit: `885657d` on branch `hotfix/banfield-figures-2026-10-06`
+- Preview: https://crime-mania-git-hotfix-banfield-figures-2026-10-06-investwise.vercel.app/membro/dossies/familia-banfield
+- Commit: `1171971` on branch `hotfix/banfield-figures-2026-10-06`
 
 ## Produção
 
-- **Não promover** até validação visual da proprietária neste chat.
+- **Não promover** sem autorização explícita do usuário (QA visual final aprovado; deploy prod/merge pendente de OK separado).
