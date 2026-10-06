@@ -4,19 +4,24 @@ import { DEMO_USER_ID } from "@/lib/auth/session";
 import type { SubscriptionTier } from "@/lib/plans";
 import {
   firstNameFromFullName,
+  isPreferredNameConfirmed,
   isValidPreferredName,
   resolveGreetingName,
   sanitizePreferredName,
+  suggestedPreferredName,
 } from "@/lib/auth/display-name";
+import { migrateUserPreferredName } from "@/lib/auth/preferred-name-migration";
 
 export interface StoredUser {
   id: string;
   email: string;
   /** Nome completo interno (Google ou cadastro legado). */
   legalName: string;
-  /** Nome escolhido para saudações na área logada. */
+  /** Nome escolhido para saudações na área logada (só usado após confirmação). */
   preferredName?: string;
-  /** Legado — espelha preferredName ou primeiro nome. */
+  /** ISO — preenchido quando o usuário salva nome no onboarding ou perfil. */
+  preferredNameConfirmedAt?: string;
+  /** Legado — espelha saudação resolvida. */
   displayName: string;
   passwordHash: string;
   tier: SubscriptionTier;
@@ -29,18 +34,22 @@ export interface StoredUser {
 /** Armazenamento em memória para desenvolvimento — substituir por banco em produção. */
 const users = new Map<string, StoredUser>();
 
+function touchUser(user: StoredUser): StoredUser {
+  migrateUserPreferredName(user);
+  user.displayName = resolveGreetingName(user);
+  return user;
+}
+
 function syncDisplayName(user: StoredUser): void {
-  user.displayName = resolveGreetingName({
-    preferredName: user.preferredName,
-    legalName: user.legalName,
-  });
+  user.displayName = resolveGreetingName(user);
 }
 
 export async function findUserByEmail(
   email: string,
 ): Promise<StoredUser | undefined> {
   const normalized = email.trim().toLowerCase();
-  return [...users.values()].find((u) => u.email === normalized);
+  const user = [...users.values()].find((u) => u.email === normalized);
+  return user ? touchUser(user) : undefined;
 }
 
 export async function createEmailUser(input: {
@@ -67,6 +76,7 @@ export async function createEmailUser(input: {
     accountType: "standard",
     isDemo: false,
     needsPreferredNameConfirm: false,
+    preferredNameConfirmedAt: new Date().toISOString(),
   };
   syncDisplayName(user);
   users.set(user.id, user);
@@ -84,7 +94,8 @@ export async function validateEmailPassword(
 }
 
 export function getUserById(id: string): StoredUser | undefined {
-  return users.get(id);
+  const user = users.get(id);
+  return user ? touchUser(user) : undefined;
 }
 
 export function setUserTier(userId: string, tier: SubscriptionTier): void {
@@ -98,6 +109,7 @@ export function updatePreferredName(userId: string, preferredName: string): Stor
   const clean = sanitizePreferredName(preferredName);
   if (!isValidPreferredName(clean)) throw new Error("Nome de exibição inválido.");
   user.preferredName = clean;
+  user.preferredNameConfirmedAt = new Date().toISOString();
   user.needsPreferredNameConfirm = false;
   syncDisplayName(user);
   return user;
@@ -115,12 +127,8 @@ export async function findOrCreateUserFromGoogle(profile: {
 }): Promise<StoredUser> {
   const bySub = findUserByGoogleSub(profile.sub);
   if (bySub) {
-    if (profile.name && !bySub.legalName) bySub.legalName = profile.name;
-    if (!bySub.preferredName?.trim()) {
-      bySub.needsPreferredNameConfirm = true;
-    }
-    syncDisplayName(bySub);
-    return bySub;
+    if (profile.name?.trim()) bySub.legalName = profile.name.trim();
+    return touchUser(bySub);
   }
 
   const existing = await findUserByEmail(profile.email);
@@ -130,11 +138,7 @@ export async function findOrCreateUserFromGoogle(profile: {
     }
     existing.googleSub = profile.sub;
     existing.legalName = existing.legalName || profile.name;
-    if (!existing.preferredName?.trim()) {
-      existing.needsPreferredNameConfirm = true;
-    }
-    syncDisplayName(existing);
-    return existing;
+    return touchUser(existing);
   }
 
   const user: StoredUser = {
@@ -149,8 +153,9 @@ export async function findOrCreateUserFromGoogle(profile: {
     isDemo: false,
     googleSub: profile.sub,
     needsPreferredNameConfirm: true,
+    preferredNameConfirmedAt: undefined,
   };
-  syncDisplayName(user);
+  touchUser(user);
   users.set(user.id, user);
   return user;
 }
@@ -171,11 +176,15 @@ export async function ensureDemoUser(): Promise<void> {
     tier: "none",
     accountType: "demo",
     isDemo: true,
+    preferredNameConfirmedAt: new Date().toISOString(),
+    needsPreferredNameConfirm: false,
   };
   users.set(user.id, user);
 }
 
 export function sessionPayloadFromUser(user: StoredUser) {
+  touchUser(user);
+  const confirmed = isPreferredNameConfirmed(user);
   return {
     id: user.id,
     email: user.email,
@@ -183,7 +192,12 @@ export function sessionPayloadFromUser(user: StoredUser) {
     tier: user.tier,
     accountType: user.accountType,
     isDemo: user.isDemo,
-    needsPreferredName: Boolean(user.needsPreferredNameConfirm && !user.preferredName?.trim()),
-    needsPreferredNameConfirm: Boolean(user.needsPreferredNameConfirm),
+    needsPreferredName: !confirmed,
+    needsPreferredNameConfirm: !confirmed,
   };
+}
+
+export function preferredNameForForm(user: StoredUser): string {
+  touchUser(user);
+  return suggestedPreferredName(user);
 }

@@ -1,6 +1,7 @@
 import { AccountPreferredNameForm } from "@/components/member/AccountPreferredNameForm";
 import { getSession } from "@/lib/auth/session";
-import { getUserById } from "@/lib/auth/users-store";
+import { getUserById, preferredNameForForm } from "@/lib/auth/users-store";
+import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
 
 export const metadata = { title: "Minha conta" };
 
@@ -37,8 +38,8 @@ export default async function AccountPage() {
           <dd className="col-span-2 capitalize text-white">{session.provider}</dd>
         </div>
         <AccountPreferredNameForm
-          initialPreferredName={stored?.preferredName ?? session.displayName}
-          needsConfirm={stored?.needsPreferredNameConfirm}
+          initialPreferredName={stored ? preferredNameForForm(stored) : session.displayName}
+          needsConfirm={stored ? !isPreferredNameConfirmed(stored) : false}
         />
       </dl>
       <p className="text-xs text-cm-gray">

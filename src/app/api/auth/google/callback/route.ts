@@ -9,6 +9,7 @@ import {
   readGoogleOAuthCookie,
   sanitizeNextPath,
 } from "@/lib/auth/google-oauth-cookie";
+import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
 import { findOrCreateUserFromGoogle, sessionPayloadFromUser } from "@/lib/auth/users-store";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
 
@@ -64,7 +65,7 @@ export async function GET(request: Request) {
     });
 
     let destination = sanitizeNextPath(stored.next);
-    if (!user.preferredName?.trim() || user.needsPreferredNameConfirm) {
+    if (!isPreferredNameConfirmed(user)) {
       destination = `/membro/onboarding/nome?next=${encodeURIComponent(destination)}`;
     }
     const response = NextResponse.redirect(new URL(destination, request.url));
