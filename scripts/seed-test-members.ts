@@ -19,7 +19,7 @@ import {
 } from "../src/lib/auth/users-store";
 import type { SubscriptionTier } from "../src/lib/plans";
 
-const SLOTS: QaUserSlot[] = ["free", "tier1", "tier2"];
+const SLOTS: QaUserSlot[] = ["free", "tier1", "tier2", "admin"];
 
 function readTierOverride(slot: QaUserSlot): SubscriptionTier | undefined {
   const key = `QA_${slot.toUpperCase()}_TIER`;

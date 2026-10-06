@@ -8,6 +8,7 @@
  *   node scripts/sync-editorial-vercel-env.mjs preview
  *   node scripts/sync-editorial-vercel-env.mjs production
  *   node scripts/sync-editorial-vercel-env.mjs preview --append-qa-tier2
+ *   node scripts/sync-editorial-vercel-env.mjs production --append-qa-admin
  */
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
@@ -19,16 +20,18 @@ const repoRoot = path.join(__dirname, "..");
 const idsPath = path.join(repoRoot, "private/ops/editorial-user-ids.txt");
 
 const QA_TIER2_ID = "00000000-0000-4000-8000-010000000003";
+const QA_ADMIN_ID = "00000000-0000-4000-8000-010000000004";
 const PLACEHOLDER = /^(OWNER_UUID|REPLACE_ME|TODO|PLACEHOLDER)/i;
 const UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const target = process.argv[2];
-const appendQa = process.argv.includes("--append-qa-tier2");
+const appendQaTier2 = process.argv.includes("--append-qa-tier2");
+const appendQaAdmin = process.argv.includes("--append-qa-admin");
 
 if (!target || !["preview", "production", "development"].includes(target)) {
   console.error(
-    "Uso: node scripts/sync-editorial-vercel-env.mjs <preview|production|development> [--append-qa-tier2]",
+    "Uso: node scripts/sync-editorial-vercel-env.mjs <preview|production|development> [--append-qa-tier2] [--append-qa-admin]",
   );
   process.exit(1);
 }
@@ -53,8 +56,11 @@ for (const line of raw.split("\n")) {
 }
 
 const unique = [...new Set(ids)];
-if (appendQa && !unique.includes(QA_TIER2_ID)) {
+if (appendQaTier2 && !unique.includes(QA_TIER2_ID)) {
   unique.push(QA_TIER2_ID);
+}
+if (appendQaAdmin && !unique.includes(QA_ADMIN_ID)) {
+  unique.push(QA_ADMIN_ID);
 }
 
 if (unique.length === 0) {

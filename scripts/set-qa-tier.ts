@@ -15,8 +15,8 @@ async function main() {
   const [, , slotRaw, tierRaw] = process.argv;
   const slot = slotRaw as QaUserSlot;
   const tier = tierRaw as SubscriptionTier;
-  if (!["free", "tier1", "tier2"].includes(slot)) {
-    console.error("Uso: npm run qa:set-tier -- <free|tier1|tier2> <none|tier1|tier2>");
+  if (!["free", "tier1", "tier2", "admin"].includes(slot)) {
+    console.error("Uso: npm run qa:set-tier -- <free|tier1|tier2|admin> <none|tier1|tier2>");
     process.exit(1);
   }
   if (!["none", "tier1", "tier2"].includes(tier)) {
