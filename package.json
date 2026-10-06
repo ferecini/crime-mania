@@ -9,7 +9,10 @@
     "build": "node scripts/validate-spotify-embeds.mjs && next build",
     "start": "next start",
     "lint": "eslint",
-    "test:preferred-name": "npx --yes tsx scripts/test-preferred-name.ts"
+    "test:preferred-name": "npx --yes tsx scripts/test-preferred-name.ts",
+    "seed:test-members": "npx --yes tsx scripts/seed-test-members.ts",
+    "revoke:test-members": "npx --yes tsx scripts/revoke-test-members.ts",
+    "qa:set-tier": "npx --yes tsx scripts/set-qa-tier.ts"
   },
   "dependencies": {
     "next": "^15.5.4",

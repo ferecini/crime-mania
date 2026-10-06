@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth/session";
+import { allowPlanSimulation } from "@/lib/auth/qa-users";
 import { getUserById, setUserTier } from "@/lib/auth/users-store";
 import type { PlanId } from "@/lib/plans";
 import { PLANS } from "@/lib/plans";
@@ -12,6 +13,13 @@ const schema = z.object({
 
 /** Simula confirmação de pagamento — integrar gateway antes do go-live. */
 export async function POST(request: Request) {
+  if (!allowPlanSimulation()) {
+    return NextResponse.json(
+      { error: "Alteração de plano pelo site desabilitada. Use contas de QA ou aguarde o gateway." },
+      { status: 403 },
+    );
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Autenticação necessária." }, { status: 401 });
@@ -33,7 +41,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Conta não encontrada." }, { status: 404 });
   }
 
-  setUserTier(session.id, plan.tier);
+  try {
+    setUserTier(session.id, plan.tier);
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Não foi possível alterar o plano.";
+    return NextResponse.json({ error: message }, { status: 403 });
+  }
 
   const token = await createSessionToken({
     ...session,
