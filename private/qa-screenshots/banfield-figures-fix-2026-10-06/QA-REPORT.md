@@ -30,8 +30,9 @@ node scripts/qa-banfield-figures-capture.mjs https://<preview-host>
 ## Preview deploy (não produção)
 
 - Branch: `hotfix/banfield-figures-2026-10-06`
-- Commit: _(atualizar após push)_
-- URL preview: _(Vercel deployment desta branch — sem promote produção)_
+- Commit: `9b0b7f1`
+- URL preview: https://crime-mania-git-hotfix-banfield-figures-2026-10-06-investwise.vercel.app/dossiers/familia-banfield
+- PR: https://github.com/ferecini/crime-mania/pull/9
 
 ## Produção
 
