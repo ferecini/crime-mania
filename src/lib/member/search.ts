@@ -5,7 +5,14 @@ import type { SessionUser } from "@/lib/auth/session";
 import { evaluateAccess } from "@/lib/paywall";
 import { tierHasFeature } from "@/lib/plans";
 
-export type SearchResultKind = "dossier" | "episodio" | "juris" | "arquivo" | "publico";
+export type SearchResultKind =
+  | "dossier"
+  | "episodio"
+  | "juris"
+  | "arquivo"
+  | "publico"
+  | "forum"
+  | "sugestao";
 
 export interface MemberSearchResult {
   id: string;
@@ -93,6 +100,58 @@ export async function searchMemberCatalog(
       locked: !access.allowed,
       planHint: "Tier 2",
     });
+  }
+
+  if (tierHasFeature(tier, "forum")) {
+    try {
+      const { getCommunityRepository } = await import("@/lib/community/repository");
+      const { displayNameForMemberId } = await import("@/lib/community/member-display");
+      const { isCommunityModerator } = await import("@/lib/community/access");
+      const repo = await getCommunityRepository();
+      const topics = await repo.searchTopics(q, 8);
+      for (const topic of topics) {
+        if (!matches(`${topic.title} ${topic.body}`, q)) continue;
+        results.push({
+          id: `forum-${topic.id}`,
+          kind: "forum",
+          title: topic.title,
+          summary: `Fórum · ${displayNameForMemberId(topic.authorId)}`,
+          href: `/membro/comunidade/forum/${topic.id}`,
+          locked: false,
+        });
+      }
+      if (tierHasFeature(tier, "caseSuggestion") && session) {
+        const mine = await repo.listSuggestionsByAuthor(session.id);
+        for (const s of mine) {
+          if (!matches(`${s.caseTitle} ${s.summary}`, q)) continue;
+          results.push({
+            id: `sug-${s.id}`,
+            kind: "sugestao",
+            title: s.caseTitle,
+            summary: `Sua sugestão · ${s.protocol}`,
+            href: "/membro/comunidade/sugira/minhas",
+            locked: false,
+          });
+        }
+      }
+      if (session && isCommunityModerator(session)) {
+        const all = await repo.adminListSuggestions();
+        for (const s of all) {
+          if (s.authorId === session.id) continue;
+          if (!matches(`${s.caseTitle} ${s.summary}`, q)) continue;
+          results.push({
+            id: `sug-admin-${s.id}`,
+            kind: "sugestao",
+            title: s.caseTitle,
+            summary: `Sugestão (moderação) · ${s.protocol}`,
+            href: "/membro/comunidade/moderacao",
+            locked: false,
+          });
+        }
+      }
+    } catch {
+      /* comunidade indisponível sem banco */
+    }
   }
 
   if (tierHasFeature(tier, "dossierSummary")) {

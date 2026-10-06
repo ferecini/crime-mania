@@ -1,0 +1,17 @@
+# Editorial user IDs — Crime Mania
+# Copie para: private/ops/editorial-user-ids.txt (gitignored)
+#
+# Como obter UUIDs reais (dono / moderadores):
+# 1. Faça login em Preview ou Production (Google ou conta QA tier2).
+# 2. GET /api/auth/session (cookie de sessão) → campo user.id
+# 3. Cole um UUID por linha abaixo (sem vírgulas).
+# 4. Sincronize na Vercel:
+#      node scripts/sync-editorial-vercel-env.mjs preview
+#      node scripts/sync-editorial-vercel-env.mjs production
+#
+# Placeholders (substituir antes de production):
+# OWNER_UUID_AQUI
+# OWNER_UUID_B_AQUI
+#
+# QA Preview (opcional — já conhecido no código como qa-tier2):
+# 00000000-0000-4000-8000-010000000003

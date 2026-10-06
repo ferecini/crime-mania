@@ -1,12 +1,15 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { DossierGalleryCarousel } from "@/components/dossier/DossierGalleryCarousel";
-import { DossierPdfViewer } from "@/components/dossier/DossierPdfViewer";
+import { DossierDownloadPdfLink } from "@/components/dossier/DossierDownloadPdfLink";
+import { ResponsiveDossierReader } from "@/components/dossier/ResponsiveDossierReader";
+import { readProcessedManifest } from "@/lib/dossier/manifest-store";
 import { DossierTextSummary } from "@/components/dossier/DossierTextSummary";
 import { PaywallCard } from "@/components/member/PaywallCard";
 import { getDossierRecord } from "@/data/dossiers";
 import { getJurisItem } from "@/data/member-media";
 import { getSession } from "@/lib/auth/session";
+import { isDossierAdmin } from "@/lib/dossier/admin-access";
 import { evaluateAccess } from "@/lib/paywall";
 import { tierHasFeature } from "@/lib/plans";
 import { MemberMediaPlayer } from "@/components/media/MemberMediaPlayer";
@@ -25,13 +28,37 @@ export default async function DossierDetailPage({
   const summaryAccess = evaluateAccess(session, "dossierSummary");
   const jurisAccess = evaluateAccess(session, "dossierJuris");
   const canViewSummary = summaryAccess.allowed;
+  const processedManifest = await readProcessedManifest(slug);
+  const useNativeReader =
+    Boolean(processedManifest?.status === "ready" && processedManifest.blocks.length > 0);
   const jurisItem = dossier.jurisMediaId ? getJurisItem(dossier.jurisMediaId) : undefined;
 
   return (
     <article className="space-y-10">
-      <Link href="/membro/dossies" className="text-sm text-cm-gray hover:text-white">
-        ← Dossiês
-      </Link>
+      <div className="flex flex-wrap items-center gap-4">
+        <Link href="/membro/dossies" className="text-sm text-cm-gray hover:text-white">
+          ← Dossiês
+        </Link>
+        {isDossierAdmin(session) && (
+          <>
+            <Link href="/membro/admin" className="text-sm text-cm-red-light hover:text-white">
+              Admin
+            </Link>
+            <Link
+              href={`/membro/admin/dossiers/${slug}`}
+              className="text-sm text-cm-red-light hover:text-white"
+            >
+              Revisão PDF
+            </Link>
+            <Link
+              href={`/membro/admin/galerias/${slug}`}
+              className="text-sm text-cm-red-light hover:text-white"
+            >
+              Galeria
+            </Link>
+          </>
+        )}
+      </div>
       <header>
         <p className="text-xs uppercase tracking-widest text-cm-red">{dossier.category}</p>
         <h1 className="font-display mt-2 text-3xl text-white">{dossier.title}</h1>
@@ -42,13 +69,22 @@ export default async function DossierDetailPage({
         <PaywallCard state={summaryAccess} />
       ) : (
         <>
-          {dossier.documentFile ? (
-            <DossierPdfViewer slug={dossier.slug} title={dossier.title} />
+          {useNativeReader ? (
+            <>
+              <ResponsiveDossierReader slug={dossier.slug} />
+              {dossier.documentFile ? (
+                <DossierDownloadPdfLink slug={dossier.slug} title={dossier.title} />
+              ) : null}
+            </>
+          ) : dossier.documentFile ? (
+            <p className="text-sm text-cm-gray">
+              Documento editorial em preparação ou aguardando revisão do pipeline.
+            </p>
           ) : (
             <p className="text-sm text-cm-gray">Documento editorial em preparação.</p>
           )}
           <DossierTextSummary dossier={dossier} />
-          <DossierGalleryCarousel images={dossier.gallery} />
+          <DossierGalleryCarousel slug={dossier.slug} />
           <section className="space-y-4">
             <h2 className="font-display text-lg text-white">Crime Mania Juris</h2>
             {!tierHasFeature(tier, "dossierJuris") ? (
