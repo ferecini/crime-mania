@@ -1,0 +1,144 @@
+{
+  "vitimasVisible390": true,
+  "vitimasNaturalWidth": 414,
+  "vitimasImgRect390": {
+    "x": 34,
+    "y": 262.0625,
+    "width": 322,
+    "height": 318.875,
+    "naturalWidth": 414,
+    "naturalHeight": 410
+  },
+  "mapMainVisible390": true,
+  "mapMainImgWidth390": 390,
+  "mapMainImgHeight390": 150.328125,
+  "mapMainImgRect390": {
+    "x": 0,
+    "y": 346.5,
+    "width": 390,
+    "height": 150.328125,
+    "naturalWidth": 908,
+    "naturalHeight": 350
+  },
+  "insetVisible390": true,
+  "insetNaturalWidth": 705,
+  "insetImgRect390": {
+    "x": 0,
+    "y": 268.828125,
+    "width": 390,
+    "height": 263.3125,
+    "naturalWidth": 705,
+    "naturalHeight": 476
+  },
+  "lightboxOk": true,
+  "lightboxMainImgRect390": {
+    "width": 366,
+    "height": 141.078125
+  },
+  "reader1280Ready": true,
+  "domMap768": {
+    "fig-mapa-main": {
+      "rect": {
+        "x": 48,
+        "y": 417.9375,
+        "width": 672,
+        "height": 259.015625,
+        "top": 417.9375,
+        "left": 48
+      },
+      "naturalWidth": 908,
+      "naturalHeight": 350,
+      "computed": {
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "width": "672px",
+        "height": "259.016px",
+        "objectFit": "fill",
+        "position": "static"
+      },
+      "visible": true
+    },
+    "fig-mapa-inset": {
+      "rect": {
+        "x": 48,
+        "y": 744.953125,
+        "width": 672,
+        "height": 453.71875,
+        "top": 744.953125,
+        "left": 48
+      },
+      "naturalWidth": 705,
+      "naturalHeight": 476,
+      "computed": {
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "width": "672px",
+        "height": "453.719px",
+        "objectFit": "fill",
+        "position": "static"
+      },
+      "visible": true
+    }
+  },
+  "domMap1280": {
+    "fig-mapa-main": {
+      "rect": {
+        "x": 380,
+        "y": 389.875,
+        "width": 392,
+        "height": 151.09375,
+        "top": 389.875,
+        "left": 380
+      },
+      "naturalWidth": 908,
+      "naturalHeight": 350,
+      "computed": {
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "width": "392px",
+        "height": "151.094px",
+        "objectFit": "fill",
+        "position": "static"
+      },
+      "visible": true
+    },
+    "fig-mapa-inset": {
+      "rect": {
+        "x": 796,
+        "y": 389.875,
+        "width": 392,
+        "height": 264.65625,
+        "top": 389.875,
+        "left": 796
+      },
+      "naturalWidth": 705,
+      "naturalHeight": 476,
+      "computed": {
+        "display": "block",
+        "visibility": "visible",
+        "opacity": "1",
+        "width": "392px",
+        "height": "264.656px",
+        "objectFit": "fill",
+        "position": "static"
+      },
+      "visible": true
+    }
+  },
+  "figureTestOk": true,
+  "buildOk": true,
+  "mapMainPixelOk": true,
+  "mapMainPixelScan": {
+    "ok": true
+  },
+  "mapMainNatural": {
+    "width": 908,
+    "height": 350,
+    "aspect": 2.594,
+    "bytes": 73686,
+    "sha256": "eaaf6da97ac45ade6ade6d119f452f94f65daed1b274a7ec514f9debe46c0f34"
+  }
+}

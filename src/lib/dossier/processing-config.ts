@@ -341,6 +341,42 @@ export const BANFIELD_EDITORIAL_CROPS: EditorialCrop[] = [
   ...BANFIELD_DESKTOP_CROPS,
 ];
 
+/** Cortes limpos para figuras do dossiê HTML (sem títulos de seção nem parágrafos). Fonte: v2/source-page.png @ 1620×2879. */
+export type HtmlFigureCrop = {
+  assetId: string;
+  xStart: number;
+  xEnd: number;
+  yStart: number;
+  yEnd: number;
+  /** Remove near-black borders after extract (tight content bounds). */
+  trimBorder?: boolean;
+};
+
+export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
+  {
+    assetId: "fig-vitimas",
+    xStart: 0.03,
+    xEnd: 0.285,
+    yStart: 0.218,
+    yEnd: 0.36,
+  },
+  {
+    assetId: "fig-mapa-main",
+    xStart: 0.02,
+    xEnd: 0.58,
+    yStart: 0.405,
+    /** Painel Fairfax/DC — termina no limite inferior do mapa, antes da linha / «03» (~908×349) */
+    yEnd: 0.526,
+  },
+  {
+    assetId: "fig-mapa-inset",
+    xStart: 0.55,
+    xEnd: 0.985,
+    yStart: 0.36,
+    yEnd: 0.525,
+  },
+];
+
 export const DOSSIER_PROCESSING_LIMITS = {
   maxPdfBytes: 25 * 1024 * 1024,
   maxPages: 20,

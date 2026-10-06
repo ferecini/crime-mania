@@ -1,10 +1,15 @@
 import type { DocumentBlock } from "@/lib/dossier/document-types";
+import { DocumentFigureBlock } from "@/components/dossier/DocumentFigureBlock";
 
-function assetSrc(slug: string, assetId: string) {
-  return `/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(assetId)}`;
-}
-
-export function DocumentBlockView({ slug, block }: { slug: string; block: DocumentBlock }) {
+export function DocumentBlockView({
+  slug,
+  block,
+  mapPanelLayout,
+}: {
+  slug: string;
+  block: DocumentBlock;
+  mapPanelLayout?: boolean;
+}) {
   switch (block.type) {
     case "heading": {
       const Tag = block.level === 1 ? "h2" : block.level === 2 ? "h3" : "h4";
@@ -130,22 +135,15 @@ export function DocumentBlockView({ slug, block }: { slug: string; block: Docume
     case "figure": {
       const portrait = block.type === "image" && block.layout === "portrait";
       return (
-        <figure className="mx-auto w-full max-w-[75rem]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={assetSrc(slug, block.assetId)}
-            alt={block.alt}
-            className={`mx-auto w-full object-contain ${
-              portrait ? "max-h-[75vh]" : "max-h-[min(75vh,720px)]"
-            }`}
-            loading="lazy"
-            decoding="async"
-          />
-          {"caption" in block && block.caption ? (
-            <figcaption className="mt-2 text-sm text-white">{block.caption}</figcaption>
-          ) : null}
-          {block.credit ? <p className="text-xs text-cm-gray">Crédito: {block.credit}</p> : null}
-        </figure>
+        <DocumentFigureBlock
+          slug={slug}
+          assetId={block.assetId}
+          alt={block.alt}
+          caption={"caption" in block ? block.caption : undefined}
+          credit={block.credit}
+          portrait={portrait}
+          mapPanelLayout={mapPanelLayout}
+        />
       );
     }
     default:

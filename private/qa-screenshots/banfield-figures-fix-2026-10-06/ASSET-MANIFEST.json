@@ -1,0 +1,23 @@
+{
+  "fig-vitimas": {
+    "width": 414,
+    "height": 410,
+    "aspect": 1.01,
+    "bytes": 33144,
+    "sha256": "98419580f172080a3f2f0bb2fd8ea715e61251a41c395e7b80dc686089c954e3"
+  },
+  "fig-mapa-main": {
+    "width": 908,
+    "height": 350,
+    "aspect": 2.594,
+    "bytes": 73686,
+    "sha256": "eaaf6da97ac45ade6ade6d119f452f94f65daed1b274a7ec514f9debe46c0f34"
+  },
+  "fig-mapa-inset": {
+    "width": 705,
+    "height": 476,
+    "aspect": 1.481,
+    "bytes": 33206,
+    "sha256": "491cecfdf85083663eb4202eba0bba10bc38fff872b51eed8a12d3d5c6d2e15a"
+  }
+}

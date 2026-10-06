@@ -52,6 +52,8 @@ export type FigureBlock = DocumentBlockBase & {
   alt: string;
   caption: string;
   credit?: string;
+  /** Tailwind md breakpoint: show only below md or md and up. */
+  showWhen?: "mobile-only" | "desktop-only";
 };
 
 export type QuoteBlock = DocumentBlockBase & {

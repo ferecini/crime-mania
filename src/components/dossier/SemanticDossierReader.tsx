@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DossierDocumentPublic } from "@/lib/dossier/document-types";
+import type { DocumentBlock, DossierDocumentPublic } from "@/lib/dossier/document-types";
 import { DocumentBlockView } from "@/components/dossier/DocumentBlockView";
 
 type LoadState = "loading" | "ready" | "blocked" | "error" | "processing";
+
+function sortedBlocks(blocks: DocumentBlock[]) {
+  return blocks.slice().sort((a, b) => a.order - b.order);
+}
 
 export function SemanticDossierReader({ slug }: { slug: string }) {
   const [doc, setDoc] = useState<DossierDocumentPublic | null>(null);
@@ -95,7 +99,7 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
   if (!doc) return null;
 
   return (
-    <div className="dossier-html-reader mx-auto max-w-3xl space-y-10 px-4 md:max-w-[42rem] md:px-0 lg:max-w-[46rem]">
+    <div className="dossier-html-reader mx-auto max-w-3xl space-y-10 px-4 pb-28 [scroll-padding-bottom:7rem] md:max-w-[42rem] md:px-0 lg:max-w-[52rem]">
       {doc.meta.extractionWarnings.length > 0 ? (
         <ul className="rounded border border-amber-500/30 bg-amber-950/20 p-3 text-sm text-amber-100/90">
           {doc.meta.extractionWarnings.map((w) => (
@@ -106,21 +110,55 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
       {doc.sections
         .slice()
         .sort((a, b) => a.order - b.order)
-        .map((section) => (
-          <section key={section.id} className="space-y-5" aria-labelledby={`sec-${section.id}`}>
-            {section.title ? (
-              <h2 id={`sec-${section.id}`} className="sr-only">
-                {section.title}
-              </h2>
-            ) : null}
-            {section.blocks
-              .slice()
-              .sort((a, b) => a.order - b.order)
-              .map((block) => (
+        .map((section) => {
+          const blocks = sortedBlocks(section.blocks);
+          const isMapSection = section.id === "mapa";
+
+          if (isMapSection) {
+            const prose = blocks.filter((b) => b.type !== "figure");
+            const figures = blocks.filter((b) => b.type === "figure");
+            return (
+              <section
+                key={section.id}
+                className="space-y-5"
+                aria-labelledby={`sec-${section.id}`}
+                data-dossier-section="mapa"
+              >
+                {section.title ? (
+                  <h2 id={`sec-${section.id}`} className="sr-only">
+                    {section.title}
+                  </h2>
+                ) : null}
+                {prose.map((block) => (
+                  <DocumentBlockView key={block.id} slug={slug} block={block} />
+                ))}
+                <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
+                  {figures.map((block) => (
+                    <DocumentBlockView
+                      key={block.id}
+                      slug={slug}
+                      block={block}
+                      mapPanelLayout
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          }
+
+          return (
+            <section key={section.id} className="space-y-5" aria-labelledby={`sec-${section.id}`}>
+              {section.title ? (
+                <h2 id={`sec-${section.id}`} className="sr-only">
+                  {section.title}
+                </h2>
+              ) : null}
+              {blocks.map((block) => (
                 <DocumentBlockView key={block.id} slug={slug} block={block} />
               ))}
-          </section>
-        ))}
+            </section>
+          );
+        })}
     </div>
   );
 }
