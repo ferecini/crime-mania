@@ -1,0 +1,37 @@
+/**
+ * Minimal PDF with text layer for E2E pipeline QA.
+ */
+import fs from "node:fs";
+import path from "node:path";
+
+const out = path.join(process.cwd(), "private/qa-fixtures/qa-html-sample.pdf");
+
+// Minimal valid PDF 1.4 with one page and Helvetica text (Tj operator).
+const objects = [
+  `%PDF-1.4
+1 0 obj<< /Type /Catalog /Pages 2 0 R >>endobj
+2 0 obj<< /Type /Pages /Kids [3 0 R] /Count 1 >>endobj
+3 0 obj<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources<< /Font<< /F1 5 0 R >> >> >>endobj
+4 0 obj<< /Length 120 >>stream
+BT
+/F1 14 Tf
+72 720 Td
+(QA Crime Mania - amostra PDF HTML) Tj
+0 -24 Td
+(Segundo paragrafo para teste de blocos.) Tj
+ET
+endstream
+endobj
+5 0 obj<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>endobj
+xref
+0 6
+0000000000 65535 f 
+trailer<< /Size 6 /Root 1 0 R >>
+startxref
+0
+%%EOF`,
+];
+
+fs.mkdirSync(path.dirname(out), { recursive: true });
+fs.writeFileSync(out, objects[0], "utf8");
+console.log("Wrote", out);

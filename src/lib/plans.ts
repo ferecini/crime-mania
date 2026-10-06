@@ -190,7 +190,7 @@ export const PLAN_COMPARISON_ROWS = [
     tier2: true,
   },
   {
-    label: "Sugira um caso",
+    label: "Sugira um episódio",
     tier1: false,
     tier2: true,
   },

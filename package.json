@@ -12,26 +12,45 @@
     "test:preferred-name": "npx --yes tsx scripts/test-preferred-name.ts",
     "seed:test-members": "npx --yes tsx scripts/seed-test-members.ts",
     "revoke:test-members": "npx --yes tsx scripts/revoke-test-members.ts",
-    "qa:set-tier": "npx --yes tsx scripts/set-qa-tier.ts"
+    "qa:set-tier": "npx --yes tsx scripts/set-qa-tier.ts",
+    "dossier:process": "npx --yes tsx scripts/process-dossier.ts",
+    "dossier:worker": "npx --yes tsx scripts/dossier-cloud-worker.ts",
+    "dossier:migrate": "node scripts/dossier-migrate.mjs",
+    "dossier:bootstrap-banfield": "npx --yes tsx scripts/dossier-bootstrap-banfield.ts",
+    "dossier:document-migrate": "node scripts/dossier-document-migrate.mjs",
+    "dossier:bootstrap-banfield-html": "npx --yes tsx scripts/dossier-bootstrap-banfield-document.ts",
+    "gallery:migrate": "node scripts/gallery-migrate.mjs",
+    "gallery:bootstrap-banfield": "node scripts/bootstrap-banfield-gallery.mjs",
+    "test:dossier-pipeline": "npx --yes tsx scripts/test-dossier-pipeline.ts",
+    "qa:mobile-dossier": "node scripts/qa-mobile-dossier-capture.mjs",
+    "community:migrate": "node scripts/community-migrate.mjs",
+    "test:community-api": "node scripts/test-community-api.mjs",
+    "qa:community-preview": "node scripts/run-community-preview-qa.mjs",
+    "ops:sync-editorial-env": "node scripts/sync-editorial-vercel-env.mjs"
   },
   "dependencies": {
+    "@napi-rs/canvas": "^1.0.10",
+    "@neondatabase/serverless": "^1.2.0",
+    "@vercel/blob": "^2.8.1",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
     "next": "^15.5.4",
+    "pdfjs-dist": "^6.4.299",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "jose": "^6.1.0",
-    "bcryptjs": "^3.0.2",
+    "sharp": "^0.35.5",
     "zod": "^4.1.5"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "^15.5.4",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

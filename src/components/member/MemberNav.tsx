@@ -35,7 +35,7 @@ const links: NavItem[] = [
       "Espaço exclusivo para debater casos, crimes e tudo sobre o universo do true crime",
   },
   { href: "/membro/comunidade/forum", label: "Fórum da comunidade", group: "comunidade" },
-  { href: "/membro/comunidade/sugira", label: "Sugira um caso", group: "comunidade" },
+  { href: "/membro/comunidade/sugira", label: "Sugira um episódio", group: "comunidade" },
   {
     href: "/membro/arquivo",
     label: "Arquivo",
@@ -50,7 +50,13 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function MemberNav({ layout = "sidebar" }: { layout?: "sidebar" | "rail" }) {
+export function MemberNav({
+  layout = "sidebar",
+  showAdmin = false,
+}: {
+  layout?: "sidebar" | "rail";
+  showAdmin?: boolean;
+}) {
   const pathname = usePathname();
   const isSidebar = layout === "sidebar";
 
@@ -63,6 +69,18 @@ export function MemberNav({ layout = "sidebar" }: { layout?: "sidebar" | "rail" 
       }
       aria-label="Área de membros"
     >
+      {showAdmin && (
+        <Link
+          href="/membro/admin"
+          className={
+            isSidebar
+              ? `rounded-md px-3 py-2.5 font-semibold text-cm-red-light ring-1 ring-cm-red/30`
+              : `whitespace-nowrap rounded-full border border-cm-red/40 px-3 py-1.5 text-cm-red-light`
+          }
+        >
+          Administração
+        </Link>
+      )}
       {links.map((link) => {
         const active = isActive(pathname, link.href);
         const label =

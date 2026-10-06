@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { MemberNav } from "@/components/member/MemberNav";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getSession } from "@/lib/auth/session";
+import { isDossierAdmin } from "@/lib/dossier/admin-access";
 import { LogoutButton } from "@/components/member/LogoutButton";
 import { MemberBottomNav } from "@/components/member/MemberBottomNav";
 import { MemberHeaderSearch } from "@/components/member/MemberHeaderSearch";
@@ -55,7 +56,7 @@ export default async function MemberLayout({
               </div>
             </div>
             <div className="lg:hidden">
-              <MemberNav layout="rail" />
+              <MemberNav layout="rail" showAdmin={isDossierAdmin(session)} />
             </div>
           </div>
         </header>
@@ -63,7 +64,7 @@ export default async function MemberLayout({
         <div className="cm-container grid gap-8 px-5 py-8 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12 lg:px-8 lg:py-12">
           <aside className="hidden lg:block">
             <p className="font-display mb-4 text-[10px] tracking-[0.35em] text-cm-gray">Área logada</p>
-            <MemberNav layout="sidebar" />
+            <MemberNav layout="sidebar" showAdmin={isDossierAdmin(session)} />
           </aside>
           <main className="min-w-0 pb-20 lg:pb-0">{children}</main>
         </div>

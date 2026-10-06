@@ -37,3 +37,10 @@ next-env.d.ts
 .vercel
 .env*
 private/data/
+private/dossiers/inbox/
+private/dossiers/processed/
+private/dossiers/jobs.json
+private/qa-credentials.txt
+private/ops/editorial-user-ids.txt
+private/.qa-expr.tmp
+private/.qa-login-one.json
