@@ -348,15 +348,32 @@ export type HtmlFigureCrop = {
   xEnd: number;
   yStart: number;
   yEnd: number;
+  /** Pad with black to at most this width/height ratio (mobile legibility). */
+  padToMaxAspect?: number;
 };
 
 export const BANFIELD_HTML_FIGURE_CROPS: HtmlFigureCrop[] = [
   {
     assetId: "fig-vitimas",
-    xStart: 0.032,
-    xEnd: 0.327,
-    yStart: 0.208,
-    yEnd: 0.336,
+    xStart: 0.03,
+    xEnd: 0.285,
+    yStart: 0.218,
+    yEnd: 0.33,
+  },
+  {
+    assetId: "fig-mapa-main",
+    xStart: 0.02,
+    xEnd: 0.58,
+    yStart: 0.405,
+    yEnd: 0.5,
+    padToMaxAspect: 352 / 180,
+  },
+  {
+    assetId: "fig-mapa-inset",
+    xStart: 0.55,
+    xEnd: 0.985,
+    yStart: 0.36,
+    yEnd: 0.498,
   },
   {
     assetId: "fig-mapa",

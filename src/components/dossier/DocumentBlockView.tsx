@@ -134,6 +134,7 @@ export function DocumentBlockView({ slug, block }: { slug: string; block: Docume
           caption={"caption" in block ? block.caption : undefined}
           credit={block.credit}
           portrait={portrait}
+          showWhen={block.type === "figure" ? block.showWhen : undefined}
         />
       );
     }

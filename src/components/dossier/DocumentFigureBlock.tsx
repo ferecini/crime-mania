@@ -13,6 +13,7 @@ export function DocumentFigureBlock({
   caption,
   credit,
   portrait,
+  showWhen,
 }: {
   slug: string;
   assetId: string;
@@ -20,7 +21,14 @@ export function DocumentFigureBlock({
   caption?: string;
   credit?: string;
   portrait?: boolean;
+  showWhen?: "mobile-only" | "desktop-only";
 }) {
+  const visibility =
+    showWhen === "mobile-only"
+      ? "md:hidden"
+      : showWhen === "desktop-only"
+        ? "hidden md:block"
+        : "";
   const [open, setOpen] = useState(false);
   const close = useCallback(() => setOpen(false), []);
 
@@ -39,7 +47,7 @@ export function DocumentFigureBlock({
 
   return (
     <>
-      <figure className="mx-auto w-full max-w-[75rem]">
+      <figure className={`mx-auto w-full max-w-[75rem] ${visibility}`}>
         <button
           type="button"
           className="block w-full cursor-zoom-in border-0 bg-transparent p-0 text-left"

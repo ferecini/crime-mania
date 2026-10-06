@@ -52,7 +52,27 @@ async function main() {
   for (const crop of BANFIELD_HTML_FIGURE_CROPS) {
     const rect = rectFromCrop(pageWidth, pageHeight, crop);
     const outPath = path.join(outDir, `${crop.assetId}.webp`);
-    const webp = await sharp(pagePng).extract(rect).webp({ quality: 90, effort: 4 }).toBuffer();
+    let pipeline = sharp(pagePng).extract(rect);
+    if (crop.padToMaxAspect) {
+      const extracted = await pipeline.png().toBuffer();
+      const em = await sharp(extracted).metadata();
+      const ew = em.width ?? 1;
+      const eh = em.height ?? 1;
+      const aspect = ew / eh;
+      if (aspect > crop.padToMaxAspect) {
+        const targetH = Math.ceil(ew / crop.padToMaxAspect);
+        const padTop = Math.floor((targetH - eh) / 2);
+        const padBottom = targetH - eh - padTop;
+        pipeline = sharp(extracted).extend({
+          top: padTop,
+          bottom: padBottom,
+          background: { r: 0, g: 0, b: 0 },
+        });
+      } else {
+        pipeline = sharp(extracted);
+      }
+    }
+    const webp = await pipeline.webp({ quality: 90, effort: 4 }).toBuffer();
     fs.writeFileSync(outPath, webp);
     const outMeta = await sharp(webp).metadata();
     const hash = crypto.createHash("sha256").update(webp).digest("hex");
