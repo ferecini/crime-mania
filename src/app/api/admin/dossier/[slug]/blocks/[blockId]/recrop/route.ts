@@ -10,7 +10,9 @@ import { createDossierStorage } from "@/lib/dossier/storage";
 type Params = { params: Promise<{ slug: string; blockId: string }> };
 
 const bodySchema = z.object({
+  sourceX: z.number().int().min(0).optional(),
   sourceY: z.number().int().min(0),
+  sourceWidth: z.number().int().min(1).optional(),
   sourceHeight: z.number().int().min(1),
 });
 
@@ -57,7 +59,13 @@ export async function POST(request: Request, { params }: Params) {
     sourcePagePng: pagePng,
     sourceWidth: manifest.sourceWidth,
     sourceHeight: manifest.sourceHeight,
-    block: { id: block.id, sourceY: parsed.data.sourceY, sourceHeight: parsed.data.sourceHeight },
+    block: {
+      id: block.id,
+      sourceX: parsed.data.sourceX ?? block.sourceX ?? 0,
+      sourceY: parsed.data.sourceY,
+      sourceWidth: parsed.data.sourceWidth ?? block.sourceWidth ?? manifest.sourceWidth ?? 1,
+      sourceHeight: parsed.data.sourceHeight,
+    },
     blockStoragePrefix: blockPrefix,
   });
 

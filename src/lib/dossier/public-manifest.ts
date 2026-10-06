@@ -20,11 +20,13 @@ export function toPublicManifest(manifest: ProcessedDossierManifest): DossierMan
       .map((b) => ({
         id: b.id,
         order: b.order,
+        viewport: b.viewport === "mobile" ? "mobile" : "desktop",
         label: b.label,
         aspectRatio: b.aspectRatio,
         altText: b.altText,
         credit: b.credit,
         decorative: b.decorative,
+        omitUiLabel: b.omitUiLabel,
         widths: sortedWidths.length ? sortedWidths : [640, 960, 1440],
       })),
   };

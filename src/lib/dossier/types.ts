@@ -15,12 +15,17 @@ export type DossierAssetVariant = {
   byteSize?: number;
 };
 
+export type DossierBlockViewport = "mobile" | "desktop";
+
 export type DossierBlock = {
   id: string;
   order: number;
   page: number;
+  viewport: DossierBlockViewport;
   label?: string;
+  sourceX: number;
   sourceY: number;
+  sourceWidth: number;
   sourceHeight: number;
   aspectRatio: number;
   variants: DossierAssetVariant[];
@@ -28,6 +33,7 @@ export type DossierBlock = {
   altText: string;
   credit?: string;
   decorative?: boolean;
+  omitUiLabel?: boolean;
 };
 
 export type ProcessedDossierManifest = {
@@ -53,11 +59,13 @@ export type ProcessedDossierManifest = {
 export type DossierManifestPublicBlock = {
   id: string;
   order: number;
+  viewport: DossierBlockViewport;
   label?: string;
   aspectRatio: number;
   altText: string;
   credit?: string;
   decorative?: boolean;
+  omitUiLabel?: boolean;
   widths: number[];
 };
 

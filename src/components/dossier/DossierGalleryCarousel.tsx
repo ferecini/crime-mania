@@ -94,10 +94,60 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
   const next = items[(index + 1) % items.length];
 
   return (
-    <section className="max-w-full space-y-4 overflow-x-hidden" aria-label="Galeria do caso">
+    <section className="max-w-full space-y-3 overflow-x-hidden md:space-y-4" aria-label="Galeria do caso">
       <h2 className="font-display text-lg text-white">Galeria</h2>
+
+      {/* Mobile: full-width slide, arrows overlaid */}
       <div
-        className="relative flex max-w-full items-center justify-center gap-1 sm:gap-2 md:gap-4"
+        className="relative md:hidden"
+        onTouchStart={(e) => {
+          touchStartX.current = e.changedTouches[0]?.clientX ?? null;
+        }}
+        onTouchEnd={(e) => {
+          const start = touchStartX.current;
+          touchStartX.current = null;
+          if (start == null) return;
+          const end = e.changedTouches[0]?.clientX ?? start;
+          const delta = end - start;
+          if (Math.abs(delta) < 40) return;
+          go(delta > 0 ? -1 : 1);
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setLightbox(true)}
+          className="relative block w-full max-w-[calc(100vw-2rem)] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={imageSrc(slug, current.id)}
+            alt={current.alt}
+            className="mx-auto block h-auto max-h-[min(70vh,520px)] w-full max-w-full object-contain"
+            draggable={false}
+            onError={() => setLoadError("Não foi possível carregar esta imagem.")}
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() => go(-1)}
+          className="absolute left-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/55 text-lg text-white backdrop-blur-sm"
+          aria-label="Imagem anterior"
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          onClick={() => go(1)}
+          className="absolute right-1 top-1/2 flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full border border-white/30 bg-black/55 text-lg text-white backdrop-blur-sm"
+          aria-label="Próxima imagem"
+        >
+          →
+        </button>
+      </div>
+
+      {/* Desktop: main ~80% width, optional neighbor previews */}
+      <div
+        className="relative hidden md:flex md:items-center md:justify-center md:gap-3"
         onTouchStart={(e) => {
           touchStartX.current = e.changedTouches[0]?.clientX ?? null;
         }}
@@ -119,11 +169,11 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
         >
           ←
         </button>
-        <div className="grid min-w-0 flex-1 grid-cols-[minmax(0,0.55fr)_minmax(0,1.45fr)_minmax(0,0.55fr)] items-center gap-1 sm:gap-2">
+        <div className="flex min-w-0 flex-1 items-center justify-center gap-3">
           <button
             type="button"
             onClick={() => go(-1)}
-            className="relative hidden aspect-[4/5] min-w-0 overflow-hidden rounded opacity-60 md:block"
+            className="relative hidden aspect-[4/5] w-[12%] max-w-[7rem] shrink-0 overflow-hidden rounded opacity-50 lg:block"
             aria-hidden
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -132,13 +182,13 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           <button
             type="button"
             onClick={() => setLightbox(true)}
-            className="relative aspect-[4/5] w-full min-w-0 overflow-hidden rounded-[4px] border border-cm-divider"
+            className="relative min-w-0 flex-[1_1_80%] overflow-hidden rounded-[4px] border border-cm-divider bg-black/20"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageSrc(slug, current.id)}
               alt={current.alt}
-              className="h-full w-full object-contain bg-black/20"
+              className="mx-auto block max-h-[70vh] w-full max-w-full object-contain"
               draggable={false}
               onError={() => setLoadError("Não foi possível carregar esta imagem.")}
             />
@@ -146,7 +196,7 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           <button
             type="button"
             onClick={() => go(1)}
-            className="relative hidden aspect-[4/5] min-w-0 overflow-hidden rounded opacity-60 md:block"
+            className="relative hidden aspect-[4/5] w-[12%] max-w-[7rem] shrink-0 overflow-hidden rounded opacity-50 lg:block"
             aria-hidden
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -162,6 +212,7 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           →
         </button>
       </div>
+
       <div className="space-y-1 text-sm">
         {current.isIllustrative && (
           <p className="font-medium text-amber-200/90">{ILLUSTRATIVE_LABEL}</p>
@@ -174,7 +225,7 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
           </p>
         )}
       </div>
-      <div className="flex flex-wrap justify-center gap-2" role="tablist" aria-label="Indicadores da galeria">
+      <div className="flex flex-wrap justify-center gap-2.5" role="tablist" aria-label="Indicadores da galeria">
         {items.map((img, i) => (
           <button
             key={img.id}
@@ -186,9 +237,13 @@ export function DossierGalleryCarousel({ slug }: { slug: string }) {
               setIndex(i);
               setLoadError(null);
             }}
-            className={`flex h-11 min-w-11 items-center justify-center rounded-full px-2 ${i === index ? "bg-cm-red" : "bg-white/10"}`}
+            className="flex h-11 min-w-11 items-center justify-center rounded-full p-0"
           >
-            <span className={`block h-2 w-2 rounded-full ${i === index ? "bg-white" : "bg-white/40"}`} />
+            <span
+              className={`block rounded-full transition-colors ${
+                i === index ? "h-2.5 w-2.5 bg-cm-red" : "h-2 w-2 bg-white/35"
+              }`}
+            />
           </button>
         ))}
       </div>

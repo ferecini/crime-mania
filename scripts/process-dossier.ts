@@ -17,6 +17,7 @@ import {
 } from "../src/lib/dossier/processing-config";
 import type { DossierBlock, ProcessedDossierManifest } from "../src/lib/dossier/types";
 import { writeProcessedManifestFile } from "../src/lib/dossier/manifest-store";
+import { extractCropPng } from "../src/lib/dossier/pipeline/crop-utils";
 
 function parseArgs(): { slug: string; publish: boolean } {
   const slugArg = process.argv.find((a) => a.startsWith("--slug="));
@@ -126,35 +127,38 @@ async function main() {
   const { png, width, height, pageCount, plainText } = await renderPagePng(pdfPath, scale);
   const crops = cropsForSlug(slug);
 
-  const version = 1;
+  const version = 2;
   const storageRoot = path.posix.join("dossiers/processed", slug, `v${version}`);
+  const sourcePageKey = path.posix.join(storageRoot, "source-page.png");
+  fs.mkdirSync(path.dirname(path.join(process.cwd(), "private", sourcePageKey)), {
+    recursive: true });
+  fs.writeFileSync(path.join(process.cwd(), "private", sourcePageKey), png);
+
   const blocks: DossierBlock[] = [];
 
-  for (let i = 0; i < crops.length; i++) {
-    const crop = crops[i];
-    const y0 = Math.min(height - 1, Math.max(0, Math.floor(crop.yStart * height)));
-    const y1 = Math.min(height, Math.max(y0 + 1, Math.ceil(crop.yEnd * height)));
-    const cropH = Math.floor(y1 - y0);
-    const cropBuffer = await sharp(png)
-      .extract({ left: 0, top: y0, width, height: cropH })
-      .png()
-      .toBuffer();
-
+  for (const crop of crops) {
+    const extracted = await extractCropPng(png, width, height, crop);
     const blockPrefix = path.posix.join(storageRoot, "blocks", crop.id);
-    const variants = await writeVariants(cropBuffer, blockPrefix);
+    const variants = await writeVariants(extracted.cropBuffer, blockPrefix);
     blocks.push({
       id: crop.id,
-      order: i + 1,
+      order: crop.order,
       page: 1,
+      viewport: crop.viewport,
       label: crop.label,
-      sourceY: y0,
-      sourceHeight: cropH,
-      aspectRatio: width / cropH,
+      sourceX: extracted.sourceX,
+      sourceY: extracted.sourceY,
+      sourceWidth: extracted.sourceWidth,
+      sourceHeight: extracted.sourceHeight,
+      aspectRatio: extracted.aspectRatio,
       variants,
       altText: crop.altText,
+      omitUiLabel: crop.omitUiLabel,
       extractedText: undefined,
     });
-    console.log(`[dossier] bloco ${crop.id} ${width}x${cropH}px`);
+    console.log(
+      `[dossier] ${crop.viewport} bloco ${crop.id} ${extracted.sourceWidth}x${extracted.sourceHeight}px ar=${extracted.aspectRatio.toFixed(2)}`,
+    );
   }
 
   const manifest: ProcessedDossierManifest = {
@@ -172,11 +176,16 @@ async function main() {
     renderScale: scale,
     sourceWidth: width,
     sourceHeight: height,
+    sourcePageStorageKey: sourcePageKey,
   };
 
   writeProcessedManifestFile(slug, manifest);
+  const mobileCount = blocks.filter((b) => b.viewport === "mobile").length;
+  const desktopCount = blocks.filter((b) => b.viewport === "desktop").length;
   const totalBytes = blocks.flatMap((b) => b.variants).reduce((s, v) => s + (v.byteSize ?? 0), 0);
-  console.log(`[dossier] manifesto ${manifest.status} — ${blocks.length} blocos, ~${Math.round(totalBytes / 1024)} KiB variantes`);
+  console.log(
+    `[dossier] manifesto ${manifest.status} — mobile=${mobileCount} desktop=${desktopCount} blocos, ~${Math.round(totalBytes / 1024)} KiB variantes`,
+  );
 }
 
 main().catch((err) => {

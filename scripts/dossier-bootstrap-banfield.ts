@@ -87,7 +87,7 @@ async function main() {
   let manifest = readLocalManifest();
   const storage = await createDossierStorage();
 
-  const pdfPath = path.join(process.cwd(), "private", "dossiers", "familia-banfield.pdf");
+  const pdfPath = path.join(process.cwd(), "private", "dossiers", "Dossie_Banfield.pdf");
   if (fs.existsSync(pdfPath)) {
     const pdf = fs.readFileSync(pdfPath);
     const key = `dossiers/inbox/${slug}-bootstrap.pdf`;
@@ -102,6 +102,13 @@ async function main() {
       const buf = fs.readFileSync(local);
       const ct = v.format === "webp" ? "image/webp" : "image/avif";
       await storage.put(v.storageKey, buf, ct);
+    }
+  }
+
+  if (manifest.sourcePageStorageKey) {
+    const localPage = path.join(process.cwd(), "private", manifest.sourcePageStorageKey);
+    if (fs.existsSync(localPage)) {
+      await storage.put(manifest.sourcePageStorageKey, fs.readFileSync(localPage), "image/png");
     }
   }
 

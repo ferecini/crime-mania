@@ -27,11 +27,20 @@ function testAccessTiers() {
 async function testManifestOrder() {
   const manifest = await readProcessedManifest("familia-banfield");
   assert.ok(manifest, "manifest Banfield deve existir após dossier:process ou bootstrap");
-  const orders = manifest.blocks.map((b) => b.order);
-  assert.deepEqual(orders, [...orders].sort((a, b) => a - b));
+  for (const viewport of ["mobile", "desktop"] as const) {
+    const subset = manifest.blocks
+      .filter((b) => (b.viewport === "mobile" ? "mobile" : "desktop") === viewport)
+      .slice()
+      .sort((a, b) => a.order - b.order);
+    assert.ok(subset.length >= 1, `blocos ${viewport}`);
+    const orders = subset.map((b) => b.order);
+    assert.deepEqual(orders, [...orders].sort((a, b) => a - b));
+  }
   const pub = toPublicManifest(manifest);
   assert.ok(!JSON.stringify(pub).includes("storageKey"));
   assert.ok(!JSON.stringify(pub).includes("passwordHash"));
+  assert.ok(pub.blocks.some((b) => b.viewport === "mobile"));
+  assert.ok(pub.blocks.some((b) => b.viewport === "desktop"));
 }
 
 function testPickWidth() {

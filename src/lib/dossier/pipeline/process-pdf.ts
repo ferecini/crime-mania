@@ -11,6 +11,7 @@ import {
 import type { DossierBlock, ProcessedDossierManifest } from "@/lib/dossier/types";
 import type { DossierStorage } from "@/lib/dossier/storage";
 import { validatePdfWithPdfJs } from "@/lib/dossier/validate-pdf";
+import { extractCropPng } from "@/lib/dossier/pipeline/crop-utils";
 
 function cropsForSlug(slug: string): EditorialCrop[] {
   if (slug === "familia-banfield") return BANFIELD_EDITORIAL_CROPS;
@@ -102,28 +103,24 @@ export async function processPdfToManifest(input: {
   await input.storage.put(sourcePageKey, png, "image/png");
   const blocks: DossierBlock[] = [];
 
-  for (let i = 0; i < crops.length; i++) {
-    const crop = crops[i];
-    const y0 = Math.min(height - 1, Math.max(0, Math.floor(crop.yStart * height)));
-    const y1 = Math.min(height, Math.max(y0 + 1, Math.ceil(crop.yEnd * height)));
-    const cropH = Math.floor(y1 - y0);
-    const cropBuffer = await sharp(png)
-      .extract({ left: 0, top: y0, width, height: cropH })
-      .png()
-      .toBuffer();
-
+  for (const crop of crops) {
+    const extracted = await extractCropPng(png, width, height, crop);
     const blockPrefix = `${storageRoot}/blocks/${crop.id}`;
-    const variants = await writeVariants(input.storage, cropBuffer, blockPrefix);
+    const variants = await writeVariants(input.storage, extracted.cropBuffer, blockPrefix);
     blocks.push({
       id: crop.id,
-      order: i + 1,
+      order: crop.order,
       page: 1,
+      viewport: crop.viewport,
       label: crop.label,
-      sourceY: y0,
-      sourceHeight: cropH,
-      aspectRatio: width / cropH,
+      sourceX: extracted.sourceX,
+      sourceY: extracted.sourceY,
+      sourceWidth: extracted.sourceWidth,
+      sourceHeight: extracted.sourceHeight,
+      aspectRatio: extracted.aspectRatio,
       variants,
       altText: crop.altText,
+      omitUiLabel: crop.omitUiLabel,
     });
   }
 

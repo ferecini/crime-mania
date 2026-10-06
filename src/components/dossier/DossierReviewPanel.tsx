@@ -195,7 +195,12 @@ export function DossierReviewPanel({ slug, title }: { slug: string; title: strin
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ sourceY: block.sourceY, sourceHeight: block.sourceHeight }),
+          body: JSON.stringify({
+            sourceX: block.sourceX ?? 0,
+            sourceY: block.sourceY,
+            sourceWidth: block.sourceWidth ?? manifest.sourceWidth ?? 1,
+            sourceHeight: block.sourceHeight,
+          }),
         },
       );
       const data = await res.json();
