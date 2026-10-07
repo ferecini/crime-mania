@@ -101,6 +101,7 @@ export function MemberHeaderSearch({
             />
             <button
               type="submit"
+              aria-label="Executar busca"
               className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-[4px] bg-cm-red px-4 text-sm font-semibold text-white hover:bg-cm-red-light focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
             >
               Buscar
