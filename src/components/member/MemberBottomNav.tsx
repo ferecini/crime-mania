@@ -27,13 +27,11 @@ export function MemberBottomNav() {
             <li key={item.href}>
               <Link
                 href={item.href}
-                className={`flex min-h-14 flex-col items-center justify-center gap-0.5 text-[10px] font-medium ${
+                className={`flex min-h-[3.25rem] min-w-0 flex-col items-center justify-center gap-0.5 px-0.5 text-[10px] font-medium leading-tight ${
                   active ? "text-cm-red-light" : "text-cm-gray"
                 }`}
               >
-                <span className="sr-only">{item.label}</span>
-                <span aria-hidden>{item.label.slice(0, 1)}</span>
-                <span>{item.label}</span>
+                <span className="max-w-full truncate text-center">{item.label}</span>
               </Link>
             </li>
           );

@@ -4,28 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { ButtonLink } from "@/components/ui/Button";
+import { MemberHeaderSearch } from "@/components/member/MemberHeaderSearch";
+import { LogoutButton } from "@/components/member/LogoutButton";
 import { PUBLIC_SITE_NAV } from "@/lib/site-nav";
 
-export type PublicMemberSession = {
-  displayName: string;
-  email: string;
-};
-
-export function SiteHeader({ memberSession = null }: { memberSession?: PublicMemberSession | null }) {
+export function MemberAreaHeader({ displayName }: { displayName: string }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const firstLinkRef = useRef<HTMLAnchorElement>(null);
-  const onHome = pathname === "/";
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -46,20 +33,15 @@ export function SiteHeader({ memberSession = null }: { memberSession?: PublicMem
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const headerBg =
-    open || scrolled || !onHome
-      ? "border-b border-cm-divider bg-black/92 backdrop-blur-md"
-      : "bg-transparent";
-
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-[background,border] duration-300 ${headerBg}`}>
-      <div className="cm-container flex h-[3.75rem] items-center gap-4 md:h-[4.25rem] md:gap-6">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-cm-divider bg-black/92 backdrop-blur-md">
+      <div className="cm-container flex h-[3.75rem] items-center gap-3 md:h-[4.25rem] md:gap-6">
         <button
           ref={menuButtonRef}
           type="button"
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[4px] border border-cm-divider text-white md:hidden"
           aria-expanded={open}
-          aria-controls="mobile-menu"
+          aria-controls="member-mobile-menu"
           onClick={() => setOpen((v) => !v)}
         >
           <span className="sr-only">{open ? "Fechar menu" : "Abrir menu"}</span>
@@ -71,7 +53,7 @@ export function SiteHeader({ memberSession = null }: { memberSession?: PublicMem
         </button>
 
         <Link
-          href="/#top"
+          href="/"
           className="relative h-[34px] w-[5.25rem] shrink-0 opacity-95 hover:opacity-100 md:h-11 md:w-[6.5rem]"
         >
           <Image
@@ -83,12 +65,15 @@ export function SiteHeader({ memberSession = null }: { memberSession?: PublicMem
           />
         </Link>
 
-        <nav className="hidden min-w-0 flex-1 items-center gap-6 md:flex lg:gap-8 xl:gap-10" aria-label="Principal">
+        <nav
+          className="hidden min-w-0 flex-1 items-center gap-4 md:flex lg:gap-8 xl:gap-10"
+          aria-label="Principal"
+        >
           {PUBLIC_SITE_NAV.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="cm-nav-link"
+              className="cm-nav-link whitespace-nowrap"
               data-active={item.match(pathname) ? "true" : undefined}
             >
               {item.label}
@@ -96,34 +81,29 @@ export function SiteHeader({ memberSession = null }: { memberSession?: PublicMem
           ))}
         </nav>
 
-        <div className="ml-auto hidden items-center gap-5 md:flex md:gap-6">
-          {memberSession ? (
-            <>
-              <span className="max-w-[12rem] truncate text-sm text-cm-gray">
-                Olá, <span className="font-medium text-white">{memberSession.displayName}</span>
-              </span>
-              <ButtonLink href="/membro" className="min-h-11 min-w-[7.5rem]">
-                Minha área
-              </ButtonLink>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/entrar"
-                className="cm-text-link inline-flex min-h-11 items-center text-base font-semibold text-cm-gray hover:text-white"
-              >
-                Entrar
-              </Link>
-              <ButtonLink href="/planos" className="min-h-11 min-w-[7.5rem]">
-                Faça parte
-              </ButtonLink>
-            </>
-          )}
+        <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3 md:gap-4 lg:gap-5">
+          <MemberHeaderSearch headerOffsetClass="top-[3.75rem] md:top-[4.25rem]" />
+          <Link
+            href="/membro/conta"
+            className="cm-text-link hidden max-w-[10rem] truncate text-sm text-cm-gray hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 sm:inline sm:max-w-[12rem] md:max-w-[14rem]"
+          >
+            Olá, <span className="font-medium text-white">{displayName}</span>
+          </Link>
+          <Link
+            href="/membro/conta"
+            className="cm-text-link inline-flex min-h-11 min-w-11 items-center justify-center rounded-[4px] border border-transparent px-2 text-sm font-semibold text-cm-gray hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 sm:hidden"
+          >
+            <span className="sr-only">Minha conta — {displayName}</span>
+            <span aria-hidden className="font-medium text-white">
+              Conta
+            </span>
+          </Link>
+          <LogoutButton className="inline-flex min-h-11 items-center px-1 text-sm font-semibold text-cm-gray hover:text-white" />
         </div>
       </div>
 
       <div
-        id="mobile-menu"
+        id="member-mobile-menu"
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
@@ -146,24 +126,6 @@ export function SiteHeader({ memberSession = null }: { memberSession?: PublicMem
               {item.label}
             </Link>
           ))}
-          {memberSession ? (
-            <ButtonLink href="/membro" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
-              Minha área
-            </ButtonLink>
-          ) : (
-            <>
-              <ButtonLink href="/planos" className="mt-6 min-h-11 w-full text-center" onClick={() => setOpen(false)}>
-                Faça parte
-              </ButtonLink>
-              <Link
-                href="/entrar"
-                onClick={() => setOpen(false)}
-                className="cm-text-link mt-4 inline-flex min-h-12 items-center justify-center text-sm font-semibold"
-              >
-                Entrar →
-              </Link>
-            </>
-          )}
         </nav>
       </div>
     </header>
