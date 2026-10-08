@@ -93,10 +93,15 @@ export async function getSession(): Promise<SessionUser | null> {
   const stored = getEffectiveUserById(user.id, user);
   if (stored) {
     const fresh = sessionPayloadFromUser(stored);
+    let tier = fresh.tier;
+    if (!stored.isTestUser) {
+      const { getBillingEffectiveTier } = await import("@/lib/billing/tier-sync");
+      tier = await getBillingEffectiveTier(user.id, false);
+    }
     return {
       ...user,
       displayName: fresh.displayName,
-      tier: fresh.tier,
+      tier,
       needsPreferredName: fresh.needsPreferredName,
       needsPreferredNameConfirm: fresh.needsPreferredNameConfirm,
       preferredName: stored.preferredName,

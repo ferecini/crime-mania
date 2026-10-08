@@ -3,7 +3,7 @@ import { z } from "zod";
 
 const schema = z.object({
   email: z.string().email(),
-  planId: z.enum(["tier1-monthly", "tier2-monthly", "tier2-annual"]),
+  planId: z.enum(["tier1-monthly", "tier2-monthly", "tier1-yearly", "tier2-yearly"]),
 });
 
 /** Registro simples em log até integração CRM/e-mail — não expor dados na UI. */

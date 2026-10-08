@@ -8,7 +8,7 @@ import { PLANS } from "@/lib/plans";
 import { COOKIE_NAME, createSessionToken } from "@/lib/auth/session";
 
 const schema = z.object({
-  planId: z.enum(["tier1-monthly", "tier2-monthly", "tier2-annual"]),
+  planId: z.enum(["tier1-monthly", "tier2-monthly", "tier1-yearly", "tier2-yearly"]),
 });
 
 /** Simula confirmação de pagamento — integrar gateway antes do go-live. */

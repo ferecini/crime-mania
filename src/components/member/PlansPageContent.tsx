@@ -14,7 +14,7 @@ export function PlansPageContent({ session }: Props) {
       <SectionHeader
         kicker="Assinatura"
         title="Planos e benefícios"
-        description="Tier 1 — Acesso básico (mensal), Tier 2 — Acesso premium (mensal) e Tier 2 — Acesso total (anual), com os mesmos direitos premium no Tier 2 mensal e anual."
+        description="Tier 1 e Tier 2 em mensal ou anual. Cobrança imediata, sem trial — acesso liberado após confirmação do pagamento. Tier 2 anual: lançamento R$ 159/ano (de R$ 348)."
       />
       {session && session.tier !== "none" && (
         <p className="cm-panel px-4 py-3 text-sm text-white">

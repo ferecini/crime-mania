@@ -1,6 +1,10 @@
 export type SubscriptionTier = "none" | "tier1" | "tier2";
 
-export type PlanId = "tier1-monthly" | "tier2-monthly" | "tier2-annual";
+export type PlanId =
+  | "tier1-monthly"
+  | "tier2-monthly"
+  | "tier1-yearly"
+  | "tier2-yearly";
 
 export interface Plan {
   id: PlanId;
@@ -16,38 +20,53 @@ export interface Plan {
   recommendedReason?: string;
 }
 
+function formatBrl(cents: number): string {
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 export const PLANS: Plan[] = [
   {
     id: "tier1-monthly",
     name: "Tier 1 — Acesso básico",
     tier: "tier1",
     billing: "monthly",
-    priceLabel: "Lançamento em breve",
-    priceNote: "Cobrança mensal · renovação automática",
-    billingDetail: "Você será avisado por e-mail quando a assinatura Tier 1 abrir.",
-    cancelPolicy: "Cancelamento a qualquer momento, conforme termos publicados no lançamento.",
+    priceLabel: formatBrl(900),
+    priceNote: "Cobrança mensal · renovação automática · sem trial",
+    billingDetail: "Acesso liberado após confirmação do pagamento.",
+    cancelPolicy: "Cancele quando quiser — sem multa; acesso até o fim do ciclo pago.",
   },
   {
     id: "tier2-monthly",
     name: "Tier 2 — Acesso premium",
     tier: "tier2",
     billing: "monthly",
-    priceLabel: "Lançamento em breve",
+    priceLabel: formatBrl(2900),
     priceNote: "Cobrança mensal · acesso premium completo",
     billingDetail: "Inclui Arquivo, Juris, exclusivos e comunidade avançada.",
-    cancelPolicy: "Cancelamento a qualquer momento, conforme termos publicados no lançamento.",
+    cancelPolicy: "Cancele quando quiser — sem multa; acesso até o fim do ciclo pago.",
     highlight: true,
     recommendedReason: "Melhor para quem quer Arquivo, Juris e conteúdo exclusivo.",
   },
   {
-    id: "tier2-annual",
+    id: "tier1-yearly",
+    name: "Tier 1 — Anual",
+    tier: "tier1",
+    billing: "annual",
+    priceLabel: formatBrl(9900),
+    priceNote: "Cobrança anual · equivalente a economia vs 12× mensal",
+    billingDetail: "Mesmos benefícios Tier 1 · ciclo de 12 meses.",
+    cancelPolicy: "Cancele quando quiser — sem multa; acesso até o fim do período anual pago.",
+  },
+  {
+    id: "tier2-yearly",
     name: "Tier 2 — Acesso total",
     tier: "tier2",
     billing: "annual",
-    priceLabel: "Lançamento em breve",
-    priceNote: "Mesmos benefícios do Tier 2 · ciclo anual",
-    billingDetail: "Cobrança anual — valores serão publicados no anúncio oficial.",
-    cancelPolicy: "Renovação anual com aviso prévio conforme termos do lançamento.",
+    priceLabel: formatBrl(15900),
+    priceNote: "Lançamento: de R$ 348/ano por R$ 159 — economize R$ 189",
+    billingDetail:
+      "R$ 159 renovam enquanto a assinatura estiver ativa. Novo cadastro após cancelamento usa o preço vigente do catálogo.",
+    cancelPolicy: "Cancele quando quiser — sem multa; acesso até o fim do período anual pago.",
   },
 ];
 
@@ -234,9 +253,14 @@ export const PLAN_HIGHLIGHTS: Record<PlanId, string[]> = {
     "Sugira um caso e acesso antecipado",
     "Crime Mania Juris",
   ],
-  "tier2-annual": [
+  "tier1-yearly": [
+    "Mesmos benefícios Tier 1 mensal",
+    "Cobrança anual",
+    "Dossiê, fórum e shop com benefício",
+  ],
+  "tier2-yearly": [
     "Mesmos direitos do Tier 2 mensal",
-    "Cobrança anual — Acesso total",
+    "Preço de lançamento anual",
     "Conteúdos exclusivos, fórum e shop com benefício",
   ],
 };
