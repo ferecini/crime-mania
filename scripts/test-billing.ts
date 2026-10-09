@@ -167,9 +167,14 @@ function securityGates() {
 
   console.log("QA billing test gate…");
   const prevQaMode = process.env.BILLING_QA_TEST_MODE;
+  const prevTestUsers = process.env.ALLOW_TEST_USERS;
+  process.env.ALLOW_TEST_USERS = "false";
   process.env.BILLING_QA_TEST_MODE = "false";
   assert.equal(billingQaTestModeEnabled(), false);
   process.env.BILLING_QA_TEST_MODE = "true";
+  assert.equal(billingQaTestModeEnabled(), true);
+  process.env.BILLING_QA_TEST_MODE = "false";
+  process.env.ALLOW_TEST_USERS = "true";
   assert.equal(billingQaTestModeEnabled(), true);
   assert.equal(canUseBillingQaTest({ userId: QA_USER_IDS.free, isTestUser: true }), true);
   assert.equal(canUseBillingQaTest({ userId: QA_USER_IDS.free, isTestUser: false }), false);
@@ -178,6 +183,7 @@ function securityGates() {
   assert.equal(qaResult.priceCents, 15900);
   assert.equal(qaResult.simulated, true);
   process.env.BILLING_QA_TEST_MODE = prevQaMode;
+  process.env.ALLOW_TEST_USERS = prevTestUsers;
 
   console.log("same-origin helper…");
   assert.equal(

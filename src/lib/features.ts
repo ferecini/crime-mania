@@ -16,7 +16,10 @@ export function billingCheckoutEnabled(): boolean {
 
 /** Ensaio sem cobrança, visível somente para as contas fixas de QA. */
 export function billingQaTestModeEnabled(): boolean {
-  return process.env.BILLING_QA_TEST_MODE === "true";
+  return (
+    process.env.BILLING_QA_TEST_MODE === "true" ||
+    process.env.ALLOW_TEST_USERS === "true"
+  );
 }
 
 /** @deprecated Prefer billingCheckoutEnabled() no servidor ou prop checkoutEnabled no client. */
