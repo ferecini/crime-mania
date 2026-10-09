@@ -3,6 +3,7 @@ import { PlansTable } from "@/components/member/PlansTable";
 import { SubscribeButtons } from "@/components/member/SubscribeButtons";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import type { SessionUser } from "@/lib/auth/session";
+import { billingCheckoutEnabled } from "@/lib/features";
 
 type Props = {
   session?: SessionUser | null;
@@ -24,7 +25,7 @@ export function PlansPageContent({ session }: Props) {
           </strong>
         </p>
       )}
-      <SubscribeButtons />
+      <SubscribeButtons checkoutEnabled={billingCheckoutEnabled()} />
       <PlansComparisonMobile />
       <PlansTable />
     </div>

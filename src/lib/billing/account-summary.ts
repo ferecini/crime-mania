@@ -1,4 +1,5 @@
-import { COMMERCIAL_PLANS, isServerBillingEnabled } from "@/lib/billing/config";
+import { COMMERCIAL_PLANS } from "@/lib/billing/config";
+import { billingCheckoutEnabled } from "@/lib/features";
 import { getLatestSubscriptionForUser } from "@/lib/billing/db";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
 import type { SessionUser } from "@/lib/auth/session";
@@ -8,7 +9,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
     return {
       qa: true as const,
       message: "Conta de QA — tier gerenciado pelo seed, sem cobrança.",
-      billingEnabled: isServerBillingEnabled(),
+      billingEnabled: billingCheckoutEnabled(),
       subscription: null,
     };
   }
@@ -21,7 +22,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
     if (!sub) {
       return {
         qa: false as const,
-        billingEnabled: isServerBillingEnabled(),
+        billingEnabled: billingCheckoutEnabled(),
         subscription: null,
         paymentMethodUpdate,
       };
@@ -30,7 +31,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
     const plan = COMMERCIAL_PLANS[sub.plan_id];
     return {
       qa: false as const,
-      billingEnabled: isServerBillingEnabled(),
+      billingEnabled: billingCheckoutEnabled(),
       paymentMethodUpdate,
       subscription: {
         planId: sub.plan_id,
@@ -55,7 +56,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
   } catch {
     return {
       qa: false as const,
-      billingEnabled: isServerBillingEnabled(),
+      billingEnabled: billingCheckoutEnabled(),
       subscription: null,
       dbUnavailable: true as const,
     };

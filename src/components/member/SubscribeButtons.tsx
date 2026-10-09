@@ -4,10 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PLANS, PLAN_HIGHLIGHTS, type PlanId } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
-import { billingEnabled } from "@/lib/features";
 import { WaitlistForm } from "@/components/member/WaitlistForm";
 
-export function SubscribeButtons() {
+export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
   const router = useRouter();
   const [loading, setLoading] = useState<PlanId | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
@@ -70,7 +69,7 @@ export function SubscribeButtons() {
                 </li>
               ))}
             </ul>
-            {billingEnabled ? (
+            {checkoutEnabled ? (
               <Button
                 className="mt-5 w-full"
                 variant={plan.highlight ? "primary" : "secondary"}

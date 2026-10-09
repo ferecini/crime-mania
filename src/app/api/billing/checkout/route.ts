@@ -3,13 +3,24 @@ import { z } from "zod";
 import { getSession, createSessionToken, COOKIE_NAME } from "@/lib/auth/session";
 import { startBillingCheckout } from "@/lib/billing/checkout-service";
 import { isCommercialPlanId } from "@/lib/billing/config";
-import { billingEnabled } from "@/lib/features";
+import { billingCheckoutEnabled } from "@/lib/features";
+import { assertSameOrigin } from "@/lib/http/same-origin";
 
 const schema = z.object({
   planId: z.string(),
 });
 
 export async function POST(request: Request) {
+  if (!assertSameOrigin(request)) {
+    return NextResponse.json({ error: "Origem não permitida." }, { status: 403 });
+  }
+  if (!billingCheckoutEnabled()) {
+    return NextResponse.json(
+      { error: "Checkout indisponível. Cobrança ainda não está ativa neste ambiente." },
+      { status: 403 },
+    );
+  }
+
   const session = await getSession();
   if (!session) {
     return NextResponse.json({ error: "Autenticação necessária." }, { status: 401 });
@@ -37,13 +48,9 @@ export async function POST(request: Request) {
 
     const response = NextResponse.json({
       ok: true,
-      billingUiEnabled: billingEnabled,
+      billingUiEnabled: billingCheckoutEnabled(),
       ...checkout,
     });
-
-    if (!billingEnabled) {
-      return response;
-    }
 
     const token = await createSessionToken(session);
     response.cookies.set(COOKIE_NAME, token, {
