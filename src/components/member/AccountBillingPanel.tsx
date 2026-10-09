@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { billingEnabled } from "@/lib/features";
 
 type SubscriptionView = {
   planId: string;
@@ -90,7 +89,7 @@ export function AccountBillingPanel({ initial }: Props) {
       <div className="cm-panel space-y-2 p-4 text-sm text-cm-gray">
         <p>Nenhuma assinatura paga vinculada.</p>
         <p>
-          {billingEnabled
+          {initial.billingEnabled
             ? "Escolha um plano em Planos para iniciar o checkout."
             : "Checkout em modo seguro — lista de espera ativa até o lançamento oficial."}
         </p>
@@ -128,7 +127,7 @@ export function AccountBillingPanel({ initial }: Props) {
       {initial.paymentMethodUpdate?.message && (
         <p className="text-xs text-cm-gray">{initial.paymentMethodUpdate.message}</p>
       )}
-      {sub.status === "active" && !sub.cancelAtPeriodEnd && billingEnabled && (
+      {sub.status === "active" && !sub.cancelAtPeriodEnd && initial.billingEnabled && (
         <Button variant="secondary" disabled={loading} onClick={cancelSubscription}>
           {loading ? "Processando…" : "Cancelar assinatura"}
         </Button>

@@ -1,6 +1,6 @@
 # Asaas — assinaturas Crime Mania
 
-Integração de assinatura recorrente via Asaas. **Produção permanece desligada** até `BILLING_ENABLED=true` e `NEXT_PUBLIC_BILLING_ENABLED=true` no deploy alvo.
+Integração de assinatura recorrente via Asaas. **Checkout e provider real só funcionam com os dois flags** `BILLING_ENABLED=true` **e** `NEXT_PUBLIC_BILLING_ENABLED=true` no mesmo deploy. Se apenas o flag público estiver true, a UI não exibe checkout e as APIs `POST /api/billing/checkout|cancel` respondem 403 (evita provider fake em produção).
 
 ## Variáveis (Vercel / local)
 

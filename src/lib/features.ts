@@ -1,11 +1,21 @@
-/** UI — checkout real visível apenas quando espelhar BILLING_ENABLED no deploy. */
-export const billingEnabled =
-  process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
-
 /** Servidor — cobrança e webhooks Asaas. */
 export function serverBillingEnabled(): boolean {
   return process.env.BILLING_ENABLED === "true";
 }
+
+/**
+ * Checkout real (UI + API) só quando ambos os flags estiverem true no deploy.
+ * Evita NEXT_PUBLIC_BILLING_ENABLED=true sozinho acionar fluxo fake em produção.
+ */
+export function billingCheckoutEnabled(): boolean {
+  return (
+    serverBillingEnabled() &&
+    process.env.NEXT_PUBLIC_BILLING_ENABLED === "true"
+  );
+}
+
+/** @deprecated Prefer billingCheckoutEnabled() no servidor ou prop checkoutEnabled no client. */
+export const billingEnabled = process.env.NEXT_PUBLIC_BILLING_ENABLED === "true";
 
 /**
  * Exibe o botão Google na UI quando o Client ID público estiver definido

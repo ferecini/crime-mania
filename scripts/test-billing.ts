@@ -18,6 +18,8 @@ import {
   parseAsaasWebhookBody,
 } from "../src/lib/billing/webhook-service";
 import type { BillingSubscriptionRow } from "../src/lib/billing/types";
+import { billingCheckoutEnabled } from "../src/lib/features";
+import { assertSameOrigin } from "../src/lib/http/same-origin";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
   return {
@@ -144,7 +146,45 @@ async function integration() {
   console.log("integration idempotency OK");
 }
 
+function securityGates() {
+  console.log("billingCheckoutEnabled gate…");
+  const prevServer = process.env.BILLING_ENABLED;
+  const prevPublic = process.env.NEXT_PUBLIC_BILLING_ENABLED;
+  process.env.BILLING_ENABLED = "false";
+  process.env.NEXT_PUBLIC_BILLING_ENABLED = "true";
+  assert.equal(billingCheckoutEnabled(), false);
+  process.env.BILLING_ENABLED = "true";
+  process.env.NEXT_PUBLIC_BILLING_ENABLED = "false";
+  assert.equal(billingCheckoutEnabled(), false);
+  process.env.BILLING_ENABLED = "true";
+  process.env.NEXT_PUBLIC_BILLING_ENABLED = "true";
+  assert.equal(billingCheckoutEnabled(), true);
+  process.env.BILLING_ENABLED = prevServer;
+  process.env.NEXT_PUBLIC_BILLING_ENABLED = prevPublic;
+
+  console.log("same-origin helper…");
+  assert.equal(
+    assertSameOrigin(
+      new Request("https://crime-mania.vercel.app/api/billing/checkout", {
+        method: "POST",
+        headers: { origin: "https://crime-mania.vercel.app" },
+      }),
+    ),
+    true,
+  );
+  assert.equal(
+    assertSameOrigin(
+      new Request("https://crime-mania.vercel.app/api/billing/checkout", {
+        method: "POST",
+        headers: { origin: "https://evil.example" },
+      }),
+    ),
+    false,
+  );
+}
+
 async function main() {
+  securityGates();
   await integration();
   console.log("test-billing: all passed");
 }

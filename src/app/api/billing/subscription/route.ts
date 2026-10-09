@@ -4,7 +4,7 @@ import { COMMERCIAL_PLANS } from "@/lib/billing/config";
 import { getLatestSubscriptionForUser } from "@/lib/billing/db";
 import { resolveTierFromSubscription } from "@/lib/billing/state";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
-import { isServerBillingEnabled } from "@/lib/billing/config";
+import { billingCheckoutEnabled } from "@/lib/features";
 
 export async function GET() {
   const session = await getSession();
@@ -52,14 +52,14 @@ export async function GET() {
         nextDue: sub.current_period_end,
       },
       access,
-      billingEnabled: isServerBillingEnabled(),
+      billingEnabled: billingCheckoutEnabled(),
       paymentMethodUpdate: paymentMethod,
     });
   } catch {
     return NextResponse.json({
       subscription: null,
       tier: session.tier,
-      billingEnabled: isServerBillingEnabled(),
+      billingEnabled: billingCheckoutEnabled(),
       dbUnavailable: true,
     });
   }
