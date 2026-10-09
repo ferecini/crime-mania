@@ -15,7 +15,7 @@ Integração de assinatura recorrente via Asaas. **Checkout e provider real só 
 | `APP_BASE_URL` | Server | Ex.: `https://crime-mania.vercel.app` |
 | `POSTGRES_URL` | Server | Neon — tabelas `billing_*` |
 
-Contas QA: **nunca** passam pelo checkout; tier via seed / `ALLOW_PLAN_SIMULATION` + `/api/subscribe`.
+Contas QA: **nunca** passam pelo checkout real. Com `BILLING_QA_TEST_MODE=true`, os IDs fixos de QA podem ensaiar plano e valor em Minha conta; o teste não chama o Asaas, não grava assinatura e não altera permissões.
 
 ## Migração
 

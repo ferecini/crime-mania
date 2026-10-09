@@ -1,5 +1,5 @@
 import { COMMERCIAL_PLANS } from "@/lib/billing/config";
-import { billingCheckoutEnabled } from "@/lib/features";
+import { billingCheckoutEnabled, billingQaTestModeEnabled } from "@/lib/features";
 import { getLatestSubscriptionForUser } from "@/lib/billing/db";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
 import type { SessionUser } from "@/lib/auth/session";
@@ -10,6 +10,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
       qa: true as const,
       message: "Conta de QA — tier gerenciado pelo seed, sem cobrança.",
       billingEnabled: billingCheckoutEnabled(),
+      qaTestEnabled: billingQaTestModeEnabled(),
       subscription: null,
     };
   }
