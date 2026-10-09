@@ -18,6 +18,7 @@ type Props = {
   initial: {
     subscription: SubscriptionView | null;
     qa?: boolean;
+    qaTestEnabled?: boolean;
     message?: string;
     billingEnabled: boolean;
     paymentMethodUpdate?: { message: string };
@@ -50,9 +51,7 @@ export function AccountBillingPanel({ initial }: Props) {
 
   if (initial.qa) {
     return (
-      <p className="text-sm text-cm-gray">
-        {initial.message ?? "Conta de QA — sem cobrança real."}
-      </p>
+      <QaBillingTest enabled={Boolean(initial.qaTestEnabled)} message={initial.message} />
     );
   }
 
@@ -142,6 +141,73 @@ export function AccountBillingPanel({ initial }: Props) {
           {feedback}
         </p>
       )}
+    </div>
+  );
+}
+
+const QA_PLANS = [
+  ["tier1-monthly", "Tier 1 mensal — R$ 9"],
+  ["tier2-monthly", "Tier 2 mensal — R$ 29"],
+  ["tier1-yearly", "Tier 1 anual — R$ 99"],
+  ["tier2-yearly", "Tier 2 anual — R$ 159"],
+] as const;
+
+function QaBillingTest({ enabled, message }: { enabled: boolean; message?: string }) {
+  const [planId, setPlanId] = useState<string>("tier1-monthly");
+  const [result, setResult] = useState<string | null>(null);
+  const [testing, setTesting] = useState(false);
+
+  async function runTest() {
+    setTesting(true);
+    setResult(null);
+    try {
+      const res = await fetch("/api/billing/qa-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId }),
+      });
+      const data = await res.json();
+      setResult(res.ok ? `${data.message} Plano: ${data.priceLabel}.` : data.error);
+    } catch {
+      setResult("Não foi possível concluir o teste.");
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  return (
+    <div className="cm-panel space-y-4 p-4 text-sm">
+      <div>
+        <h2 className="font-display text-lg text-white">Teste seguro de pagamento</h2>
+        <p className="mt-1 text-cm-gray">
+          {message ?? "Conta de QA — sem cobrança real."}
+        </p>
+      </div>
+      {enabled ? (
+        <>
+          <label className="block space-y-2 text-cm-gray">
+            <span>Plano para simular</span>
+            <select
+              className="min-h-12 w-full rounded border border-cm-divider bg-black px-3 text-white"
+              value={planId}
+              onChange={(event) => setPlanId(event.target.value)}
+            >
+              {QA_PLANS.map(([id, label]) => (
+                <option key={id} value={id}>{label}</option>
+              ))}
+            </select>
+          </label>
+          <Button onClick={runTest} disabled={testing}>
+            {testing ? "Testando…" : "Simular pagamento aprovado"}
+          </Button>
+          <p className="text-xs text-cm-gray">
+            Não chama o Asaas, não cobra e não altera o tier da conta.
+          </p>
+        </>
+      ) : (
+        <p className="text-xs text-cm-gray">Simulação desativada neste ambiente.</p>
+      )}
+      {result && <p role="status" className="text-sm text-white">{result}</p>}
     </div>
   );
 }

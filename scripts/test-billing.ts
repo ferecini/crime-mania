@@ -19,6 +19,9 @@ import {
 } from "../src/lib/billing/webhook-service";
 import type { BillingSubscriptionRow } from "../src/lib/billing/types";
 import { billingCheckoutEnabled } from "../src/lib/features";
+import { billingQaTestModeEnabled } from "../src/lib/features";
+import { canUseBillingQaTest, makeBillingQaResult } from "../src/lib/billing/qa-test";
+import { QA_USER_IDS } from "../src/lib/auth/qa-users";
 import { assertSameOrigin } from "../src/lib/http/same-origin";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
@@ -161,6 +164,20 @@ function securityGates() {
   assert.equal(billingCheckoutEnabled(), true);
   process.env.BILLING_ENABLED = prevServer;
   process.env.NEXT_PUBLIC_BILLING_ENABLED = prevPublic;
+
+  console.log("QA billing test gate…");
+  const prevQaMode = process.env.BILLING_QA_TEST_MODE;
+  process.env.BILLING_QA_TEST_MODE = "false";
+  assert.equal(billingQaTestModeEnabled(), false);
+  process.env.BILLING_QA_TEST_MODE = "true";
+  assert.equal(billingQaTestModeEnabled(), true);
+  assert.equal(canUseBillingQaTest({ userId: QA_USER_IDS.free, isTestUser: true }), true);
+  assert.equal(canUseBillingQaTest({ userId: QA_USER_IDS.free, isTestUser: false }), false);
+  assert.equal(canUseBillingQaTest({ userId: crypto.randomUUID(), isTestUser: true }), false);
+  const qaResult = makeBillingQaResult("tier2-yearly");
+  assert.equal(qaResult.priceCents, 15900);
+  assert.equal(qaResult.simulated, true);
+  process.env.BILLING_QA_TEST_MODE = prevQaMode;
 
   console.log("same-origin helper…");
   assert.equal(
