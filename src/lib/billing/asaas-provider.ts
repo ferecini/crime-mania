@@ -12,6 +12,21 @@ function apiKey(): string {
   return key;
 }
 
+/** Valida credenciais e ambiente sem criar cliente, cobrança ou assinatura. */
+export async function checkAsaasConnection(): Promise<{
+  ok: boolean;
+  status: number;
+  environment: "sandbox" | "production";
+}> {
+  const environment = asaasApiBaseUrl().includes("sandbox") ? "sandbox" : "production";
+  const response = await fetch(`${asaasApiBaseUrl()}/myAccount`, {
+    method: "GET",
+    headers: { access_token: apiKey() },
+    cache: "no-store",
+  });
+  return { ok: response.ok, status: response.status, environment };
+}
+
 async function asaasFetch(path: string, init?: RequestInit): Promise<Response> {
   if (!isServerBillingEnabled()) {
     throw new Error("Asaas desabilitado (BILLING_ENABLED=false).");
