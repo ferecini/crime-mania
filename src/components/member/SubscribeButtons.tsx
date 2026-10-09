@@ -16,7 +16,7 @@ export function SubscribeButtons() {
     setLoading(planId);
     setFeedback(null);
     try {
-      const res = await fetch("/api/subscribe", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId }),
@@ -26,7 +26,14 @@ export function SubscribeButtons() {
         setFeedback(data.error ?? "Não foi possível concluir.");
         return;
       }
-      setFeedback("Plano atualizado com sucesso.");
+      if (data.checkoutUrl && data.mode !== "simulated") {
+        window.location.href = data.checkoutUrl as string;
+        return;
+      }
+      setFeedback(
+        (data.message as string) ??
+          "Checkout iniciado em modo seguro. Conclua o pagamento quando o gateway estiver ativo.",
+      );
       router.refresh();
     } finally {
       setLoading(null);
@@ -40,7 +47,7 @@ export function SubscribeButtons() {
         Mania. Enquanto isso, entre na lista de espera ou finalize a compra quando o checkout estiver
         ativo.
       </p>
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((plan) => (
           <div
             key={plan.id}

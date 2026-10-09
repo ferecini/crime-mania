@@ -28,7 +28,9 @@
     "community:migrate": "node scripts/community-migrate.mjs",
     "test:community-api": "node scripts/test-community-api.mjs",
     "qa:community-preview": "node scripts/run-community-preview-qa.mjs",
-    "ops:sync-editorial-env": "node scripts/sync-editorial-vercel-env.mjs"
+    "ops:sync-editorial-env": "node scripts/sync-editorial-vercel-env.mjs",
+    "billing:migrate": "node scripts/billing-migrate.mjs",
+    "test:billing": "npx --yes tsx scripts/test-billing.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.10",
