@@ -42,7 +42,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    await abandonPendingCheckout(session.id);
+    await abandonPendingCheckout(session.id, {
+      isTestUser: session.isTestUser,
+      email: session.email,
+    });
     const tier = await syncUserTierFromBilling(session.id);
     const token = await createSessionToken({ ...session, tier });
     const response = NextResponse.json({

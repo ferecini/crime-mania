@@ -45,6 +45,7 @@ export async function POST(request: Request) {
       email: session.email,
       displayName: session.displayName,
       planId: parsed.data.planId,
+      session: { isTestUser: session.isTestUser, email: session.email },
     });
 
     if (isServerBillingEnabled() && checkout.mode !== "hosted") {

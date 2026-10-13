@@ -10,19 +10,19 @@ import {
 import { checkAsaasConnection } from "@/lib/billing/asaas-provider";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
 import type { CheckoutSessionResult } from "@/lib/billing/types";
-import { getUserById } from "@/lib/auth/users-store";
+import { assertBillingAccountAllowed, type BillingSessionContext } from "@/lib/billing/billing-account";
 
 export async function startBillingCheckout(input: {
   userId: string;
   email: string;
   displayName: string;
   planId: string;
+  session?: BillingSessionContext | null;
 }): Promise<CheckoutSessionResult> {
-  const user = getUserById(input.userId);
-  if (!user) throw new Error("Conta não encontrada.");
-  if (user.isTestUser) {
-    throw new Error("Contas de QA não usam checkout de cobrança.");
-  }
+  assertBillingAccountAllowed(input.userId, {
+    isTestUser: input.session?.isTestUser,
+    email: input.email,
+  });
   if (!isCommercialPlanId(input.planId)) {
     throw new Error("Plano inválido.");
   }
@@ -118,11 +118,11 @@ export async function startBillingCheckout(input: {
   return { ...session, subscriptionId };
 }
 
-export async function abandonPendingCheckout(userId: string): Promise<void> {
-  const user = getUserById(userId);
-  if (!user || user.isTestUser) {
-    throw new Error("Operação indisponível para esta conta.");
-  }
+export async function abandonPendingCheckout(
+  userId: string,
+  session?: BillingSessionContext | null,
+): Promise<void> {
+  assertBillingAccountAllowed(userId, session);
   const sub = await getLatestSubscriptionForUser(userId);
   if (!sub || sub.status !== "pending") {
     throw new Error("Nenhum checkout pendente para cancelar.");
@@ -136,11 +136,11 @@ export async function abandonPendingCheckout(userId: string): Promise<void> {
   await deleteSubscriptionById(sub.id);
 }
 
-export async function cancelBillingAtPeriodEnd(userId: string): Promise<void> {
-  const user = getUserById(userId);
-  if (!user || user.isTestUser) {
-    throw new Error("Cancelamento indisponível para esta conta.");
-  }
+export async function cancelBillingAtPeriodEnd(
+  userId: string,
+  session?: BillingSessionContext | null,
+): Promise<void> {
+  assertBillingAccountAllowed(userId, session);
   const sub = await getLatestSubscriptionForUser(userId);
   if (!sub || sub.status !== "active") {
     throw new Error("Nenhuma assinatura ativa para cancelar.");

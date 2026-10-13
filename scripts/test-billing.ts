@@ -25,6 +25,8 @@ import { billingQaTestModeEnabled } from "../src/lib/features";
 import { canUseBillingQaTest, makeBillingQaResult } from "../src/lib/billing/qa-test";
 import { QA_USER_IDS } from "../src/lib/auth/qa-users";
 import { assertSameOrigin } from "../src/lib/http/same-origin";
+import { assertBillingAccountAllowed } from "../src/lib/billing/billing-account";
+import { hydrateUsersStore } from "../src/lib/auth/users-store-hydrate";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
   return {
@@ -178,7 +180,32 @@ function providerConfigGates() {
   process.env.ASAAS_API_KEY = prevKey;
 }
 
+function billingAccountGuard() {
+  console.log("billing account guard (OAuth / Vercel store miss)…");
+  hydrateUsersStore(true);
+  const oauthId = "b6663e93-54e8-430f-b76c-0626b8c6746a";
+  assert.throws(
+    () => assertBillingAccountAllowed(oauthId),
+    /Conta não encontrada no cadastro/,
+  );
+  assert.doesNotThrow(() =>
+    assertBillingAccountAllowed(oauthId, {
+      email: "owner@example.com",
+      isTestUser: false,
+    }),
+  );
+  assert.throws(
+    () =>
+      assertBillingAccountAllowed(QA_USER_IDS.free, {
+        email: "qa-free@crime-mania.test",
+        isTestUser: true,
+      }),
+    /Contas de QA/,
+  );
+}
+
 function securityGates() {
+  billingAccountGuard();
   providerConfigGates();
   console.log("billingCheckoutEnabled gate…");
   const prevServer = process.env.BILLING_ENABLED;
