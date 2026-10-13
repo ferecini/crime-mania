@@ -39,13 +39,22 @@ export async function startBillingCheckout(input: {
   }
 
   if (isServerBillingEnabled()) {
-    const asaas = await checkAsaasConnection();
-    if (!asaas.ok) {
-      throw new Error(
-        asaas.status === 401
-          ? "Pagamento indisponível: chave Asaas inválida. A equipe precisa atualizar ASAAS_API_KEY."
-          : "Pagamento indisponível: não foi possível conectar ao Asaas. Tente mais tarde.",
-      );
+    try {
+      const asaas = await checkAsaasConnection();
+      if (!asaas.ok) {
+        throw new Error(
+          asaas.status === 401
+            ? "Pagamento indisponível: chave Asaas inválida ou ausente. A equipe precisa configurar ASAAS_API_KEY na Vercel."
+            : "Pagamento indisponível: não foi possível conectar ao Asaas. Tente mais tarde.",
+        );
+      }
+    } catch (err) {
+      if (err instanceof Error && /ASAAS_API_KEY/i.test(err.message)) {
+        throw new Error(
+          "Pagamento indisponível: chave Asaas inválida ou ausente. A equipe precisa configurar ASAAS_API_KEY na Vercel.",
+        );
+      }
+      throw err;
     }
   }
 

@@ -1,13 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PLANS, PLAN_HIGHLIGHTS, type PlanId } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { WaitlistForm } from "@/components/member/WaitlistForm";
 
 export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
   const [loading, setLoading] = useState<PlanId | null>(null);
-  const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<{ kind: "error" | "info"; message: string } | null>(
+    null,
+  );
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (feedback?.kind === "error") {
+      feedbackRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [feedback]);
 
   async function checkout(planId: PlanId) {
     setLoading(planId);
@@ -18,9 +27,12 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ planId }),
       });
-      const data = await res.json();
+      const data = (await res.json()) as { error?: string; message?: string; mode?: string; checkoutUrl?: string };
       if (!res.ok) {
-        setFeedback(data.error ?? "Não foi possível concluir.");
+        setFeedback({
+          kind: "error",
+          message: data.error ?? "Não foi possível abrir o pagamento. Tente de novo em instantes.",
+        });
         return;
       }
       if (data.mode === "hosted" && typeof data.checkoutUrl === "string") {
@@ -31,16 +43,20 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         }
       }
       if (data.mode === "simulated") {
-        setFeedback(
-          "Checkout simulado não está disponível com cobrança ativa. Entre em contato com o suporte.",
-        );
+        setFeedback({
+          kind: "error",
+          message:
+            "Checkout simulado não está disponível com cobrança ativa. Entre em contato com o suporte.",
+        });
         return;
       }
-      setFeedback(
-        (data.error as string) ??
-          (data.message as string) ??
+      setFeedback({
+        kind: "error",
+        message:
+          data.error ??
+          data.message ??
           "Não foi possível abrir o pagamento Asaas. Nenhuma cobrança foi iniciada — tente de novo em instantes.",
-      );
+      });
     } finally {
       setLoading(null);
     }
@@ -48,6 +64,25 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
 
   return (
     <div className="space-y-4">
+      {feedback && (
+        <div
+          ref={feedbackRef}
+          role={feedback.kind === "error" ? "alert" : "status"}
+          aria-live={feedback.kind === "error" ? "assertive" : "polite"}
+          className={
+            feedback.kind === "error"
+              ? "rounded-lg border border-red-500/60 bg-red-950/40 px-4 py-3 text-sm leading-relaxed text-red-100"
+              : "cm-panel px-4 py-3 text-sm text-cm-gray"
+          }
+        >
+          {feedback.kind === "error" && (
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-red-300">
+              Pagamento não iniciado
+            </p>
+          )}
+          <p>{feedback.message}</p>
+        </div>
+      )}
       <p className="text-sm leading-relaxed text-cm-gray">
         Assinaturas em fase de lançamento. Os valores finais serão publicados pela equipe Crime
         Mania. Enquanto isso, entre na lista de espera ou finalize a compra quando o checkout estiver
@@ -92,11 +127,6 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
           </div>
         ))}
       </div>
-      {feedback && (
-        <p className="text-sm text-cm-gray" role="status">
-          {feedback}
-        </p>
-      )}
     </div>
   );
 }

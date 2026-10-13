@@ -70,6 +70,13 @@ Tier de membro **só** muda após processamento idempotente desses eventos.
 3. Atualizar token do webhook (`ASAAS_WEBHOOK_TOKEN`) no painel e na Vercel.
 4. Redeploy; reenviar evento de teste.
 
+## Checkout não abre o Asaas (sem linha `pending`)
+
+1. **Sintoma:** em `/planos`, “Assinar agora” volta ao normal; **não** redireciona; **não** cria `billing_subscriptions` `pending`.
+2. **Causa usual:** `ASAAS_API_KEY` ausente, placeholder ou inválida — o servidor faz preflight `GET /myAccount` (401) **antes** de gravar `pending`.
+3. **Mensagem na UI (após deploy recente):** banner vermelho *Pagamento não iniciado* com texto sobre chave Asaas na Vercel.
+4. **Owner:** colar chave de **Produção** do painel Asaas (Integrações → API) em `ASAAS_API_KEY` (Production) e `vercel deploy --prod`. O CLI não revela o valor (`env pull` → `[SENSITIVE]`); `vercel env run` local pode mostrar LEN 0 mesmo com chave válida no runtime da Vercel.
+
 ## Checkout preso em “Aguardando pagamento”
 
 1. **Causa comum:** `ASAAS_API_KEY` inválida (401), assinatura Asaas sem `invoiceUrl` na resposta (normal — o app cria a 1ª cobrança ou faz poll em `/payments`), ou deploy antigo que gravava `pending` antes do link hospedado.
