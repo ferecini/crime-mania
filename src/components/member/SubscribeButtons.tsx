@@ -25,13 +25,19 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         setFeedback(data.error ?? "Não foi possível concluir.");
         return;
       }
-      if (data.checkoutUrl && data.mode !== "simulated") {
+      if (data.mode === "hosted" && data.checkoutUrl) {
         window.location.href = data.checkoutUrl as string;
+        return;
+      }
+      if (data.mode === "simulated") {
+        setFeedback(
+          "Checkout simulado não está disponível com cobrança ativa. Entre em contato com o suporte.",
+        );
         return;
       }
       setFeedback(
         (data.message as string) ??
-          "Checkout iniciado em modo seguro. Conclua o pagamento quando o gateway estiver ativo.",
+          "Não foi possível abrir o pagamento Asaas. Tente de novo ou use Minha conta se houver checkout pendente.",
       );
       router.refresh();
     } finally {

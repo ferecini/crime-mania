@@ -1,6 +1,7 @@
-import { COMMERCIAL_PLANS } from "@/lib/billing/config";
+import { COMMERCIAL_PLANS, isServerBillingEnabled } from "@/lib/billing/config";
 import { billingCheckoutEnabled, billingQaTestModeEnabled } from "@/lib/features";
 import { getLatestSubscriptionForUser } from "@/lib/billing/db";
+import { fetchAsaasSubscriptionInvoiceUrl } from "@/lib/billing/asaas-provider";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
 import type { SessionUser } from "@/lib/auth/session";
 
@@ -30,6 +31,14 @@ export async function getAccountBillingSummary(session: SessionUser) {
     }
 
     const plan = COMMERCIAL_PLANS[sub.plan_id];
+    let paymentUrl: string | null = null;
+    if (
+      sub.status === "pending" &&
+      isServerBillingEnabled() &&
+      sub.provider_subscription_id
+    ) {
+      paymentUrl = await fetchAsaasSubscriptionInvoiceUrl(sub.provider_subscription_id);
+    }
     return {
       qa: false as const,
       billingEnabled: billingCheckoutEnabled(),
@@ -52,6 +61,7 @@ export async function getAccountBillingSummary(session: SessionUser) {
         currentPeriodEnd: sub.current_period_end,
         cancelAtPeriodEnd: sub.cancel_at_period_end,
         nextDue: sub.current_period_end,
+        paymentUrl,
       },
     };
   } catch {

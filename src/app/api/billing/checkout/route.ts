@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession, createSessionToken, COOKIE_NAME } from "@/lib/auth/session";
 import { startBillingCheckout } from "@/lib/billing/checkout-service";
-import { isCommercialPlanId } from "@/lib/billing/config";
+import { isCommercialPlanId, isServerBillingEnabled } from "@/lib/billing/config";
+import { syncUserTierFromBilling } from "@/lib/billing/tier-sync";
 import { billingCheckoutEnabled } from "@/lib/features";
 import { assertSameOrigin } from "@/lib/http/same-origin";
 
@@ -46,13 +47,22 @@ export async function POST(request: Request) {
       planId: parsed.data.planId,
     });
 
+    if (isServerBillingEnabled() && checkout.mode !== "hosted") {
+      return NextResponse.json(
+        { error: "Pagamento indisponível: gateway não retornou checkout hospedado." },
+        { status: 503 },
+      );
+    }
+
+    const tier = await syncUserTierFromBilling(session.id);
     const response = NextResponse.json({
       ok: true,
       billingUiEnabled: billingCheckoutEnabled(),
+      tier,
       ...checkout,
     });
 
-    const token = await createSessionToken(session);
+    const token = await createSessionToken({ ...session, tier });
     response.cookies.set(COOKIE_NAME, token, {
       httpOnly: true,
       sameSite: "lax",

@@ -7,6 +7,8 @@ import {
   ASAAS_WEBHOOK_EVENTS_ALLOWLIST,
   COMMERCIAL_PLANS,
   PAST_DUE_GRACE_DAYS,
+  billingProviderName,
+  isServerBillingEnabled,
 } from "../src/lib/billing/config";
 import {
   nextStatusOnPaymentConfirmed,
@@ -48,10 +50,10 @@ assert.equal(COMMERCIAL_PLANS["tier2-yearly"].priceCents, 15900);
 assert.equal(COMMERCIAL_PLANS["tier1-monthly"].priceCents, 900);
 
 console.log("pending blocks access…");
-assert.equal(
-  resolveTierFromSubscription(sub({ status: "pending" })).tier,
-  "none",
-);
+const pendingResolution = resolveTierFromSubscription(sub({ status: "pending" }));
+assert.equal(pendingResolution.tier, "none");
+assert.equal(pendingResolution.blocked, true);
+assert.equal(pendingResolution.status, "pending");
 
 console.log("active tier1…");
 assert.equal(
@@ -149,7 +151,35 @@ async function integration() {
   console.log("integration idempotency OK");
 }
 
+function providerConfigGates() {
+  console.log("billingProviderName gates…");
+  const prevEnabled = process.env.BILLING_ENABLED;
+  const prevProvider = process.env.BILLING_PROVIDER;
+  const prevKey = process.env.ASAAS_API_KEY;
+
+  process.env.BILLING_ENABLED = "false";
+  assert.equal(billingProviderName(), "fake");
+
+  process.env.BILLING_ENABLED = "true";
+  process.env.BILLING_PROVIDER = "fake";
+  process.env.ASAAS_API_KEY = "test_key";
+  assert.throws(() => billingProviderName(), /BILLING_PROVIDER/);
+
+  process.env.BILLING_PROVIDER = "asaas";
+  process.env.ASAAS_API_KEY = "";
+  assert.throws(() => billingProviderName(), /ASAAS_API_KEY/);
+
+  process.env.ASAAS_API_KEY = "test_key";
+  assert.equal(billingProviderName(), "asaas");
+  assert.equal(isServerBillingEnabled(), true);
+
+  process.env.BILLING_ENABLED = prevEnabled;
+  process.env.BILLING_PROVIDER = prevProvider;
+  process.env.ASAAS_API_KEY = prevKey;
+}
+
 function securityGates() {
+  providerConfigGates();
   console.log("billingCheckoutEnabled gate…");
   const prevServer = process.env.BILLING_ENABLED;
   const prevPublic = process.env.NEXT_PUBLIC_BILLING_ENABLED;

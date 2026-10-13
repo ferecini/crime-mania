@@ -1,11 +1,13 @@
 import { COMMERCIAL_PLANS, isCommercialPlanId, isServerBillingEnabled } from "@/lib/billing/config";
 import {
+  deleteSubscriptionById,
   getBillingCustomerByUserId,
   getLatestSubscriptionForUser,
   insertSubscription,
   upsertBillingCustomer,
   updateSubscriptionFields,
 } from "@/lib/billing/db";
+import { checkAsaasConnection } from "@/lib/billing/asaas-provider";
 import { getBillingProvider } from "@/lib/billing/provider-factory";
 import type { CheckoutSessionResult } from "@/lib/billing/types";
 import { getUserById } from "@/lib/auth/users-store";
@@ -27,8 +29,24 @@ export async function startBillingCheckout(input: {
 
   const plan = COMMERCIAL_PLANS[input.planId];
   const existing = await getLatestSubscriptionForUser(input.userId);
-  if (existing && (existing.status === "active" || existing.status === "pending")) {
-    throw new Error("Já existe uma assinatura em andamento. Gerencie em Minha conta.");
+  if (existing?.status === "active") {
+    throw new Error("Já existe uma assinatura ativa. Gerencie em Minha conta.");
+  }
+  if (existing?.status === "pending") {
+    throw new Error(
+      "Há um checkout pendente. Em Minha conta, cancele a tentativa ou conclua o pagamento.",
+    );
+  }
+
+  if (isServerBillingEnabled()) {
+    const asaas = await checkAsaasConnection();
+    if (!asaas.ok) {
+      throw new Error(
+        asaas.status === 401
+          ? "Pagamento indisponível: chave Asaas inválida. A equipe precisa atualizar ASAAS_API_KEY."
+          : "Pagamento indisponível: não foi possível conectar ao Asaas. Tente mais tarde.",
+      );
+    }
   }
 
   const subscriptionId = crypto.randomUUID();
@@ -53,33 +71,69 @@ export async function startBillingCheckout(input: {
     };
   }
 
-  await insertSubscription({
-    id: subscriptionId,
-    userId: input.userId,
-    planId: input.planId,
-    billingCycle: plan.billingCycle,
-    status: "pending",
-    providerCustomerId: customer.customer_id,
-    priceCents: plan.priceCents,
-  });
-
-  const session = await provider.startCheckout({
-    userId: input.userId,
-    email: input.email,
-    name: input.displayName,
-    planId: input.planId,
-    priceCents: plan.priceCents,
-    existingCustomerId: customer.customer_id,
-    subscriptionId,
-  });
-
-  if (session.providerSubscriptionId) {
-    await updateSubscriptionFields(subscriptionId, {
-      provider_subscription_id: session.providerSubscriptionId,
+  let session: CheckoutSessionResult;
+  try {
+    session = await provider.startCheckout({
+      userId: input.userId,
+      email: input.email,
+      name: input.displayName,
+      planId: input.planId,
+      priceCents: plan.priceCents,
+      existingCustomerId: customer.customer_id,
+      subscriptionId,
     });
+  } catch (err) {
+    throw err instanceof Error ? err : new Error("Checkout indisponível.");
+  }
+
+  if (isServerBillingEnabled()) {
+    if (session.mode === "simulated") {
+      throw new Error(
+        "Checkout simulado não permitido com cobrança real. Verifique BILLING_PROVIDER e ASAAS_API_KEY.",
+      );
+    }
+    if (session.mode !== "hosted" || !session.checkoutUrl?.startsWith("http")) {
+      throw new Error("Asaas não retornou link de pagamento válido.");
+    }
+  }
+
+  try {
+    await insertSubscription({
+      id: subscriptionId,
+      userId: input.userId,
+      planId: input.planId,
+      billingCycle: plan.billingCycle,
+      status: "pending",
+      providerCustomerId: customer.customer_id,
+      providerSubscriptionId: session.providerSubscriptionId ?? null,
+      priceCents: plan.priceCents,
+    });
+  } catch (err) {
+    if (session.providerSubscriptionId && isServerBillingEnabled()) {
+      await provider.cancelSubscription(session.providerSubscriptionId).catch(() => undefined);
+    }
+    throw err instanceof Error ? err : new Error("Não foi possível registrar a assinatura.");
   }
 
   return { ...session, subscriptionId };
+}
+
+export async function abandonPendingCheckout(userId: string): Promise<void> {
+  const user = getUserById(userId);
+  if (!user || user.isTestUser) {
+    throw new Error("Operação indisponível para esta conta.");
+  }
+  const sub = await getLatestSubscriptionForUser(userId);
+  if (!sub || sub.status !== "pending") {
+    throw new Error("Nenhum checkout pendente para cancelar.");
+  }
+
+  const provider = getBillingProvider();
+  if (sub.provider_subscription_id && isServerBillingEnabled()) {
+    await provider.cancelSubscription(sub.provider_subscription_id);
+  }
+
+  await deleteSubscriptionById(sub.id);
 }
 
 export async function cancelBillingAtPeriodEnd(userId: string): Promise<void> {

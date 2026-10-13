@@ -14,11 +14,13 @@ export default async function AccountPage() {
   const stored = getEffectiveUserById(session.id, session);
   const billing = await getAccountBillingSummary(session);
   const tierLabel =
-    session.tier === "tier2"
-      ? "Tier 2 ativo"
-      : session.tier === "tier1"
-        ? "Tier 1 ativo"
-        : "Sem assinatura";
+    billing.subscription?.status === "pending"
+      ? "Pagamento pendente (sem acesso ao plano)"
+      : session.tier === "tier2"
+        ? "Tier 2 ativo"
+        : session.tier === "tier1"
+          ? "Tier 1 ativo"
+          : "Sem assinatura";
 
   return (
     <div className="max-w-xl space-y-6">

@@ -27,6 +27,24 @@ export async function checkAsaasConnection(): Promise<{
   return { ok: response.ok, status: response.status, environment };
 }
 
+export async function fetchAsaasSubscriptionInvoiceUrl(
+  providerSubscriptionId: string,
+): Promise<string | null> {
+  const res = await asaasFetch(
+    `/payments?subscription=${encodeURIComponent(providerSubscriptionId)}&limit=5`,
+  );
+  if (!res.ok) return null;
+  const data = (await res.json()) as {
+    data?: Array<{ invoiceUrl?: string; bankSlipUrl?: string; status?: string }>;
+  };
+  const payments = data.data ?? [];
+  for (const payment of payments) {
+    if (payment.invoiceUrl) return payment.invoiceUrl;
+    if (payment.bankSlipUrl) return payment.bankSlipUrl;
+  }
+  return null;
+}
+
 async function asaasFetch(path: string, init?: RequestInit): Promise<Response> {
   if (!isServerBillingEnabled()) {
     throw new Error("Asaas desabilitado (BILLING_ENABLED=false).");
@@ -58,7 +76,11 @@ export class AsaasBillingProvider implements BillingProvider {
     });
     const data = (await res.json()) as { id?: string; errors?: unknown };
     if (!res.ok || !data.id) {
-      throw new Error("Falha ao criar cliente Asaas.");
+      throw new Error(
+        res.status === 401
+          ? "Chave API Asaas inválida (401). Atualize ASAAS_API_KEY na Vercel."
+          : "Falha ao criar cliente Asaas.",
+      );
     }
     return { customerId: data.id };
   }
@@ -99,12 +121,27 @@ export class AsaasBillingProvider implements BillingProvider {
       errors?: unknown;
     };
     if (!res.ok || !data.id) {
-      throw new Error("Falha ao iniciar assinatura Asaas.");
+      const detail =
+        res.status === 401
+          ? "Chave API Asaas inválida (401). Atualize ASAAS_API_KEY na Vercel."
+          : "Falha ao iniciar assinatura Asaas.";
+      throw new Error(detail);
+    }
+
+    let checkoutUrl = data.invoiceUrl ?? null;
+    if (!checkoutUrl) {
+      checkoutUrl = await fetchAsaasSubscriptionInvoiceUrl(data.id);
+    }
+    if (!checkoutUrl) {
+      await asaasFetch(`/subscriptions/${data.id}`, { method: "DELETE" }).catch(() => undefined);
+      throw new Error(
+        "Asaas não retornou link de pagamento. Verifique a chave API e tente novamente.",
+      );
     }
 
     return {
-      mode: data.invoiceUrl ? "hosted" : "tokenized",
-      checkoutUrl: data.invoiceUrl ?? `${appBaseUrl()}/membro/conta?checkout=pending`,
+      mode: "hosted",
+      checkoutUrl,
       subscriptionId: input.subscriptionId,
       providerSubscriptionId: data.id,
       customerId,

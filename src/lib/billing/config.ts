@@ -6,9 +6,17 @@ export function isServerBillingEnabled(): boolean {
 }
 
 export function billingProviderName(): "asaas" | "fake" {
-  const raw = (process.env.BILLING_PROVIDER ?? "asaas").trim().toLowerCase();
   if (!isServerBillingEnabled()) return "fake";
-  return raw === "asaas" ? "asaas" : "fake";
+  const raw = (process.env.BILLING_PROVIDER ?? "asaas").trim().toLowerCase();
+  if (raw !== "asaas") {
+    throw new Error(
+      "BILLING_PROVIDER deve ser 'asaas' quando BILLING_ENABLED=true (provider fake bloqueado).",
+    );
+  }
+  if (!process.env.ASAAS_API_KEY?.trim()) {
+    throw new Error("ASAAS_API_KEY é obrigatória quando BILLING_ENABLED=true.");
+  }
+  return "asaas";
 }
 
 export function asaasEnvironment(): "sandbox" | "production" {

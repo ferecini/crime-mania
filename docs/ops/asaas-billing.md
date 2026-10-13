@@ -70,6 +70,24 @@ Tier de membro **só** muda após processamento idempotente desses eventos.
 3. Atualizar token do webhook (`ASAAS_WEBHOOK_TOKEN`) no painel e na Vercel.
 4. Redeploy; reenviar evento de teste.
 
+## Checkout preso em “Aguardando pagamento”
+
+1. **Causa comum:** `ASAAS_API_KEY` inválida (401) ou assinatura criada sem `invoiceUrl`.
+2. **Usuário:** em Minha conta → **Cancelar checkout pendente**, depois assinar de novo em Planos.
+3. **Se houver link:** **Abrir pagamento no Asaas** (fatura hospedada).
+4. **Suporte (Neon, pendente):** `DELETE FROM billing_subscriptions WHERE user_id = '<id>' AND status = 'pending';`
+5. **Ativo sem pagamento (bug legado):** tier só deve subir após webhook `PAYMENT_CONFIRMED`. Corrigir linha e re-sincronizar tier no app (logout/login) ou ajustar `users` store se aplicável:
+
+```sql
+-- substituir <user_id>
+UPDATE billing_subscriptions
+SET status = 'expired', updated_at = NOW()
+WHERE user_id = '<user_id>' AND status IN ('active', 'pending') AND payment_id IS NULL;
+DELETE FROM billing_subscriptions WHERE user_id = '<user_id>' AND status = 'pending';
+```
+
+API alternativa: `POST /api/billing/abandon-pending` (usuário logado, `{"confirm":true}`) remove checkout `pending` e cancela assinatura no Asaas quando houver `provider_subscription_id`.
+
 ## Rollback
 
 1. `BILLING_ENABLED=false` + `NEXT_PUBLIC_BILLING_ENABLED=false` → redeploy imediato (checkout volta waitlist / simulado).

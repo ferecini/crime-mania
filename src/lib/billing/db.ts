@@ -165,6 +165,11 @@ export async function updateSubscriptionFields(
   `;
 }
 
+export async function deleteSubscriptionById(id: string): Promise<void> {
+  const sql = getSql();
+  await sql`DELETE FROM billing_subscriptions WHERE id = ${id}`;
+}
+
 export async function recordBillingEvent(input: {
   id: string;
   eventType: string;

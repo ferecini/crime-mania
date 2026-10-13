@@ -12,6 +12,7 @@ type SubscriptionView = {
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
   nextDue: string | null;
+  paymentUrl?: string | null;
 };
 
 type Props = {
@@ -53,6 +54,34 @@ export function AccountBillingPanel({ initial }: Props) {
     return (
       <QaBillingTest enabled={Boolean(initial.qaTestEnabled)} message={initial.message} />
     );
+  }
+
+  async function abandonPending() {
+    if (
+      !window.confirm(
+        "Cancelar este checkout pendente? Você poderá assinar de novo em Planos quando o pagamento estiver disponível.",
+      )
+    ) {
+      return;
+    }
+    setLoading(true);
+    setFeedback(null);
+    try {
+      const res = await fetch("/api/billing/abandon-pending", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirm: true }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setFeedback(data.error ?? "Não foi possível cancelar o checkout.");
+        return;
+      }
+      setFeedback(data.message ?? "Checkout cancelado.");
+      setSub(null);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function cancelSubscription() {
@@ -125,6 +154,34 @@ export function AccountBillingPanel({ initial }: Props) {
       </dl>
       {initial.paymentMethodUpdate?.message && (
         <p className="text-xs text-cm-gray">{initial.paymentMethodUpdate.message}</p>
+      )}
+      {sub.status === "pending" && (
+        <div className="space-y-3 border-t border-cm-divider pt-4">
+          <p className="text-xs text-cm-gray">
+            Pagamento ainda não confirmado — o acesso ao plano só libera após o Asaas confirmar o
+            pagamento.
+          </p>
+          {sub.paymentUrl ? (
+            <a
+              href={sub.paymentUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-[4px] border border-transparent bg-cm-red px-6 py-2.5 text-sm font-semibold tracking-wide text-white shadow-[0_12px_32px_rgba(0,0,0,0.35)] transition-colors hover:bg-cm-red-light sm:w-auto"
+            >
+              Abrir pagamento no Asaas
+            </a>
+          ) : (
+            <p className="text-xs text-cm-gray">
+              Link de pagamento indisponível. Cancele a tentativa abaixo e tente de novo, ou aguarde
+              a equipe corrigir a integração.
+            </p>
+          )}
+          {initial.billingEnabled && (
+            <Button variant="secondary" disabled={loading} onClick={abandonPending}>
+              {loading ? "Processando…" : "Cancelar checkout pendente"}
+            </Button>
+          )}
+        </div>
       )}
       {sub.status === "active" && !sub.cancelAtPeriodEnd && initial.billingEnabled && (
         <Button variant="secondary" disabled={loading} onClick={cancelSubscription}>
