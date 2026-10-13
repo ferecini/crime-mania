@@ -63,6 +63,17 @@ Tier de membro **só** muda após processamento idempotente desses eventos.
 4. Verificar tier em `/membro/conta` após `PAYMENT_CONFIRMED`.
 5. Cancelar → `cancelAtPeriodEnd` → acesso até `current_period_end`.
 
+## Painel Asaas (URLs corretas)
+
+Rotas legadas como `https://www.asaas.com/configIntegracao/index` podem responder **Denied** — usar o menu **Integrações** (conta logada) ou estes caminhos:
+
+| Recurso | URL |
+|---------|-----|
+| Chaves de API | `https://www.asaas.com/customerApiAccessToken/index` |
+| Webhooks | `https://www.asaas.com/customerConfigIntegrations/webhooks` |
+
+A chave secreta só aparece **uma vez** ao criar o token (ex.: “Crime Mania Produção”); se perdeu, gere outra. Salve localmente em `private/tmp-asaas-api-key.txt` (chmod 600, **não** commitar) para o agente ou o owner aplicarem na Vercel. Token do header do webhook: `private/tmp-asaas-webhook-token.txt` → `ASAAS_WEBHOOK_TOKEN` (mesmo valor no painel Asaas, header `asaas-access-token`).
+
 ## Rotação de chaves
 
 1. Gerar nova API key no Asaas.
