@@ -27,6 +27,28 @@ export async function checkAsaasConnection(): Promise<{
   return { ok: response.ok, status: response.status, environment };
 }
 
+type AsaasPaymentLinkFields = {
+  invoiceUrl?: string | null;
+  bankSlipUrl?: string | null;
+};
+
+/** Prefer hosted invoice URL; fall back to boleto slip when that is all Asaas returns. */
+export function pickPayableUrl(payment: AsaasPaymentLinkFields): string | null {
+  const invoice = payment.invoiceUrl?.trim();
+  if (invoice?.startsWith("http")) return invoice;
+  const slip = payment.bankSlipUrl?.trim();
+  if (slip?.startsWith("http")) return slip;
+  return null;
+}
+
+function todayIsoDateInBrazil(): string {
+  return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+}
+
+async function waitMs(ms: number): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function fetchAsaasSubscriptionInvoiceUrl(
   providerSubscriptionId: string,
 ): Promise<string | null> {
@@ -35,14 +57,46 @@ export async function fetchAsaasSubscriptionInvoiceUrl(
   );
   if (!res.ok) return null;
   const data = (await res.json()) as {
-    data?: Array<{ invoiceUrl?: string; bankSlipUrl?: string; status?: string }>;
+    data?: Array<AsaasPaymentLinkFields & { status?: string }>;
   };
-  const payments = data.data ?? [];
-  for (const payment of payments) {
-    if (payment.invoiceUrl) return payment.invoiceUrl;
-    if (payment.bankSlipUrl) return payment.bankSlipUrl;
+  for (const payment of data.data ?? []) {
+    const url = pickPayableUrl(payment);
+    if (url) return url;
   }
   return null;
+}
+
+/** Subscriptions often omit invoiceUrl; poll payments then create the first charge if needed. */
+export async function resolveHostedCheckoutUrl(input: {
+  providerSubscriptionId: string;
+  customerId: string;
+  value: number;
+  externalReference: string;
+  subscriptionInvoiceUrl?: string | null;
+}): Promise<string | null> {
+  const direct = input.subscriptionInvoiceUrl?.trim();
+  if (direct?.startsWith("http")) return direct;
+
+  for (const delayMs of [0, 400, 900, 1600]) {
+    if (delayMs > 0) await waitMs(delayMs);
+    const fromList = await fetchAsaasSubscriptionInvoiceUrl(input.providerSubscriptionId);
+    if (fromList) return fromList;
+  }
+
+  const res = await asaasFetch("/payments", {
+    method: "POST",
+    body: JSON.stringify({
+      customer: input.customerId,
+      billingType: "UNDEFINED",
+      value: input.value,
+      dueDate: todayIsoDateInBrazil(),
+      subscription: input.providerSubscriptionId,
+      externalReference: input.externalReference,
+    }),
+  });
+  const payment = (await res.json()) as AsaasPaymentLinkFields & { errors?: unknown };
+  if (!res.ok) return null;
+  return pickPayableUrl(payment);
 }
 
 async function asaasFetch(path: string, init?: RequestInit): Promise<Response> {
@@ -104,8 +158,9 @@ export class AsaasBillingProvider implements BillingProvider {
       method: "POST",
       body: JSON.stringify({
         customer: customerId,
-        billingType: "CREDIT_CARD",
+        billingType: "UNDEFINED",
         value,
+        nextDueDate: todayIsoDateInBrazil(),
         cycle: input.planId.includes("yearly") ? "YEARLY" : "MONTHLY",
         description: `Crime Mania — ${input.planId}`,
         externalReference: input.subscriptionId,
@@ -128,10 +183,13 @@ export class AsaasBillingProvider implements BillingProvider {
       throw new Error(detail);
     }
 
-    let checkoutUrl = data.invoiceUrl ?? null;
-    if (!checkoutUrl) {
-      checkoutUrl = await fetchAsaasSubscriptionInvoiceUrl(data.id);
-    }
+    const checkoutUrl = await resolveHostedCheckoutUrl({
+      providerSubscriptionId: data.id,
+      customerId,
+      value,
+      externalReference: input.subscriptionId,
+      subscriptionInvoiceUrl: data.invoiceUrl,
+    });
     if (!checkoutUrl) {
       await asaasFetch(`/subscriptions/${data.id}`, { method: "DELETE" }).catch(() => undefined);
       throw new Error(

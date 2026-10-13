@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { PLANS, PLAN_HIGHLIGHTS, type PlanId } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { WaitlistForm } from "@/components/member/WaitlistForm";
 
 export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
-  const router = useRouter();
   const [loading, setLoading] = useState<PlanId | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -25,9 +23,12 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         setFeedback(data.error ?? "Não foi possível concluir.");
         return;
       }
-      if (data.mode === "hosted" && data.checkoutUrl) {
-        window.location.href = data.checkoutUrl as string;
-        return;
+      if (data.mode === "hosted" && typeof data.checkoutUrl === "string") {
+        const url = data.checkoutUrl.trim();
+        if (url.startsWith("http")) {
+          window.location.assign(url);
+          return;
+        }
       }
       if (data.mode === "simulated") {
         setFeedback(
@@ -36,10 +37,10 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         return;
       }
       setFeedback(
-        (data.message as string) ??
-          "Não foi possível abrir o pagamento Asaas. Tente de novo ou use Minha conta se houver checkout pendente.",
+        (data.error as string) ??
+          (data.message as string) ??
+          "Não foi possível abrir o pagamento Asaas. Nenhuma cobrança foi iniciada — tente de novo em instantes.",
       );
-      router.refresh();
     } finally {
       setLoading(null);
     }

@@ -72,7 +72,7 @@ Tier de membro **só** muda após processamento idempotente desses eventos.
 
 ## Checkout preso em “Aguardando pagamento”
 
-1. **Causa comum:** `ASAAS_API_KEY` inválida (401) ou assinatura criada sem `invoiceUrl`.
+1. **Causa comum:** `ASAAS_API_KEY` inválida (401), assinatura Asaas sem `invoiceUrl` na resposta (normal — o app cria a 1ª cobrança ou faz poll em `/payments`), ou deploy antigo que gravava `pending` antes do link hospedado.
 2. **Usuário:** em Minha conta → **Cancelar checkout pendente**, depois assinar de novo em Planos.
 3. **Se houver link:** **Abrir pagamento no Asaas** (fatura hospedada).
 4. **Suporte (Neon, pendente):** `DELETE FROM billing_subscriptions WHERE user_id = '<id>' AND status = 'pending';`

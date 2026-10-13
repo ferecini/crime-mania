@@ -27,6 +27,7 @@ import { QA_USER_IDS } from "../src/lib/auth/qa-users";
 import { assertSameOrigin } from "../src/lib/http/same-origin";
 import { assertBillingAccountAllowed } from "../src/lib/billing/billing-account";
 import { hydrateUsersStore } from "../src/lib/auth/users-store-hydrate";
+import { pickPayableUrl } from "../src/lib/billing/asaas-provider";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
   return {
@@ -129,6 +130,18 @@ assert.equal(end.getUTCMonth(), 1);
 
 console.log("payment confirmed status…");
 assert.equal(nextStatusOnPaymentConfirmed("pending"), "active");
+
+console.log("Asaas payable URL selection…");
+assert.equal(
+  pickPayableUrl({ invoiceUrl: "https://sandbox.asaas.com/i/abc", bankSlipUrl: null }),
+  "https://sandbox.asaas.com/i/abc",
+);
+assert.equal(
+  pickPayableUrl({ invoiceUrl: "", bankSlipUrl: "https://sandbox.asaas.com/b/1" }),
+  "https://sandbox.asaas.com/b/1",
+);
+assert.equal(pickPayableUrl({ invoiceUrl: "not-a-url" }), null);
+assert.equal(pickPayableUrl({}), null);
 
 async function integration() {
   if (!process.argv.includes("--integration")) return;
