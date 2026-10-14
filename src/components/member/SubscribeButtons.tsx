@@ -7,6 +7,7 @@ import { WaitlistForm } from "@/components/member/WaitlistForm";
 
 export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
   const [loading, setLoading] = useState<PlanId | null>(null);
+  const [cpfCnpj, setCpfCnpj] = useState("");
   const [feedback, setFeedback] = useState<{ kind: "error" | "info"; message: string } | null>(
     null,
   );
@@ -19,13 +20,23 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
   }, [feedback]);
 
   async function checkout(planId: PlanId) {
+    if (checkoutEnabled && cpfCnpj.replace(/\D/g, "").length < 11) {
+      setFeedback({
+        kind: "error",
+        message: "Informe seu CPF ou CNPJ antes de assinar — é exigido pelo gateway de pagamento.",
+      });
+      return;
+    }
     setLoading(planId);
     setFeedback(null);
     try {
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId }),
+        body: JSON.stringify({
+          planId,
+          ...(checkoutEnabled && cpfCnpj.trim() ? { cpfCnpj: cpfCnpj.trim() } : {}),
+        }),
       });
       const data = (await res.json()) as { error?: string; message?: string; mode?: string; checkoutUrl?: string };
       if (!res.ok) {
@@ -88,6 +99,26 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
         Mania. Enquanto isso, entre na lista de espera ou finalize a compra quando o checkout estiver
         ativo.
       </p>
+      {checkoutEnabled && (
+        <label className="block max-w-md space-y-1.5">
+          <span className="text-xs font-medium uppercase tracking-wide text-cm-gray">
+            CPF ou CNPJ
+          </span>
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            placeholder="000.000.000-00"
+            value={cpfCnpj}
+            onChange={(e) => setCpfCnpj(e.target.value)}
+            className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-cm-gray/60 focus:border-cm-red/50 focus:outline-none focus:ring-1 focus:ring-cm-red/40"
+          />
+          <span className="text-[11px] text-cm-gray">
+            Obrigatório para emitir a cobrança no Asaas. Seus dados ficam apenas no provedor de
+            pagamento.
+          </span>
+        </label>
+      )}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((plan) => (
           <div

@@ -29,9 +29,11 @@ import { assertBillingAccountAllowed } from "../src/lib/billing/billing-account"
 import { hydrateUsersStore } from "../src/lib/auth/users-store-hydrate";
 import { pickPayableUrl } from "../src/lib/billing/asaas-provider";
 import {
+  isMissingCustomerTaxIdError,
   parseAsaasErrors,
   userMessageForAsaasErrors,
 } from "../src/lib/billing/asaas-errors";
+import { isValidCpfCnpj, normalizeCpfCnpj } from "../src/lib/billing/cpf-cnpj";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
   return {
@@ -160,6 +162,17 @@ assert.equal(
   userMessageForAsaasErrors([], 401, "fallback"),
   userMessageForAsaasErrors([{ code: "invalid_access_token" }], 401, "fallback"),
 );
+const taxIdErr = [
+  {
+    code: "invalid_object",
+    description: "Para criar esta cobrança é necessário preencher o CPF ou CNPJ do cliente.",
+  },
+];
+assert.ok(isMissingCustomerTaxIdError(taxIdErr));
+assert.match(userMessageForAsaasErrors(taxIdErr, 400, "fallback"), /CPF ou CNPJ/);
+assert.equal(normalizeCpfCnpj("123.456.789-09"), "12345678909");
+assert.ok(isValidCpfCnpj("11144477735"));
+assert.ok(!isValidCpfCnpj("11111111111"));
 
 async function integration() {
   if (!process.argv.includes("--integration")) return;

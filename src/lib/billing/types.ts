@@ -49,6 +49,7 @@ export interface BillingProvider {
     userId: string;
     email: string;
     name: string;
+    cpfCnpj?: string;
   }): Promise<{ customerId: string }>;
 
   startCheckout(input: {
@@ -59,6 +60,7 @@ export interface BillingProvider {
     priceCents: number;
     existingCustomerId?: string;
     subscriptionId: string;
+    cpfCnpj?: string;
   }): Promise<CheckoutSessionResult>;
 
   cancelSubscription(providerSubscriptionId: string): Promise<void>;

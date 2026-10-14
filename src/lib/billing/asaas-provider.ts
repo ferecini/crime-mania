@@ -10,6 +10,7 @@ import {
   throwAsaasFailure,
   logAsaasFailure,
 } from "@/lib/billing/asaas-errors";
+import { isValidCpfCnpj, normalizeCpfCnpj } from "@/lib/billing/cpf-cnpj";
 import type { BillingProvider, CheckoutSessionResult } from "@/lib/billing/types";
 
 function apiKey(): string {
@@ -165,6 +166,30 @@ export async function resolveHostedCheckoutUrl(input: {
   return pickPayableUrl(payment);
 }
 
+async function syncAsaasCustomerTaxId(customerId: string, cpfCnpj: string): Promise<void> {
+  const res = await asaasFetch(`/customers/${customerId}`, {
+    method: "PUT",
+    body: JSON.stringify({ cpfCnpj }),
+  });
+  const data = (await res.json()) as { id?: string; errors?: unknown };
+  if (!res.ok || !data.id) {
+    throwAsaasFailure(
+      "PUT /customers (cpfCnpj)",
+      res.status,
+      data,
+      "Não foi possível validar CPF/CNPJ no Asaas.",
+    );
+  }
+}
+
+function requireNormalizedTaxId(raw: string | undefined): string {
+  const digits = normalizeCpfCnpj(raw ?? "");
+  if (!isValidCpfCnpj(digits)) {
+    throw new Error("Informe um CPF ou CNPJ válido para assinar.");
+  }
+  return digits;
+}
+
 async function asaasFetch(path: string, init?: RequestInit): Promise<Response> {
   if (!isServerBillingEnabled()) {
     throw new Error("Asaas desabilitado (BILLING_ENABLED=false).");
@@ -185,14 +210,17 @@ export class AsaasBillingProvider implements BillingProvider {
     userId: string;
     email: string;
     name: string;
+    cpfCnpj?: string;
   }): Promise<{ customerId: string }> {
+    const payload: Record<string, string> = {
+      name: input.name || input.email,
+      email: input.email,
+      externalReference: input.userId,
+    };
+    if (input.cpfCnpj) payload.cpfCnpj = input.cpfCnpj;
     const res = await asaasFetch("/customers", {
       method: "POST",
-      body: JSON.stringify({
-        name: input.name || input.email,
-        email: input.email,
-        externalReference: input.userId,
-      }),
+      body: JSON.stringify(payload),
     });
     const data = (await res.json()) as { id?: string; errors?: unknown };
     if (!res.ok || !data.id) {
@@ -214,10 +242,14 @@ export class AsaasBillingProvider implements BillingProvider {
     priceCents: number;
     existingCustomerId?: string;
     subscriptionId: string;
+    cpfCnpj?: string;
   }): Promise<CheckoutSessionResult> {
+    const cpfCnpj = requireNormalizedTaxId(input.cpfCnpj);
     let customerId = input.existingCustomerId;
     if (!customerId) {
-      customerId = (await this.createCustomer(input)).customerId;
+      customerId = (await this.createCustomer({ ...input, cpfCnpj })).customerId;
+    } else {
+      await syncAsaasCustomerTaxId(customerId, cpfCnpj);
     }
 
     const value = input.priceCents / 100;
@@ -235,7 +267,7 @@ export class AsaasBillingProvider implements BillingProvider {
         err instanceof AsaasOperationError &&
         isInvalidCustomerError(err.codes.map((code) => ({ code })));
       if (!canRetryCustomer) throw err;
-      customerId = (await this.createCustomer(input)).customerId;
+      customerId = (await this.createCustomer({ ...input, cpfCnpj })).customerId;
       data = await createAsaasSubscription({
         customerId,
         value,

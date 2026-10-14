@@ -46,6 +46,7 @@ async function main() {
       name: `CM Probe ${Date.now()}`,
       email: `cm-probe-${Date.now()}@crime-mania.test`,
       externalReference: `probe-${Date.now()}`,
+      cpfCnpj: "24971563792",
     }),
   });
   console.log("customer:", cust.status, JSON.stringify(cust.json));
@@ -61,11 +62,14 @@ async function main() {
     cycle: "MONTHLY",
     description: "Crime Mania — tier1-monthly",
     externalReference: crypto.randomUUID(),
-    callback: {
-      successUrl: "https://crime-mania.vercel.app/membro/conta?checkout=success",
-      autoRedirect: true,
-    },
   };
+  const successUrl = process.env.ASAAS_CHECKOUT_SUCCESS_URL?.trim();
+  if (successUrl?.startsWith("https://")) {
+    (subBody as { callback?: unknown }).callback = {
+      successUrl: successUrl.replace(/\/$/, ""),
+      autoRedirect: true,
+    };
+  }
   const sub = await asaas("/subscriptions", {
     method: "POST",
     body: JSON.stringify(subBody),

@@ -10,6 +10,7 @@ import { assertSameOrigin } from "@/lib/http/same-origin";
 
 const schema = z.object({
   planId: z.string(),
+  cpfCnpj: z.string().min(11).max(18).optional(),
 });
 
 export async function POST(request: Request) {
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
       email: session.email,
       displayName: session.displayName,
       planId: parsed.data.planId,
+      cpfCnpj: parsed.data.cpfCnpj,
       session: { isTestUser: session.isTestUser, email: session.email },
     });
 

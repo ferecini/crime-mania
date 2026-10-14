@@ -33,13 +33,15 @@ export function parseAsaasErrors(body: unknown): AsaasErrorItem[] {
     }));
 }
 
+const GENERIC_INVALID_OBJECT =
+  "Configuração de cobrança inválida no Asaas. A equipe foi notificada nos logs.";
+
 const USER_SAFE_BY_CODE: Record<string, string> = {
   invalid_access_token:
     "Pagamento indisponível: chave Asaas inválida. A equipe precisa revisar ASAAS_API_KEY na Vercel.",
   invalid_customer:
     "Não foi possível vincular sua conta ao Asaas. Tente de novo em instantes ou contate o suporte.",
-  invalid_object:
-    "Configuração de cobrança inválida no Asaas. A equipe foi notificada nos logs.",
+  invalid_object: GENERIC_INVALID_OBJECT,
   invalid_callback:
     "URL de retorno após pagamento não está liberada no Asaas. Assinatura sem redirecionamento automático.",
   invalid_successUrl:
@@ -50,6 +52,29 @@ const USER_SAFE_BY_CODE: Record<string, string> = {
     "Data da primeira cobrança inválida. Tente novamente em instantes.",
 };
 
+export function isMissingCustomerTaxIdError(items: AsaasErrorItem[]): boolean {
+  return items.some(
+    (e) =>
+      e.code === "invalid_object" &&
+      /CPF|CNPJ/i.test(e.description ?? ""),
+  );
+}
+
+function userMessageForItem(item: AsaasErrorItem): string | undefined {
+  const code = item.code?.trim();
+  const desc = item.description?.trim() ?? "";
+  if (isMissingCustomerTaxIdError([item])) {
+    return "Informe um CPF ou CNPJ válido para continuar — o Asaas exige esse dado na nota fiscal.";
+  }
+  if (code && USER_SAFE_BY_CODE[code]) {
+    return USER_SAFE_BY_CODE[code];
+  }
+  if (code === "invalid_object" && /billingType|forma de pagamento/i.test(desc)) {
+    return "Forma de pagamento indisponível na conta Asaas. A equipe foi notificada nos logs.";
+  }
+  return undefined;
+}
+
 export function userMessageForAsaasErrors(
   items: AsaasErrorItem[],
   httpStatus: number,
@@ -59,10 +84,8 @@ export function userMessageForAsaasErrors(
     return USER_SAFE_BY_CODE.invalid_access_token;
   }
   for (const item of items) {
-    const code = item.code?.trim();
-    if (code && USER_SAFE_BY_CODE[code]) {
-      return USER_SAFE_BY_CODE[code];
-    }
+    const mapped = userMessageForItem(item);
+    if (mapped) return mapped;
   }
   const desc = items.find((e) => e.description?.trim())?.description?.trim();
   if (desc && desc.length <= 160 && !/access_token|api key/i.test(desc)) {

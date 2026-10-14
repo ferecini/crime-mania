@@ -17,6 +17,7 @@ export async function startBillingCheckout(input: {
   email: string;
   displayName: string;
   planId: string;
+  cpfCnpj?: string;
   session?: BillingSessionContext | null;
 }): Promise<CheckoutSessionResult> {
   assertBillingAccountAllowed(input.userId, {
@@ -66,6 +67,7 @@ export async function startBillingCheckout(input: {
       userId: input.userId,
       email: input.email,
       name: input.displayName,
+      cpfCnpj: input.cpfCnpj,
     });
     await upsertBillingCustomer({
       userId: input.userId,
@@ -90,6 +92,7 @@ export async function startBillingCheckout(input: {
       priceCents: plan.priceCents,
       existingCustomerId: customer.customer_id,
       subscriptionId,
+      cpfCnpj: input.cpfCnpj,
     });
   } catch (err) {
     throw err instanceof Error ? err : new Error("Checkout indisponível.");
