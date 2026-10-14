@@ -36,6 +36,12 @@ export function appBaseUrl(): string {
   return "http://localhost:3000";
 }
 
+/** Nome exibido em descrições de cobrança/assinatura (cabeçalho da fatura Asaas vem do painel da conta). */
+export function billingMerchantName(): string {
+  const raw = process.env.BILLING_MERCHANT_NAME?.trim();
+  return raw || "Crime Mania";
+}
+
 export const PAST_DUE_GRACE_DAYS = 5;
 
 export type CommercialPlanId =

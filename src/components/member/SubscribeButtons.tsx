@@ -8,11 +8,13 @@ import { isValidCpfCnpj } from "@/lib/billing/cpf-cnpj";
 
 export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
   const [loading, setLoading] = useState<PlanId | null>(null);
+  const [cpfModalPlan, setCpfModalPlan] = useState<PlanId | null>(null);
   const [cpfCnpj, setCpfCnpj] = useState("");
   const [feedback, setFeedback] = useState<{ kind: "error" | "info"; message: string } | null>(
     null,
   );
   const feedbackRef = useRef<HTMLDivElement | null>(null);
+  const cpfInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (feedback?.kind === "error") {
@@ -20,33 +22,49 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
     }
   }, [feedback]);
 
-  async function checkout(planId: PlanId) {
-    if (checkoutEnabled && !isValidCpfCnpj(cpfCnpj)) {
-      setFeedback({
-        kind: "error",
-        message: "Informe um CPF ou CNPJ válido no painel acima antes de assinar.",
-      });
-      return;
+  useEffect(() => {
+    if (cpfModalPlan) {
+      cpfInputRef.current?.focus();
     }
+  }, [cpfModalPlan]);
+
+  async function checkout(planId: PlanId, taxId?: string) {
     setLoading(planId);
     setFeedback(null);
     try {
+      const body: { planId: PlanId; cpfCnpj?: string } = { planId };
+      if (taxId?.trim()) body.cpfCnpj = taxId.trim();
+
       const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId,
-          ...(checkoutEnabled && cpfCnpj.trim() ? { cpfCnpj: cpfCnpj.trim() } : {}),
-        }),
+        body: JSON.stringify(body),
       });
-      const data = (await res.json()) as { error?: string; message?: string; mode?: string; checkoutUrl?: string };
+      const data = (await res.json()) as {
+        error?: string;
+        message?: string;
+        mode?: string;
+        checkoutUrl?: string;
+        needsCpf?: boolean;
+      };
       if (!res.ok) {
+        if (data.needsCpf && checkoutEnabled) {
+          setCpfModalPlan(planId);
+          setFeedback({
+            kind: "info",
+            message:
+              data.error ??
+              "Informe seu CPF ou CNPJ para continuar. Você só verá este passo se o Asaas exigir o documento antes de abrir a fatura.",
+          });
+          return;
+        }
         setFeedback({
           kind: "error",
           message: data.error ?? "Não foi possível abrir o pagamento. Tente de novo em instantes.",
         });
         return;
       }
+      setCpfModalPlan(null);
       if (data.mode === "hosted" && typeof data.checkoutUrl === "string") {
         const url = data.checkoutUrl.trim();
         if (url.startsWith("http")) {
@@ -74,6 +92,18 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
     }
   }
 
+  function confirmCpfModal() {
+    if (!cpfModalPlan) return;
+    if (!isValidCpfCnpj(cpfCnpj)) {
+      setFeedback({
+        kind: "error",
+        message: "Informe um CPF ou CNPJ válido para continuar.",
+      });
+      return;
+    }
+    void checkout(cpfModalPlan, cpfCnpj);
+  }
+
   return (
     <div className="space-y-4">
       {feedback && (
@@ -95,18 +125,26 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
           <p>{feedback.message}</p>
         </div>
       )}
-      {checkoutEnabled && (
-        <div className="cm-panel max-w-md space-y-3 p-4 text-sm">
-          <h2 className="font-display text-lg text-white">CPF ou CNPJ</h2>
+      {cpfModalPlan && checkoutEnabled && (
+        <div
+          className="cm-panel max-w-md space-y-3 p-4 text-sm"
+          role="dialog"
+          aria-labelledby="cpf-modal-title"
+          aria-modal="true"
+        >
+          <h2 id="cpf-modal-title" className="font-display text-lg text-white">
+            CPF ou CNPJ
+          </h2>
           <p className="text-xs leading-relaxed text-cm-gray">
-            Informe uma vez antes de escolher o plano. Obrigatório para emitir a cobrança no Asaas;
-            seus dados ficam apenas no provedor de pagamento.
+            Necessário para emitir a cobrança no Asaas. Seus dados ficam apenas no provedor de
+            pagamento.
           </p>
           <label className="block space-y-1.5">
             <span className="text-xs font-medium uppercase tracking-wide text-cm-gray">
               Documento
             </span>
             <input
+              ref={cpfInputRef}
               type="text"
               inputMode="numeric"
               autoComplete="off"
@@ -116,6 +154,27 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
               className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-cm-gray/60 focus:border-cm-red/50 focus:outline-none focus:ring-1 focus:ring-cm-red/40"
             />
           </label>
+          <div className="flex flex-wrap gap-2 pt-1">
+            <Button
+              className="min-h-10"
+              disabled={loading !== null}
+              onClick={() => confirmCpfModal()}
+            >
+              {loading === cpfModalPlan ? "Processando…" : "Continuar para pagamento"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-10"
+              disabled={loading !== null}
+              onClick={() => {
+                setCpfModalPlan(null);
+                setFeedback(null);
+              }}
+            >
+              Cancelar
+            </Button>
+          </div>
         </div>
       )}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

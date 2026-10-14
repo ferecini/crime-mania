@@ -13,7 +13,25 @@ Integração de assinatura recorrente via Asaas. **Checkout e provider real só 
 | `ASAAS_API_KEY` | Server | Chave API (nunca commitar) |
 | `ASAAS_WEBHOOK_TOKEN` | Server | Token enviado pelo Asaas no header do webhook |
 | `APP_BASE_URL` | Server | Ex.: `https://crime-mania.vercel.app` |
+| `BILLING_MERCHANT_NAME` | Server | Opcional — padrão `Crime Mania`; usado na **descrição** da assinatura/cobrança (`Crime Mania — tier1-monthly`). **Não** altera o cabeçalho azul da fatura hospedada. |
 | `POSTGRES_URL` | Server | Neon — tabelas `billing_*` |
+
+## Marca na fatura Asaas (cabeçalho azul)
+
+O bloco superior da **fatura hospedada** (nome do vendedor, CPF/CNPJ do recebedor, logo) vem da **conta comercial Asaas** do recebedor, não do comprador nem da API de pagamento.
+
+| O quê | Onde configurar |
+|-------|-----------------|
+| Nome **Crime Mania** (em vez de nome pessoal do titular) | Painel Asaas → **Minha conta** / dados comerciais — **nome fantasia** e **razão social** (MEI/PF pode usar nome fantasia mesmo sem CNPJ empresarial, conforme cadastro Asaas) |
+| Logo no topo da fatura | Painel Asaas → personalização / logo da conta (quando disponível no seu tipo de conta) |
+| Texto da linha de cobrança (`Crime Mania — tier1-monthly`) | Código — `BILLING_MERCHANT_NAME` + `description` em `POST /subscriptions` |
+
+A API **não** expõe campo confiável para substituir o cabeçalho do recebedor na fatura; `createCustomer` envia e-mail e nome do **comprador** (correto). CPF/CNPJ do comprador: preferencialmente **só na fatura Asaas** (`billingType: UNDEFINED`); se a API recusar sem documento, o site abre um painel **após** clicar em Assinar (não em `/planos` antes).
+
+### CPF/CNPJ do assinante (UX)
+
+1. Fluxo padrão: cliente Asaas **sem** `cpfCnpj` → assinatura `UNDEFINED` → link da fatura; o comprador preenche documento na página Asaas quando necessário.
+2. Fallback: se `POST /subscriptions` ou a 1ª cobrança retornar `invalid_object` exigindo CPF/CNPJ, a API responde `422` com `needsCpf: true` e a UI pede o documento **depois** do clique em Assinar.
 
 Contas QA: **nunca** passam pelo checkout real. Com `ALLOW_TEST_USERS=true` (ou `BILLING_QA_TEST_MODE=true`), os IDs fixos de QA podem ensaiar plano e valor em Minha conta; o teste não chama o Asaas, não grava assinatura e não altera permissões.
 

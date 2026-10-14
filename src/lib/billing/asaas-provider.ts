@@ -1,11 +1,13 @@
 import {
   asaasApiBaseUrl,
+  billingMerchantName,
   isServerBillingEnabled,
   type CommercialPlanId,
 } from "@/lib/billing/config";
 import {
   AsaasOperationError,
   isInvalidCustomerError,
+  isMissingCustomerTaxIdError,
   parseAsaasErrors,
   throwAsaasFailure,
   logAsaasFailure,
@@ -75,7 +77,7 @@ function buildSubscriptionBody(input: {
     value: input.value,
     nextDueDate: todayIsoDateInBrazil(),
     cycle: input.planId.includes("yearly") ? "YEARLY" : "MONTHLY",
-    description: `Crime Mania — ${input.planId}`,
+    description: `${billingMerchantName()} — ${input.planId}`,
     externalReference: input.subscriptionId,
   };
   const callback = subscriptionPaymentCallback();
@@ -160,7 +162,16 @@ export async function resolveHostedCheckoutUrl(input: {
   });
   const payment = (await res.json()) as AsaasPaymentLinkFields & { errors?: unknown };
   if (!res.ok) {
-    logAsaasFailure("POST /payments (subscription link)", res.status, parseAsaasErrors(payment));
+    const items = parseAsaasErrors(payment);
+    if (isMissingCustomerTaxIdError(items)) {
+      throwAsaasFailure(
+        "POST /payments (subscription link)",
+        res.status,
+        payment,
+        "CPF ou CNPJ necessário para emitir a cobrança.",
+      );
+    }
+    logAsaasFailure("POST /payments (subscription link)", res.status, items);
     return null;
   }
   return pickPayableUrl(payment);
@@ -182,10 +193,12 @@ async function syncAsaasCustomerTaxId(customerId: string, cpfCnpj: string): Prom
   }
 }
 
-function requireNormalizedTaxId(raw: string | undefined): string {
-  const digits = normalizeCpfCnpj(raw ?? "");
+function optionalNormalizedTaxId(raw: string | undefined): string | undefined {
+  const trimmed = raw?.trim();
+  if (!trimmed) return undefined;
+  const digits = normalizeCpfCnpj(trimmed);
   if (!isValidCpfCnpj(digits)) {
-    throw new Error("Informe um CPF ou CNPJ válido para assinar.");
+    throw new Error("Informe um CPF ou CNPJ válido para continuar.");
   }
   return digits;
 }
@@ -244,11 +257,11 @@ export class AsaasBillingProvider implements BillingProvider {
     subscriptionId: string;
     cpfCnpj?: string;
   }): Promise<CheckoutSessionResult> {
-    const cpfCnpj = requireNormalizedTaxId(input.cpfCnpj);
+    const cpfCnpj = optionalNormalizedTaxId(input.cpfCnpj);
     let customerId = input.existingCustomerId;
     if (!customerId) {
       customerId = (await this.createCustomer({ ...input, cpfCnpj })).customerId;
-    } else {
+    } else if (cpfCnpj) {
       await syncAsaasCustomerTaxId(customerId, cpfCnpj);
     }
 

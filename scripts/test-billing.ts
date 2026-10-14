@@ -7,6 +7,7 @@ import {
   ASAAS_WEBHOOK_EVENTS_ALLOWLIST,
   COMMERCIAL_PLANS,
   PAST_DUE_GRACE_DAYS,
+  billingMerchantName,
   billingProviderName,
   isServerBillingEnabled,
 } from "../src/lib/billing/config";
@@ -56,6 +57,14 @@ function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: s
 
 console.log("billing catalog…");
 assert.equal(COMMERCIAL_PLANS["tier2-yearly"].priceCents, 15900);
+
+console.log("billing merchant name…");
+const prevMerchant = process.env.BILLING_MERCHANT_NAME;
+delete process.env.BILLING_MERCHANT_NAME;
+assert.equal(billingMerchantName(), "Crime Mania");
+process.env.BILLING_MERCHANT_NAME = "  Test Brand  ";
+assert.equal(billingMerchantName(), "Test Brand");
+process.env.BILLING_MERCHANT_NAME = prevMerchant;
 assert.equal(COMMERCIAL_PLANS["tier1-monthly"].priceCents, 900);
 
 console.log("pending blocks access…");

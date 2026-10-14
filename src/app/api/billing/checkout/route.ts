@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession, createSessionToken, COOKIE_NAME } from "@/lib/auth/session";
-import { AsaasOperationError } from "@/lib/billing/asaas-errors";
+import { AsaasOperationError, isMissingCustomerTaxIdError } from "@/lib/billing/asaas-errors";
 import { startBillingCheckout } from "@/lib/billing/checkout-service";
 import { isCommercialPlanId, isServerBillingEnabled } from "@/lib/billing/config";
 import { syncUserTierFromBilling } from "@/lib/billing/tier-sync";
@@ -81,8 +81,30 @@ export async function POST(request: Request) {
         httpStatus: err.httpStatus,
         codes: err.codes.length ? err.codes : undefined,
       });
+      const items = err.codes.map((code, i) => ({
+        code,
+        description: err.descriptions[i] ?? err.descriptions[0],
+      }));
+      if (
+        isMissingCustomerTaxIdError(items) ||
+        /CPF ou CNPJ/i.test(err.message)
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Precisamos do seu CPF ou CNPJ para emitir a cobrança no Asaas. Informe abaixo e tente novamente.",
+            needsCpf: true,
+          },
+          { status: 422 },
+        );
+      }
     }
     const message = err instanceof Error ? err.message : "Checkout indisponível.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    const status =
+      err instanceof Error && /CPF ou CNPJ válido/i.test(err.message) ? 422 : 400;
+    return NextResponse.json(
+      { error: message, ...(status === 422 ? { needsCpf: true } : {}) },
+      { status },
+    );
   }
 }
