@@ -3,8 +3,14 @@ import {
   isServerBillingEnabled,
   type CommercialPlanId,
 } from "@/lib/billing/config";
+import {
+  AsaasOperationError,
+  isInvalidCustomerError,
+  parseAsaasErrors,
+  throwAsaasFailure,
+  logAsaasFailure,
+} from "@/lib/billing/asaas-errors";
 import type { BillingProvider, CheckoutSessionResult } from "@/lib/billing/types";
-import { appBaseUrl } from "@/lib/billing/config";
 
 function apiKey(): string {
   const key = process.env.ASAAS_API_KEY?.trim();
@@ -43,6 +49,63 @@ export function pickPayableUrl(payment: AsaasPaymentLinkFields): string | null {
 
 function todayIsoDateInBrazil(): string {
   return new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+}
+
+/** Optional post-payment redirect — only when domain is registered in Asaas. */
+function subscriptionPaymentCallback():
+  | { successUrl: string; autoRedirect: true }
+  | undefined {
+  const explicit = process.env.ASAAS_CHECKOUT_SUCCESS_URL?.trim();
+  if (explicit?.startsWith("https://")) {
+    return { successUrl: explicit.replace(/\/$/, ""), autoRedirect: true };
+  }
+  return undefined;
+}
+
+function buildSubscriptionBody(input: {
+  customerId: string;
+  value: number;
+  planId: CommercialPlanId;
+  subscriptionId: string;
+}): Record<string, unknown> {
+  const body: Record<string, unknown> = {
+    customer: input.customerId,
+    billingType: "UNDEFINED",
+    value: input.value,
+    nextDueDate: todayIsoDateInBrazil(),
+    cycle: input.planId.includes("yearly") ? "YEARLY" : "MONTHLY",
+    description: `Crime Mania — ${input.planId}`,
+    externalReference: input.subscriptionId,
+  };
+  const callback = subscriptionPaymentCallback();
+  if (callback) body.callback = callback;
+  return body;
+}
+
+async function createAsaasSubscription(input: {
+  customerId: string;
+  value: number;
+  planId: CommercialPlanId;
+  subscriptionId: string;
+}): Promise<{ id: string; invoiceUrl?: string | null }> {
+  const res = await asaasFetch("/subscriptions", {
+    method: "POST",
+    body: JSON.stringify(buildSubscriptionBody(input)),
+  });
+  const data = (await res.json()) as {
+    id?: string;
+    invoiceUrl?: string;
+    errors?: unknown;
+  };
+  if (!res.ok || !data.id) {
+    throwAsaasFailure(
+      "POST /subscriptions",
+      res.status,
+      data,
+      "Falha ao iniciar assinatura Asaas.",
+    );
+  }
+  return { id: data.id, invoiceUrl: data.invoiceUrl };
 }
 
 async function waitMs(ms: number): Promise<void> {
@@ -95,7 +158,10 @@ export async function resolveHostedCheckoutUrl(input: {
     }),
   });
   const payment = (await res.json()) as AsaasPaymentLinkFields & { errors?: unknown };
-  if (!res.ok) return null;
+  if (!res.ok) {
+    logAsaasFailure("POST /payments (subscription link)", res.status, parseAsaasErrors(payment));
+    return null;
+  }
   return pickPayableUrl(payment);
 }
 
@@ -130,10 +196,11 @@ export class AsaasBillingProvider implements BillingProvider {
     });
     const data = (await res.json()) as { id?: string; errors?: unknown };
     if (!res.ok || !data.id) {
-      throw new Error(
-        res.status === 401
-          ? "Chave API Asaas inválida (401). Atualize ASAAS_API_KEY na Vercel."
-          : "Falha ao criar cliente Asaas.",
+      throwAsaasFailure(
+        "POST /customers",
+        res.status,
+        data,
+        "Falha ao criar cliente Asaas.",
       );
     }
     return { customerId: data.id };
@@ -154,33 +221,27 @@ export class AsaasBillingProvider implements BillingProvider {
     }
 
     const value = input.priceCents / 100;
-    const res = await asaasFetch("/subscriptions", {
-      method: "POST",
-      body: JSON.stringify({
-        customer: customerId,
-        billingType: "UNDEFINED",
+    let data: { id: string; invoiceUrl?: string | null };
+    try {
+      data = await createAsaasSubscription({
+        customerId,
         value,
-        nextDueDate: todayIsoDateInBrazil(),
-        cycle: input.planId.includes("yearly") ? "YEARLY" : "MONTHLY",
-        description: `Crime Mania — ${input.planId}`,
-        externalReference: input.subscriptionId,
-        callback: {
-          successUrl: `${appBaseUrl()}/membro/conta?checkout=success`,
-          autoRedirect: true,
-        },
-      }),
-    });
-    const data = (await res.json()) as {
-      id?: string;
-      invoiceUrl?: string;
-      errors?: unknown;
-    };
-    if (!res.ok || !data.id) {
-      const detail =
-        res.status === 401
-          ? "Chave API Asaas inválida (401). Atualize ASAAS_API_KEY na Vercel."
-          : "Falha ao iniciar assinatura Asaas.";
-      throw new Error(detail);
+        planId: input.planId,
+        subscriptionId: input.subscriptionId,
+      });
+    } catch (err) {
+      const canRetryCustomer =
+        !!input.existingCustomerId &&
+        err instanceof AsaasOperationError &&
+        isInvalidCustomerError(err.codes.map((code) => ({ code })));
+      if (!canRetryCustomer) throw err;
+      customerId = (await this.createCustomer(input)).customerId;
+      data = await createAsaasSubscription({
+        customerId,
+        value,
+        planId: input.planId,
+        subscriptionId: input.subscriptionId,
+      });
     }
 
     const checkoutUrl = await resolveHostedCheckoutUrl({

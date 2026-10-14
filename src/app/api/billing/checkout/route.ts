@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession, createSessionToken, COOKIE_NAME } from "@/lib/auth/session";
+import { AsaasOperationError } from "@/lib/billing/asaas-errors";
 import { startBillingCheckout } from "@/lib/billing/checkout-service";
 import { isCommercialPlanId, isServerBillingEnabled } from "@/lib/billing/config";
 import { syncUserTierFromBilling } from "@/lib/billing/tier-sync";
@@ -73,6 +74,12 @@ export async function POST(request: Request) {
     });
     return response;
   } catch (err) {
+    if (err instanceof AsaasOperationError) {
+      console.error("[billing/checkout] asaas", {
+        httpStatus: err.httpStatus,
+        codes: err.codes.length ? err.codes : undefined,
+      });
+    }
     const message = err instanceof Error ? err.message : "Checkout indisponível.";
     return NextResponse.json({ error: message }, { status: 400 });
   }

@@ -28,6 +28,10 @@ import { assertSameOrigin } from "../src/lib/http/same-origin";
 import { assertBillingAccountAllowed } from "../src/lib/billing/billing-account";
 import { hydrateUsersStore } from "../src/lib/auth/users-store-hydrate";
 import { pickPayableUrl } from "../src/lib/billing/asaas-provider";
+import {
+  parseAsaasErrors,
+  userMessageForAsaasErrors,
+} from "../src/lib/billing/asaas-errors";
 
 function sub(partial: Partial<BillingSubscriptionRow> & { id: string; user_id: string }): BillingSubscriptionRow {
   return {
@@ -142,6 +146,20 @@ assert.equal(
 );
 assert.equal(pickPayableUrl({ invoiceUrl: "not-a-url" }), null);
 assert.equal(pickPayableUrl({}), null);
+
+console.log("Asaas error parsing…");
+const parsedErrors = parseAsaasErrors({
+  errors: [{ code: "invalid_successUrl", description: "internal detail" }],
+});
+assert.equal(parsedErrors[0]?.code, "invalid_successUrl");
+assert.match(
+  userMessageForAsaasErrors(parsedErrors, 400, "fallback"),
+  /Domínio de retorno/,
+);
+assert.equal(
+  userMessageForAsaasErrors([], 401, "fallback"),
+  userMessageForAsaasErrors([{ code: "invalid_access_token" }], 401, "fallback"),
+);
 
 async function integration() {
   if (!process.argv.includes("--integration")) return;

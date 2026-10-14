@@ -95,6 +95,15 @@ export async function startBillingCheckout(input: {
     throw err instanceof Error ? err : new Error("Checkout indisponível.");
   }
 
+  if (session.customerId !== customer.customer_id) {
+    await upsertBillingCustomer({
+      userId: input.userId,
+      customerId: session.customerId,
+      email: input.email,
+    });
+    customer = { ...customer, customer_id: session.customerId };
+  }
+
   if (isServerBillingEnabled()) {
     if (session.mode === "simulated") {
       throw new Error(
