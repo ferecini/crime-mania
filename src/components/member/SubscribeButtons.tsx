@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { PLANS, PLAN_HIGHLIGHTS, type PlanId } from "@/lib/plans";
 import { Button } from "@/components/ui/Button";
 import { WaitlistForm } from "@/components/member/WaitlistForm";
+import { isValidCpfCnpj } from "@/lib/billing/cpf-cnpj";
 
 export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?: boolean }) {
   const [loading, setLoading] = useState<PlanId | null>(null);
@@ -20,10 +21,10 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
   }, [feedback]);
 
   async function checkout(planId: PlanId) {
-    if (checkoutEnabled && cpfCnpj.replace(/\D/g, "").length < 11) {
+    if (checkoutEnabled && !isValidCpfCnpj(cpfCnpj)) {
       setFeedback({
         kind: "error",
-        message: "Informe seu CPF ou CNPJ antes de assinar — é exigido pelo gateway de pagamento.",
+        message: "Informe um CPF ou CNPJ válido no painel acima antes de assinar.",
       });
       return;
     }
@@ -94,30 +95,28 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
           <p>{feedback.message}</p>
         </div>
       )}
-      <p className="text-sm leading-relaxed text-cm-gray">
-        Assinaturas em fase de lançamento. Os valores finais serão publicados pela equipe Crime
-        Mania. Enquanto isso, entre na lista de espera ou finalize a compra quando o checkout estiver
-        ativo.
-      </p>
       {checkoutEnabled && (
-        <label className="block max-w-md space-y-1.5">
-          <span className="text-xs font-medium uppercase tracking-wide text-cm-gray">
-            CPF ou CNPJ
-          </span>
-          <input
-            type="text"
-            inputMode="numeric"
-            autoComplete="off"
-            placeholder="000.000.000-00"
-            value={cpfCnpj}
-            onChange={(e) => setCpfCnpj(e.target.value)}
-            className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-cm-gray/60 focus:border-cm-red/50 focus:outline-none focus:ring-1 focus:ring-cm-red/40"
-          />
-          <span className="text-[11px] text-cm-gray">
-            Obrigatório para emitir a cobrança no Asaas. Seus dados ficam apenas no provedor de
-            pagamento.
-          </span>
-        </label>
+        <div className="cm-panel max-w-md space-y-3 p-4 text-sm">
+          <h2 className="font-display text-lg text-white">CPF ou CNPJ</h2>
+          <p className="text-xs leading-relaxed text-cm-gray">
+            Informe uma vez antes de escolher o plano. Obrigatório para emitir a cobrança no Asaas;
+            seus dados ficam apenas no provedor de pagamento.
+          </p>
+          <label className="block space-y-1.5">
+            <span className="text-xs font-medium uppercase tracking-wide text-cm-gray">
+              Documento
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              placeholder="000.000.000-00 ou 00.000.000/0000-00"
+              value={cpfCnpj}
+              onChange={(e) => setCpfCnpj(e.target.value)}
+              className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white placeholder:text-cm-gray/60 focus:border-cm-red/50 focus:outline-none focus:ring-1 focus:ring-cm-red/40"
+            />
+          </label>
+        </div>
       )}
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {PLANS.map((plan) => (
@@ -149,7 +148,7 @@ export function SubscribeButtons({ checkoutEnabled = false }: { checkoutEnabled?
                 disabled={loading !== null}
                 onClick={() => checkout(plan.id)}
               >
-                {loading === plan.id ? "Processando…" : "Assinar agora"}
+                {loading === plan.id ? "Processando…" : "Assinar"}
               </Button>
             ) : (
               <WaitlistForm planId={plan.id} />
