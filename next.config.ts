@@ -7,12 +7,24 @@ const nextConfig: NextConfig = {
     "/api/admin/dossier/worker": ["./node_modules/pdfjs-dist/legacy/build/pdf.worker.mjs"],
   },
   async redirects() {
+    const canonical = "crimemania.com.br";
+    const alternateHosts = [
+      "www.crimemania.com.br",
+      "crimemania.com",
+      "www.crimemania.com",
+    ];
     return [
       {
         source: "/membro/exclusivo",
         destination: "/membro/episodios",
         permanent: true,
       },
+      ...alternateHosts.map((host) => ({
+        source: "/:path*",
+        has: [{ type: "host" as const, value: host }],
+        destination: `https://${canonical}/:path*`,
+        permanent: true,
+      })),
     ];
   },
   images: {

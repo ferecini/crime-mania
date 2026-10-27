@@ -12,7 +12,8 @@ Integração de assinatura recorrente via Asaas. **Checkout e provider real só 
 | `ASAAS_ENVIRONMENT` | Server | `sandbox` ou `production` |
 | `ASAAS_API_KEY` | Server | Chave API (nunca commitar) |
 | `ASAAS_WEBHOOK_TOKEN` | Server | Token enviado pelo Asaas no header do webhook |
-| `APP_BASE_URL` | Server | Ex.: `https://crime-mania.vercel.app` |
+| `APP_BASE_URL` | Server | Produção canônica: `https://crimemania.com.br` (até DNS ok: `https://crime-mania.vercel.app`) |
+| `ASAAS_CHECKOUT_SUCCESS_URL` | Server | Opcional — URL **https** em domínio **cadastrado no painel Asaas**; ex.: `https://crimemania.com.br/membro/conta`. Sem isso, a fatura Asaas não redireciona automaticamente após pagamento. |
 | `BILLING_MERCHANT_NAME` | Server | Opcional — padrão `Crime Mania`; usado na **descrição** da assinatura/cobrança (`Crime Mania — tier1-monthly`). **Não** altera o cabeçalho azul da fatura hospedada. |
 | `POSTGRES_URL` | Server | Neon — tabelas `billing_*` |
 
@@ -42,6 +43,17 @@ POSTGRES_URL=... npm run billing:migrate
 ```
 
 Arquivo: `migrations/006_billing.sql`
+
+## Domínio customizado (Asaas)
+
+Antes de definir `ASAAS_CHECKOUT_SUCCESS_URL` com `crimemania.com.br` ou `crimemania.com`:
+
+1. Concluir DNS na Vercel ([custom-domains.md](./custom-domains.md)) até status **Valid**.
+2. No painel Asaas (conta logada) → **Integrações** / configurações de checkout ou URLs permitidas — cadastrar o host exato usado na success URL (ex.: `crimemania.com.br`).
+3. Production na Vercel:
+   - `APP_BASE_URL=https://crimemania.com.br`
+   - `ASAAS_CHECKOUT_SUCCESS_URL=https://crimemania.com.br/membro/conta` (ajuste o path se a UX mudar)
+4. Webhook de produção: `https://crimemania.com.br/api/billing/webhook/asaas` (substituir `{production-host}` abaixo quando migrar).
 
 ## URLs de webhook (registrar no painel Asaas)
 
