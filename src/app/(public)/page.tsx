@@ -1,5 +1,7 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { EpisodeListItem } from "@/components/episodes/EpisodeListItem";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 import { EditorialHero } from "@/components/home/EditorialHero";
 import { RecentEpisodeStrip } from "@/components/home/RecentEpisodeStrip";
 import { ProductVisual } from "@/components/shop/ProductVisual";
@@ -10,6 +12,13 @@ import { SHOP_PRODUCTS } from "@/data/products";
 import { getPublicEpisodes } from "@/data/episodes";
 /** ISR catálogo — alinhar com EPISODE_REVALIDATE_SECONDS no servidor */
 export const revalidate = 1800;
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Início",
+  description:
+    "Crime Mania — podcast de true crime com casos reais, narrativa investigativa e respeito às vítimas. Ouça o episódio mais recente e conheça a comunidade.",
+  path: "/",
+});
 
 export default async function HomePage() {
   const episodes = await getPublicEpisodes();

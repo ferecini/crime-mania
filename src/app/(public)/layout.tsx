@@ -1,5 +1,6 @@
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
+import { SiteJsonLd } from "@/components/seo/SiteJsonLd";
 import { getSession } from "@/lib/auth/session";
 
 export default async function PublicLayout({
@@ -14,6 +15,7 @@ export default async function PublicLayout({
 
   return (
     <>
+      <SiteJsonLd />
       <SiteHeader memberSession={memberSession} />
       <main>{children}</main>
       <SiteFooter memberSession={memberSession} />

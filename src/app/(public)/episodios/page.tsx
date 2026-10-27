@@ -1,8 +1,16 @@
+import type { Metadata } from "next";
 import { EpisodeListItem } from "@/components/episodes/EpisodeListItem";
 import { ButtonLink } from "@/components/ui/Button";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { getPublicEpisodes } from "@/data/episodes";
-export const metadata = { title: "Episódios" };
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "Episódios",
+  description:
+    "Catálogo de episódios do Crime Mania — true crime em áudio e vídeo. Ouça no site ou nas plataformas de podcast.",
+  path: "/episodios",
+});
 export const revalidate = 1800;
 
 export default async function EpisodesCatalogPage() {

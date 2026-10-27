@@ -1,9 +1,15 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { ProductVisual } from "@/components/shop/ProductVisual";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SHOP_PRODUCTS } from "@/data/products";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata = { title: "Shop" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Shop",
+  description: "Loja Crime Mania — produtos e pré-venda para fãs de true crime.",
+  path: "/shop",
+});
 
 export default function ShopPage() {
   return (

@@ -1,10 +1,17 @@
 import { Suspense } from "react";
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AuthForms } from "@/components/auth/AuthForms";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { getSession } from "@/lib/auth/session";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
-export const metadata = { title: "Entrar" };
+export const metadata: Metadata = buildPageMetadata({
+  title: "Entrar",
+  description: "Acesso de membros Crime Mania.",
+  path: "/entrar",
+  noIndex: true,
+});
 
 export default async function LoginPage() {
   const session = await getSession();

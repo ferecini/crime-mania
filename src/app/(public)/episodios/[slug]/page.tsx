@@ -11,8 +11,8 @@ import {
   getArchivedEpisodeBySlug,
   getEpisodeBySlug,
   getPublicEpisodes,
-  SITE_URL,
 } from "@/data/episodes";
+import { absoluteUrl, getSiteUrl } from "@/lib/seo/site-url";
 import { formatDateBR } from "@/lib/format";
 import { resolveEpisodeBackgroundSrc } from "@/lib/visual/category-artwork";
 
@@ -33,20 +33,25 @@ export async function generateMetadata({
   if (!episode) return { title: "Episódio" };
   const title = episodePublicTitle(episode);
   const ogImage = resolveEpisodeBackgroundSrc(episode);
+  const canonical = absoluteUrl(`/episodios/${slug}`);
+  const ogImageAbsolute = ogImage.startsWith("http") ? ogImage : absoluteUrl(ogImage);
   return {
     title,
     description: episode.summary,
+    alternates: { canonical },
     openGraph: {
       title,
       description: episode.summary,
-      images: [{ url: ogImage, alt: title }],
+      url: canonical,
+      images: [{ url: ogImageAbsolute, alt: title }],
       type: "article",
+      locale: "pt_BR",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description: episode.summary,
-      images: [ogImage],
+      images: [ogImageAbsolute],
     },
   };
 }
@@ -63,7 +68,8 @@ export default async function EpisodeDetailPage({
   const episodes = await getPublicEpisodes();
   const epLabel = formatEpisodeNumber(episode.number);
   const publicTitle = episodePublicTitle(episode);
-  const pageUrl = `${SITE_URL.replace(/\/$/, "")}/episodios/${episode.slug}`;
+  const pageUrl = absoluteUrl(`/episodios/${episode.slug}`);
+  const siteUrl = getSiteUrl();
   const jsonLd: Record<string, unknown>[] = [
     {
       "@context": "https://schema.org",
@@ -75,7 +81,7 @@ export default async function EpisodeDetailPage({
       partOfSeries: {
         "@type": "PodcastSeries",
         name: "Crime Mania",
-        url: SITE_URL,
+        url: siteUrl,
       },
     },
   ];

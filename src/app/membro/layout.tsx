@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { getSession } from "@/lib/auth/session";
@@ -6,6 +7,10 @@ import { MemberBottomNav } from "@/components/member/MemberBottomNav";
 import { MemberAreaHeader } from "@/components/member/MemberAreaHeader";
 import { MemberSidebar } from "@/components/member/MemberSidebar";
 import { MediaPlaybackProvider } from "@/components/media/MediaPlaybackProvider";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 export default async function MemberLayout({
   children,

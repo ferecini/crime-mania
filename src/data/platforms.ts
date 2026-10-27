@@ -10,4 +10,5 @@ export const DEEZER_SHOW_URL = "https://www.deezer.com/br/show/2064782";
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@CRIMEMANIACOS";
 
 export const INSTAGRAM_URL = "https://www.instagram.com/crimemania/";
-export const SITE_URL = "https://www.crimemania.com.br/";
+/** @deprecated Prefer getSiteUrl() / absoluteUrl() from @/lib/seo/site-url */
+export const SITE_URL = "https://crimemania.com.br/";

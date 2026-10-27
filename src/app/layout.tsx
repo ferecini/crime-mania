@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Open_Sans } from "next/font/google";
+import { rootMetadata } from "@/lib/seo/metadata";
 import "./globals.css";
 
 const openSans = Open_Sans({
@@ -9,14 +10,7 @@ const openSans = Open_Sans({
   weight: ["400", "600", "700", "800"],
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "Crime Mania",
-    template: "%s · Crime Mania",
-  },
-  description: "Histórias verdadeiras para maníacos por true crime.",
-  metadataBase: new URL("https://www.crimemania.com.br"),
-};
+export const metadata: Metadata = rootMetadata();
 
 export default function RootLayout({
   children,
