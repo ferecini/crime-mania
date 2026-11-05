@@ -30,7 +30,9 @@
     "qa:community-preview": "node scripts/run-community-preview-qa.mjs",
     "ops:sync-editorial-env": "node scripts/sync-editorial-vercel-env.mjs",
     "billing:migrate": "node scripts/billing-migrate.mjs",
-    "test:billing": "npx --yes tsx scripts/test-billing.ts"
+    "test:billing": "npx --yes tsx scripts/test-billing.ts",
+    "spotify-soa:migrate": "node scripts/spotify-soa-migrate.mjs",
+    "test:spotify-soa": "npx --yes tsx scripts/test-spotify-soa.ts"
   },
   "dependencies": {
     "@napi-rs/canvas": "^1.0.10",

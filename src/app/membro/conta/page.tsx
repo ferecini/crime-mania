@@ -1,5 +1,7 @@
 import { AccountBillingPanel } from "@/components/member/AccountBillingPanel";
 import { AccountPreferredNameForm } from "@/components/member/AccountPreferredNameForm";
+import { SpotifyLinkPanel } from "@/components/member/SpotifyLinkPanel";
+import { isSpotifySoaReady } from "@/lib/spotify-soa/config";
 import { getSession } from "@/lib/auth/session";
 import { getEffectiveUserById, preferredNameForForm } from "@/lib/auth/users-store";
 import { isPreferredNameConfirmed } from "@/lib/auth/display-name";
@@ -7,9 +9,14 @@ import { getAccountBillingSummary } from "@/lib/billing/account-summary";
 
 export const metadata = { title: "Minha conta" };
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ spotify?: string }>;
+}) {
   const session = await getSession();
   if (!session) return null;
+  const { spotify } = await searchParams;
 
   const stored = getEffectiveUserById(session.id, session);
   const billing = await getAccountBillingSummary(session);
@@ -48,6 +55,13 @@ export default async function AccountPage() {
         />
       </dl>
       <AccountBillingPanel initial={billing} />
+      <SpotifyLinkPanel
+        enabled={isSpotifySoaReady()}
+        tier={session.tier}
+        pending={billing.subscription?.status === "pending"}
+        isTestUser={session.isTestUser}
+        status={spotify}
+      />
     </div>
   );
 }

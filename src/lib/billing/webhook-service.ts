@@ -19,6 +19,7 @@ import {
 } from "@/lib/billing/state";
 import { syncUserTierFromBilling } from "@/lib/billing/tier-sync";
 import type { WebhookContext } from "@/lib/billing/types";
+import { syncSpotifyEntitlementsSafe } from "@/lib/spotify-soa/sync";
 
 export function parseAsaasWebhookBody(body: unknown): WebhookContext | null {
   if (!body || typeof body !== "object") return null;
@@ -95,6 +96,8 @@ export async function processAsaasWebhook(
 
   await applyWebhookToSubscription(sub.id, ctx);
   await syncUserTierFromBilling(sub.user_id);
+  // Awaited (serverless pode encerrar tarefas soltas); nunca lança nem falha o webhook.
+  await syncSpotifyEntitlementsSafe(sub.user_id);
   return { ok: true };
 }
 
@@ -174,4 +177,5 @@ export async function simulatePaymentConfirmedForSubscription(
     past_due_since: null,
   });
   await syncUserTierFromBilling(sub.user_id);
+  await syncSpotifyEntitlementsSafe(sub.user_id);
 }
