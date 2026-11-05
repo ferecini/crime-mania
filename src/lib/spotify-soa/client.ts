@@ -5,6 +5,7 @@ import {
   getSpotifySoaCredentials,
 } from "@/lib/spotify-soa/config";
 import { signSoaPayload } from "@/lib/spotify-soa/jwt";
+import { spotifyPartnerUserId } from "@/lib/spotify-soa/partner-user-id";
 
 const FETCH_TIMEOUT_MS = 10_000;
 
@@ -86,10 +87,11 @@ async function postSoa(path: string, bearer: string, jwt: string): Promise<Respo
 /** POST register-user com o token do usuário; retorna completion_url. */
 export async function registerUser(
   accessToken: string,
-  partnerUserId: string,
+  crimeManiaUserId: string,
   entitlements: string[],
 ): Promise<{ completionUrl: string }> {
   const { partnerId } = getSpotifySoaCredentials();
+  const partnerUserId = spotifyPartnerUserId(crimeManiaUserId);
   const jwt = await signSoaPayload({
     partner_id: partnerId,
     partner_user_id: partnerUserId,
@@ -103,10 +105,11 @@ export async function registerUser(
 
 /** POST replace-entitlements com token client-credentials. */
 export async function replaceEntitlements(
-  partnerUserId: string,
+  crimeManiaUserId: string,
   entitlements: string[],
 ): Promise<void> {
   const { partnerId } = getSpotifySoaCredentials();
+  const partnerUserId = spotifyPartnerUserId(crimeManiaUserId);
   const token = await getClientCredentialsToken();
   const jwt = await signSoaPayload({
     partner_id: partnerId,

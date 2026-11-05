@@ -11,6 +11,7 @@ import {
 } from "../src/lib/spotify-soa/config";
 import { isSoaEligibleTier, tierToEntitlements } from "../src/lib/spotify-soa/entitlements";
 import { signSoaPayload } from "../src/lib/spotify-soa/jwt";
+import { spotifyPartnerUserId } from "../src/lib/spotify-soa/partner-user-id";
 import { syncSpotifyEntitlementsForUser } from "../src/lib/spotify-soa/sync";
 import { QA_USER_IDS } from "../src/lib/auth/qa-users";
 
@@ -30,6 +31,14 @@ async function main() {
   delete process.env.SPOTIFY_SOA_ENTITLEMENT_TIER2;
   assert.equal(isSoaEligibleTier("none"), false);
   assert.equal(isSoaEligibleTier("tier1"), true);
+
+  // partner_user_id (Spotify: hex 16–128)
+  assert.equal(
+    spotifyPartnerUserId("550e8400-e29b-41d4-a716-446655440000"),
+    "550e8400e29b41d4a716446655440000",
+  );
+  const hashed = spotifyPartnerUserId("00000000-0000-4000-8000-crime00000001");
+  assert.match(hashed, /^[0-9a-f]{64}$/);
 
   // JWT shape
   const secret = "test-client-secret-with-enough-length-0123456789";
