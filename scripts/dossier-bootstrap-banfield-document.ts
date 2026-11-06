@@ -18,9 +18,24 @@ const slug = "familia-banfield";
 
 const ASSETS: { id: string; localRel: string; alt: string }[] = [
   {
-    id: "fig-vitimas",
-    localRel: "private/dossiers/documents/familia-banfield/assets/fig-vitimas.webp",
-    alt: "Fotos das vítimas Christine Banfield e Joseph Ryan.",
+    id: "fig-portrait-christine",
+    localRel: "private/dossiers/documents/familia-banfield/assets/fig-portrait-christine.webp",
+    alt: "Christine Banfield.",
+  },
+  {
+    id: "fig-portrait-joseph",
+    localRel: "private/dossiers/documents/familia-banfield/assets/fig-portrait-joseph.webp",
+    alt: "Joseph Ryan.",
+  },
+  {
+    id: "fig-portrait-brendan",
+    localRel: "private/dossiers/documents/familia-banfield/assets/fig-portrait-brendan.webp",
+    alt: "Brendan Banfield.",
+  },
+  {
+    id: "fig-portrait-juliana",
+    localRel: "private/dossiers/documents/familia-banfield/assets/fig-portrait-juliana.webp",
+    alt: "Juliana Magalhães.",
   },
   {
     id: "fig-mapa-main",

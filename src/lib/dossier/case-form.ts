@@ -46,6 +46,8 @@ export type DossierCaseForm = {
     highlightText?: string;
   };
   victims: { title?: string; people: CasePerson[] };
+  /** Acusados / réus (fotos e nomes separados das vítimas). */
+  reus: { title?: string; people: CasePerson[] };
   phases: CasePhase[];
   timeline: { title?: string; entries: TimelineEntry[] };
   map: { title?: string; images: CaseImage[] };
@@ -80,6 +82,7 @@ export function emptyCaseForm(title = ""): DossierCaseForm {
       highlightText: "",
     },
     victims: { title: "Vítimas", people: [] },
+    reus: { title: "Réus / acusados", people: [] },
     phases: [],
     timeline: { title: "Cronologia editorial", entries: [] },
     map: { title: "Mapa", images: [] },
@@ -136,6 +139,7 @@ export function normalizeCaseForm(raw: unknown): DossierCaseForm {
   const cover = rec(r.cover);
   const summary = rec(r.summary);
   const victims = rec(r.victims);
+  const reus = rec(r.reus);
   const timeline = rec(r.timeline);
   const map = rec(r.map);
   const theories = rec(r.theories);
@@ -160,6 +164,20 @@ export function normalizeCaseForm(raw: unknown): DossierCaseForm {
     victims: {
       title: optStr(victims.title, 200),
       people: list(victims.people, CASE_FORM_LIMITS.people, (p) => {
+        const name = str(p.name, 200);
+        const id = assetId(p.assetId);
+        if (!name && !id) return null;
+        return {
+          name,
+          role: optStr(p.role, 300),
+          credit: optStr(p.credit, 300),
+          assetId: id || undefined,
+        };
+      }),
+    },
+    reus: {
+      title: optStr(reus.title, 200),
+      people: list(reus.people, CASE_FORM_LIMITS.people, (p) => {
         const name = str(p.name, 200);
         const id = assetId(p.assetId);
         if (!name && !id) return null;
@@ -264,7 +282,7 @@ function section(
 }
 
 export function compileCaseForm(form: DossierCaseForm): DossierDocumentSection[] {
-  const { cover, summary, victims, timeline, map, theories } = form;
+  const { cover, summary, victims, reus, timeline, map, theories } = form;
   const sections: DossierDocumentSection[] = [];
 
   sections.push(
@@ -306,6 +324,22 @@ export function compileCaseForm(form: DossierCaseForm): DossierDocumentSection[]
               order: 0,
               title: victims.title,
               items: victims.people,
+            },
+          ]
+        : []),
+    ]),
+  );
+
+  sections.push(
+    ...section("reus", reus.title || "Réus / acusados", [
+      ...(reus.people.length
+        ? [
+            {
+              id: "people-reus",
+              type: "people" as const,
+              order: 0,
+              title: reus.title,
+              items: reus.people,
             },
           ]
         : []),
@@ -419,6 +453,7 @@ export function importCaseForm(doc: DossierDocument): DossierCaseForm {
   const form = emptyCaseForm(doc.title);
   form.summary.facts = [];
   form.victims.title = undefined;
+  form.reus.title = undefined;
   form.map.title = undefined;
   form.theories.title = undefined;
   form.timeline.title = undefined;
@@ -443,7 +478,7 @@ export function importCaseForm(doc: DossierDocument): DossierCaseForm {
       return out;
     };
 
-    const known = ["intro", "facts", "vitimas", "timeline", "mapa", "teorias"].includes(sec.id) && !seen.has(sec.id);
+    const known = ["intro", "facts", "vitimas", "reus", "timeline", "mapa", "teorias"].includes(sec.id) && !seen.has(sec.id);
     if (known) seen.add(sec.id);
 
     if (known && sec.id === "intro") {
@@ -488,11 +523,25 @@ export function importCaseForm(doc: DossierDocument): DossierCaseForm {
             return [{ name: names[0] ?? "Vítimas", credit: img.credit, assetId: img.assetId }];
           }
           // Fotografia única com legenda multi-pessoa: um card por nome (mesmo assetId até trocar no admin).
-          return names.map((name) => ({
+          return names.map((name, idx) => ({
             name,
             credit: img.credit,
-            assetId: img.assetId,
+            assetId: idx === 0 ? img.assetId : undefined,
           }));
+        });
+      }
+    } else if (known && sec.id === "reus") {
+      const h = first("heading");
+      form.reus.title = h?.text;
+      const people = first("people");
+      if (people) {
+        form.reus.people = people.items;
+      } else {
+        form.reus.people = all((b) => b.type === "image" || b.type === "figure").flatMap((b) => {
+          const img = toCaseImage(b);
+          return img
+            ? [{ name: img.caption || img.alt || "Réus", credit: img.credit, assetId: img.assetId }]
+            : [];
         });
       }
     } else if (known && sec.id === "timeline") {

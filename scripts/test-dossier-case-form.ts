@@ -14,8 +14,16 @@ const form = importCaseForm(banfield);
 assert.equal(form.cover.title, "Assassinato: Família Banfield");
 assert.ok(form.cover.lede.includes("Brendan"));
 assert.equal(form.summary.facts.length, 3);
-assert.equal(form.victims.people.length, 4, "legenda com vírgulas vira um card por vítima");
-assert.ok(form.victims.people.every((p) => p.assetId === "fig-vitimas"));
+assert.equal(form.victims.people.length, 2);
+assert.equal(form.reus.people.length, 2);
+assert.deepEqual(
+  form.victims.people.map((p) => p.assetId),
+  ["fig-portrait-christine", "fig-portrait-joseph"],
+);
+assert.deepEqual(
+  form.reus.people.map((p) => p.assetId),
+  ["fig-portrait-brendan", "fig-portrait-juliana"],
+);
 assert.equal(form.victims.people[0]!.name, "Christine Banfield");
 assert.equal(form.phases.length, 3, "versoes -> 3 fases (acusação, defesa Brendan, defesa Juliana)");
 assert.equal(form.timeline.entries.length, 6);
@@ -26,7 +34,7 @@ assert.equal(form.extraSections.length, 0);
 // 2. Formulário -> sections (ids estáveis para o leitor: mapa, timeline)
 const sections = compileCaseForm(form);
 const ids = sections.map((s) => s.id);
-assert.deepEqual(ids.slice(0, 3), ["intro", "facts", "vitimas"]);
+assert.deepEqual(ids.slice(0, 4), ["intro", "facts", "vitimas", "reus"]);
 assert.ok(ids.includes("mapa") && ids.includes("timeline") && ids.includes("teorias"));
 const phaseSections = sections.filter((s) => s.kind === "phase");
 assert.equal(phaseSections.length, 3);
@@ -56,8 +64,10 @@ assert.equal(clean.caseForm!.timeline.entries[0]!.assetId, "ab");
 assert.deepEqual(importCaseForm(clean), clean.caseForm);
 
 // 5. Seção desconhecida com blocos não compatíveis é preservada (extraSections)
+// Sem `caseForm`: importCaseForm lê só `sections` (com caseForm preenchido ele normaliza só o JSON do formulário).
+const { caseForm: _ignoreCaseForm, ...banfieldSectionsOnly } = banfield;
 const withTable: DossierDocument = {
-  ...banfield,
+  ...banfieldSectionsOnly,
   sections: [
     ...banfield.sections,
     {

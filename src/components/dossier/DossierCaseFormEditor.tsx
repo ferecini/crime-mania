@@ -266,9 +266,10 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
   }
 
   const setPeople = (people: CasePerson[]) => update((f) => ({ ...f, victims: { ...f.victims, people } }));
+  const setReusPeople = (people: CasePerson[]) => update((f) => ({ ...f, reus: { ...f.reus, people } }));
   const setPhases = (phases: CasePhase[]) => update((f) => ({ ...f, phases }));
   const setEntries = (entries: TimelineEntry[]) => update((f) => ({ ...f, timeline: { ...f.timeline, entries } }));
-  const { cover, summary, victims, phases, timeline, map, theories } = form;
+  const { cover, summary, victims, reus, phases, timeline, map, theories } = form;
 
   return (
     <div className="space-y-4">
@@ -406,7 +407,62 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
         <p className="text-xs text-cm-gray">Uma única foto aparece em largura total; várias viram uma grade de cards.</p>
       </Panel>
 
-      <Panel title={`4. Fases do dossiê (${phases.length})`} description="Etapas do caso, em ordem: texto + imagens" defaultOpen>
+      <Panel title="4. Réus / acusados" description="Separado das vítimas — nomes, fotos e créditos">
+        <TextField
+          label="Título da seção"
+          value={reus.title}
+          onChange={(v) => update((f) => ({ ...f, reus: { ...f.reus, title: v } }))}
+        />
+        {reus.people.map((p, i) => (
+          <div key={i} className="grid gap-3 rounded border border-cm-divider/80 p-3 md:grid-cols-[10rem_1fr]">
+            <div className="space-y-2">
+              {p.assetId ? <Thumb slug={slug} assetId={p.assetId} alt={p.name || "Foto"} /> : null}
+              <ImageUpload
+                slug={slug}
+                label={p.assetId ? "Trocar foto" : "Enviar foto"}
+                onUploaded={(assetId) => setReusPeople(replaceAt(reus.people, i, { assetId }))}
+              />
+            </div>
+            <div className="space-y-2">
+              <TextField label="Nome" value={p.name} onChange={(v) => setReusPeople(replaceAt(reus.people, i, { name: v }))} />
+              <TextField
+                label="Observação (opcional)"
+                value={p.role}
+                onChange={(v) => setReusPeople(replaceAt(reus.people, i, { role: v }))}
+              />
+              <TextField label="Crédito da foto" value={p.credit} onChange={(v) => setReusPeople(replaceAt(reus.people, i, { credit: v }))} />
+              <div className="flex flex-wrap gap-2">
+                {p.assetId ? (
+                  <button
+                    type="button"
+                    className="min-h-11 rounded border border-cm-divider px-3 text-sm"
+                    onClick={() => setReusPeople(replaceAt(reus.people, i, { assetId: undefined }))}
+                  >
+                    Remover foto
+                  </button>
+                ) : null}
+                <RowControls
+                  index={i}
+                  count={reus.people.length}
+                  onMove={(d) => setReusPeople(move(reus.people, i, d))}
+                  onRemove={() => setReusPeople(reus.people.filter((_, k) => k !== i))}
+                />
+              </div>
+            </div>
+          </div>
+        ))}
+        <Button
+          type="button"
+          variant="secondary"
+          className="min-h-11"
+          disabled={reus.people.length >= CASE_FORM_LIMITS.people}
+          onClick={() => setReusPeople([...reus.people, { name: "" }])}
+        >
+          + Adicionar pessoa
+        </Button>
+      </Panel>
+
+      <Panel title={`5. Fases do dossiê (${phases.length})`} description="Etapas do caso, em ordem: texto + imagens" defaultOpen>
         {phases.map((phase, i) => (
           <div key={phase.id} className="space-y-3 rounded border border-cm-divider/80 p-3">
             <div className="grid gap-2 md:grid-cols-[10rem_1fr]">
@@ -448,7 +504,7 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
       </Panel>
 
       <Panel
-        title={`5. Linha do tempo (${timeline.entries.length})`}
+        title={`6. Linha do tempo (${timeline.entries.length})`}
         description="Vertical no celular; espinha central com cards alternados no desktop"
       >
         <TextField
@@ -509,7 +565,7 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
         </Button>
       </Panel>
 
-      <Panel title={`6. Mapa e imagens (${map.images.length})`} description="Mapas, locais, documentos visuais">
+      <Panel title={`7. Mapa e imagens (${map.images.length})`} description="Mapas, locais, documentos visuais">
         <TextField
           label="Título da seção"
           value={map.title}
@@ -522,7 +578,7 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
         />
       </Panel>
 
-      <Panel title="7. Teorias e análise editorial">
+      <Panel title="8. Teorias e análise editorial">
         <TextField
           label="Título da seção"
           value={theories.title}

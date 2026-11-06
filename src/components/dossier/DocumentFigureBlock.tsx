@@ -105,7 +105,7 @@ export function DocumentFigureBlock({
           <img
             src={assetSrc(slug, assetId, 960)}
             alt={alt}
-            className={`block w-full ${portrait ? "h-auto max-h-[75vh]" : "h-auto"}`}
+            className={`block w-full ${portrait ? "h-auto max-h-[75vh] object-contain" : mapPanel ? "h-auto max-h-[min(70vh,520px)] w-full object-contain" : "h-auto object-contain"}`}
             loading="eager"
             decoding="async"
           />

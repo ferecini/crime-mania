@@ -1,15 +1,150 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 7,
+  "version": 8,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
   "meta": {
-    "charCount": 2821,
+    "charCount": 3247,
     "ocrUsed": false,
     "extractionWarnings": [],
     "pageCount": 1
+  },
+  "caseForm": {
+    "cover": {
+      "title": "Assassinato: Família Banfield",
+      "subtitle": "Uma família. Dois crimes. Muitas perguntas.",
+      "lede": "Em 2023 no estado americano da Virgínia, Christine Banfield e Joseph Ryan foram assassinados na casa da família Banfield. O ato foi cometido pelo marido de Christine, Brendan, com a participação da Au Pair brasileira Juliana Magalhães. Brendan e Juliana tinham um relacionamento e de acordo com a acusação planejaram matar Christine para ficarem juntos. Eles atraíram Joseph até a residência por meio de um perfil falso em um site de fetiches, simulando um encontro sexual. Eles tentaram encenar uma situação em que Joseph seria um invasor que atacou Christine.\n\nEm 2026 Brendan foi condenado à prisão perpétua. Juliana recebeu uma pena mais amena de 10 anos. Ela testemunhou contra o ex-amante e se declarou culpada de homicídio culposo."
+    },
+    "summary": {
+      "title": "Vítimas e local",
+      "facts": [
+        {
+          "label": "Vítimas",
+          "value": "Christine Banfield e Joseph Ryan"
+        },
+        {
+          "label": "Local",
+          "value": "Fairfax, Virgínia, EUA"
+        },
+        {
+          "label": "Data",
+          "value": "24 de fevereiro de 2023"
+        }
+      ],
+      "highlightTitle": "O que parecia ser uma invasão",
+      "highlightText": "Escondia uma história muito mais complexa envolvendo relacionamento extraconjugal, perfil falso em site de fetiches e simulação de invasão."
+    },
+    "victims": {
+      "title": "Vítimas",
+      "people": [
+        {
+          "name": "Christine Banfield",
+          "credit": "Material editorial Crime Mania",
+          "assetId": "fig-portrait-christine"
+        },
+        {
+          "name": "Joseph Ryan",
+          "credit": "Material editorial Crime Mania",
+          "assetId": "fig-portrait-joseph"
+        }
+      ]
+    },
+    "reus": {
+      "title": "Réus / acusados",
+      "people": [
+        {
+          "name": "Brendan Banfield",
+          "credit": "Material editorial Crime Mania",
+          "assetId": "fig-portrait-brendan"
+        },
+        {
+          "name": "Juliana Magalhães",
+          "credit": "Material editorial Crime Mania",
+          "assetId": "fig-portrait-juliana"
+        }
+      ]
+    },
+    "phases": [
+      {
+        "id": "p1",
+        "title": "Versão da acusação",
+        "body": "Brendan e Juliana atuaram juntos no plano para assassinar Christine e eliminar uma possível testemunha. A promotoria sustentou que Brendan teve papel central na concepção e mentoria da estratégia, enquanto Juliana participou da preparação e execução. Afirmou também que o objetivo do suposto invasor era confundir a polícia e colocar a culpa em Joseph.",
+        "images": []
+      },
+      {
+        "id": "p2",
+        "title": "Versão da defesa de Brendan",
+        "body": "Afirmou que ele não participou de qualquer plano para assassinar Christine ou Joseph. Ele disse que desconhecia o perfil da esposa no FetLife e o contato mantido com Ryan. Segundo ele, Juliana o chamou ao quarto após Joseph atacar Christine. Brendan admitiu ter atirado em Ryan, mas sustentou que agiu para impedir que ele matasse Christine.",
+        "images": []
+      },
+      {
+        "id": "p3",
+        "title": "Versão da defesa de Juliana",
+        "body": "Sustentou inicialmente que ela não participara de nenhum plano de assassinato e atirou em Joseph para interromper o ataque e proteger Christine. Posteriormente, ela mudou seu relato, declarou-se culpada por homicídio culposo e disse que atirou em Joseph para garantir que ele estava morto. Como parte do acordo, testemunhou contra Brendan.",
+        "images": []
+      }
+    ],
+    "timeline": {
+      "title": "Cronologia editorial",
+      "entries": [
+        {
+          "date": "Out. 2021",
+          "title": "Au pair contratada",
+          "body": "Juliana Peres Magalhães é contratada como Au Pair da família Banfield. Ela passa a morar com o casal e cuidar da filha deles."
+        },
+        {
+          "date": "Ago. 2022",
+          "title": "Relacionamento extraconjugal",
+          "body": "Juliana e Brendan iniciam um relacionamento extraconjugal. Segundo a acusação, o caso se tornou o ponto de partida para o planejamento dos assassinatos."
+        },
+        {
+          "date": "Out. 2022",
+          "title": "Planejamento",
+          "body": "Brendan manifesta o desejo de se livrar da esposa e começa a planejar o assassinato. A acusação afirma que ele pretendia evitar um divórcio e uma disputa pela guarda da filha."
+        },
+        {
+          "date": "Jan. 2023",
+          "title": "Arma adquirida",
+          "body": "Brendan compra uma pistola Glock 43X e, segundo a acusação, prepara Juliana para utilizá-la."
+        },
+        {
+          "date": "Fev. 2023",
+          "title": "Duplo homicídio",
+          "body": "Christine e Joseph são mortos na residência da família. Ryan foi atraído por um perfil falso no FetLife, e o crime foi planejado para simular uma invasão."
+        },
+        {
+          "date": "2026",
+          "title": "Sentenças",
+          "body": "Brendan condenado à prisão perpétua. Juliana recebe 10 anos após acordo e testemunho contra Brendan."
+        }
+      ]
+    },
+    "map": {
+      "title": "Mapa",
+      "images": [
+        {
+          "assetId": "fig-mapa-main",
+          "alt": "Mapa satélite de Fairfax e Washington D.C.",
+          "caption": "Fairfax e região metropolitana de Washington D.C.",
+          "credit": "Material editorial Crime Mania"
+        },
+        {
+          "assetId": "fig-mapa-inset",
+          "alt": "Inset de Virgínia e coordenadas de Fairfax.",
+          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
+          "credit": "Material editorial Crime Mania"
+        }
+      ]
+    },
+    "theories": {
+      "title": "Teorias — Crime Mania",
+      "text": "O dossiê reúne versões da acusação, das defesas e a análise editorial sobre inconsistências nos relatos, o uso do FetLife como isca e o papel de cada envolvido na encenação da invasão.",
+      "quote": "O que parecia ser uma invasão escondia uma história muito mais complexa.",
+      "quoteAttribution": "Dossiê Crime Mania — Família Banfield"
+    },
+    "extraSections": []
   },
   "sections": [
     {
@@ -35,7 +170,13 @@
           "id": "cover-lede-p-1",
           "type": "paragraph",
           "order": 3,
-          "text": "Em fevereiro de 2023, na Virgínia (EUA), Christine Banfield e Joseph Ryan foram mortos na casa da família Banfield. O marido de Christine, Brendan Banfield, e a au pair brasileira Juliana Magalhães foram acusados de planejar os assassinatos para ficarem juntos e encenar uma invasão. Em 2026, Brendan foi condenado à prisão perpétua; Juliana recebeu pena de 10 anos após declarar-se culpada de homicídio culposo e testemunhar contra Brendan."
+          "text": "Em 2023 no estado americano da Virgínia, Christine Banfield e Joseph Ryan foram assassinados na casa da família Banfield. O ato foi cometido pelo marido de Christine, Brendan, com a participação da Au Pair brasileira Juliana Magalhães. Brendan e Juliana tinham um relacionamento e de acordo com a acusação planejaram matar Christine para ficarem juntos. Eles atraíram Joseph até a residência por meio de um perfil falso em um site de fetiches, simulando um encontro sexual. Eles tentaram encenar uma situação em que Joseph seria um invasor que atacou Christine."
+        },
+        {
+          "id": "cover-lede-p-2",
+          "type": "paragraph",
+          "order": 4,
+          "text": "Em 2026 Brendan foi condenado à prisão perpétua. Juliana recebeu uma pena mais amena de 10 anos. Ela testemunhou contra o ex-amante e se declarou culpada de homicídio culposo."
         }
       ]
     },
@@ -88,22 +229,37 @@
             {
               "name": "Christine Banfield",
               "credit": "Material editorial Crime Mania",
-              "assetId": "fig-vitimas"
+              "assetId": "fig-portrait-christine"
             },
             {
               "name": "Joseph Ryan",
               "credit": "Material editorial Crime Mania",
-              "assetId": "fig-vitimas"
-            },
+              "assetId": "fig-portrait-joseph"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "reus",
+      "order": 4,
+      "title": "Réus / acusados",
+      "blocks": [
+        {
+          "id": "people-reus",
+          "type": "people",
+          "order": 1,
+          "title": "Réus / acusados",
+          "items": [
             {
               "name": "Brendan Banfield",
               "credit": "Material editorial Crime Mania",
-              "assetId": "fig-vitimas"
+              "assetId": "fig-portrait-brendan"
             },
             {
               "name": "Juliana Magalhães",
               "credit": "Material editorial Crime Mania",
-              "assetId": "fig-vitimas"
+              "assetId": "fig-portrait-juliana"
             }
           ]
         }
@@ -111,7 +267,7 @@
     },
     {
       "id": "fase-p1",
-      "order": 4,
+      "order": 5,
       "title": "Versão da acusação",
       "kind": "phase",
       "label": "Fase 1",
@@ -126,7 +282,7 @@
     },
     {
       "id": "fase-p2",
-      "order": 5,
+      "order": 6,
       "title": "Versão da defesa de Brendan",
       "kind": "phase",
       "label": "Fase 2",
@@ -135,13 +291,13 @@
           "id": "fase-p2-p-1",
           "type": "paragraph",
           "order": 1,
-          "text": "Brendan afirmou que não participou de qualquer plano para assassinar Christine ou Joseph. Disse desconhecer o perfil de Christine no FetLife e o contato com Ryan. Segundo ele, Juliana o chamou ao quarto após Joseph atacar Christine. Brendan admitiu ter atirado em Ryan, mas sustentou que agiu para impedir que ele matasse Christine."
+          "text": "Afirmou que ele não participou de qualquer plano para assassinar Christine ou Joseph. Ele disse que desconhecia o perfil da esposa no FetLife e o contato mantido com Ryan. Segundo ele, Juliana o chamou ao quarto após Joseph atacar Christine. Brendan admitiu ter atirado em Ryan, mas sustentou que agiu para impedir que ele matasse Christine."
         }
       ]
     },
     {
       "id": "fase-p3",
-      "order": 6,
+      "order": 7,
       "title": "Versão da defesa de Juliana",
       "kind": "phase",
       "label": "Fase 3",
@@ -150,13 +306,13 @@
           "id": "fase-p3-p-1",
           "type": "paragraph",
           "order": 1,
-          "text": "Juliana sustentou inicialmente que não participara de nenhum plano de assassinato e atirou em Joseph para interromper o ataque e proteger Christine. Posteriormente mudou o relato, declarou-se culpada por homicídio culposo e disse que atirou em Joseph para garantir que estava morto. Como parte do acordo, testemunhou contra Brendan."
+          "text": "Sustentou inicialmente que ela não participara de nenhum plano de assassinato e atirou em Joseph para interromper o ataque e proteger Christine. Posteriormente, ela mudou seu relato, declarou-se culpada por homicídio culposo e disse que atirou em Joseph para garantir que ele estava morto. Como parte do acordo, testemunhou contra Brendan."
         }
       ]
     },
     {
       "id": "timeline",
-      "order": 7,
+      "order": 8,
       "title": "Linha do tempo",
       "blocks": [
         {
@@ -168,17 +324,17 @@
             {
               "date": "Out. 2021",
               "title": "Au pair contratada",
-              "body": "Juliana Peres Magalhães é contratada como au pair da família Banfield e passa a morar com o casal."
+              "body": "Juliana Peres Magalhães é contratada como Au Pair da família Banfield. Ela passa a morar com o casal e cuidar da filha deles."
             },
             {
               "date": "Ago. 2022",
               "title": "Relacionamento extraconjugal",
-              "body": "Juliana e Brendan iniciam um caso. Segundo a acusação, isso se tornou o ponto de partida para o planejamento dos assassinatos."
+              "body": "Juliana e Brendan iniciam um relacionamento extraconjugal. Segundo a acusação, o caso se tornou o ponto de partida para o planejamento dos assassinatos."
             },
             {
               "date": "Out. 2022",
               "title": "Planejamento",
-              "body": "Brendan manifesta desejo de se livrar da esposa e começa a planejar o crime, buscando evitar divórcio e disputa pela guarda da filha."
+              "body": "Brendan manifesta o desejo de se livrar da esposa e começa a planejar o assassinato. A acusação afirma que ele pretendia evitar um divórcio e uma disputa pela guarda da filha."
             },
             {
               "date": "Jan. 2023",
@@ -188,7 +344,7 @@
             {
               "date": "Fev. 2023",
               "title": "Duplo homicídio",
-              "body": "Christine e Joseph são mortos na residência. Ryan foi atraído por perfil falso no FetLife; o crime foi planejado para simular invasão."
+              "body": "Christine e Joseph são mortos na residência da família. Ryan foi atraído por um perfil falso no FetLife, e o crime foi planejado para simular uma invasão."
             },
             {
               "date": "2026",
@@ -201,7 +357,7 @@
     },
     {
       "id": "mapa",
-      "order": 8,
+      "order": 9,
       "title": "Mapa",
       "blocks": [
         {
@@ -233,7 +389,7 @@
     },
     {
       "id": "teorias",
-      "order": 9,
+      "order": 10,
       "title": "Teorias do dossiê",
       "blocks": [
         {
@@ -258,135 +414,5 @@
         }
       ]
     }
-  ],
-  "caseForm": {
-    "cover": {
-      "title": "Assassinato: Família Banfield",
-      "subtitle": "Uma família. Dois crimes. Muitas perguntas.",
-      "lede": "Em fevereiro de 2023, na Virgínia (EUA), Christine Banfield e Joseph Ryan foram mortos na casa da família Banfield. O marido de Christine, Brendan Banfield, e a au pair brasileira Juliana Magalhães foram acusados de planejar os assassinatos para ficarem juntos e encenar uma invasão. Em 2026, Brendan foi condenado à prisão perpétua; Juliana recebeu pena de 10 anos após declarar-se culpada de homicídio culposo e testemunhar contra Brendan."
-    },
-    "summary": {
-      "title": "Vítimas e local",
-      "facts": [
-        {
-          "label": "Vítimas",
-          "value": "Christine Banfield e Joseph Ryan"
-        },
-        {
-          "label": "Local",
-          "value": "Fairfax, Virgínia, EUA"
-        },
-        {
-          "label": "Data",
-          "value": "24 de fevereiro de 2023"
-        }
-      ],
-      "highlightTitle": "O que parecia ser uma invasão",
-      "highlightText": "Escondia uma história muito mais complexa envolvendo relacionamento extraconjugal, perfil falso em site de fetiches e simulação de invasão."
-    },
-    "victims": {
-      "title": "Vítimas",
-      "people": [
-        {
-          "name": "Christine Banfield",
-          "credit": "Material editorial Crime Mania",
-          "assetId": "fig-vitimas"
-        },
-        {
-          "name": "Joseph Ryan",
-          "credit": "Material editorial Crime Mania",
-          "assetId": "fig-vitimas"
-        },
-        {
-          "name": "Brendan Banfield",
-          "credit": "Material editorial Crime Mania",
-          "assetId": "fig-vitimas"
-        },
-        {
-          "name": "Juliana Magalhães",
-          "credit": "Material editorial Crime Mania",
-          "assetId": "fig-vitimas"
-        }
-      ]
-    },
-    "phases": [
-      {
-        "id": "p1",
-        "title": "Versão da acusação",
-        "body": "Brendan e Juliana atuaram juntos no plano para assassinar Christine e eliminar uma possível testemunha. A promotoria sustentou que Brendan teve papel central na concepção e mentoria da estratégia, enquanto Juliana participou da preparação e execução. Afirmou também que o objetivo do suposto invasor era confundir a polícia e colocar a culpa em Joseph.",
-        "images": []
-      },
-      {
-        "id": "p2",
-        "title": "Versão da defesa de Brendan",
-        "body": "Brendan afirmou que não participou de qualquer plano para assassinar Christine ou Joseph. Disse desconhecer o perfil de Christine no FetLife e o contato com Ryan. Segundo ele, Juliana o chamou ao quarto após Joseph atacar Christine. Brendan admitiu ter atirado em Ryan, mas sustentou que agiu para impedir que ele matasse Christine.",
-        "images": []
-      },
-      {
-        "id": "p3",
-        "title": "Versão da defesa de Juliana",
-        "body": "Juliana sustentou inicialmente que não participara de nenhum plano de assassinato e atirou em Joseph para interromper o ataque e proteger Christine. Posteriormente mudou o relato, declarou-se culpada por homicídio culposo e disse que atirou em Joseph para garantir que estava morto. Como parte do acordo, testemunhou contra Brendan.",
-        "images": []
-      }
-    ],
-    "timeline": {
-      "title": "Cronologia editorial",
-      "entries": [
-        {
-          "date": "Out. 2021",
-          "title": "Au pair contratada",
-          "body": "Juliana Peres Magalhães é contratada como au pair da família Banfield e passa a morar com o casal."
-        },
-        {
-          "date": "Ago. 2022",
-          "title": "Relacionamento extraconjugal",
-          "body": "Juliana e Brendan iniciam um caso. Segundo a acusação, isso se tornou o ponto de partida para o planejamento dos assassinatos."
-        },
-        {
-          "date": "Out. 2022",
-          "title": "Planejamento",
-          "body": "Brendan manifesta desejo de se livrar da esposa e começa a planejar o crime, buscando evitar divórcio e disputa pela guarda da filha."
-        },
-        {
-          "date": "Jan. 2023",
-          "title": "Arma adquirida",
-          "body": "Brendan compra uma pistola Glock 43X e, segundo a acusação, prepara Juliana para utilizá-la."
-        },
-        {
-          "date": "Fev. 2023",
-          "title": "Duplo homicídio",
-          "body": "Christine e Joseph são mortos na residência. Ryan foi atraído por perfil falso no FetLife; o crime foi planejado para simular invasão."
-        },
-        {
-          "date": "2026",
-          "title": "Sentenças",
-          "body": "Brendan condenado à prisão perpétua. Juliana recebe 10 anos após acordo e testemunho contra Brendan."
-        }
-      ]
-    },
-    "map": {
-      "title": "Mapa",
-      "images": [
-        {
-          "assetId": "fig-mapa-main",
-          "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C.",
-          "credit": "Material editorial Crime Mania"
-        },
-        {
-          "assetId": "fig-mapa-inset",
-          "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
-          "credit": "Material editorial Crime Mania"
-        }
-      ]
-    },
-    "theories": {
-      "title": "Teorias — Crime Mania",
-      "text": "O dossiê reúne versões da acusação, das defesas e a análise editorial sobre inconsistências nos relatos, o uso do FetLife como isca e o papel de cada envolvido na encenação da invasão.",
-      "quote": "O que parecia ser uma invasão escondia uma história muito mais complexa.",
-      "quoteAttribution": "Dossiê Crime Mania — Família Banfield"
-    },
-    "extraSections": []
-  }
+  ]
 }

@@ -136,7 +136,7 @@ export function DocumentBlockView({
                         alt={p.name}
                         loading="lazy"
                         decoding="async"
-                        className="aspect-[4/5] w-full rounded-[4px] border border-cm-divider object-cover"
+                        className="aspect-[4/5] w-full rounded-[4px] border border-cm-divider bg-black/30 object-contain"
                       />
                     ) : null}
                     <figcaption className="mt-2">

@@ -18,27 +18,34 @@ const MOBILE_MAP_MIN_HEIGHT_AT_358 = 130;
 const MOBILE_CONTENT_WIDTH = 358;
 
 async function testFigureAssets() {
-  for (const id of ["fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
+  const portraitIds = [
+    "fig-portrait-christine",
+    "fig-portrait-joseph",
+    "fig-portrait-brendan",
+    "fig-portrait-juliana",
+  ];
+  for (const id of [...portraitIds, "fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
     const p = path.join(assetsDir, `${id}.webp`);
     assert.ok(fs.existsSync(p), `${id}.webp deve existir`);
   }
 
-  const vitimasPath = path.join(assetsDir, "fig-vitimas.webp");
   const mapaMainPath = path.join(assetsDir, "fig-mapa-main.webp");
   const mapaInsetPath = path.join(assetsDir, "fig-mapa-inset.webp");
 
-  const vitimas = await sharp(vitimasPath).metadata();
+  for (const id of portraitIds) {
+    const meta = await sharp(path.join(assetsDir, `${id}.webp`)).metadata();
+    const w = meta.width ?? 0;
+    const h = meta.height ?? 0;
+    assert.ok(w >= 200 && w <= 220, `${id} width ${w}`);
+    assert.ok(h >= 200 && h <= 215, `${id} height ${h}`);
+  }
+
   const mapaMain = await sharp(mapaMainPath).metadata();
   const mapaInset = await sharp(mapaInsetPath).metadata();
-  const vw = vitimas.width ?? 0;
-  const vh = vitimas.height ?? 0;
   const mmw = mapaMain.width ?? 0;
   const mmh = mapaMain.height ?? 0;
   const miw = mapaInset.width ?? 0;
   const mih = mapaInset.height ?? 0;
-
-  assert.ok(vw >= 400 && vw <= 430, `fig-vitimas width ${vw}`);
-  assert.ok(vh >= 395 && vh <= 425, `fig-vitimas height ${vh}`);
 
   assert.ok(mmw >= 880 && mmw <= 930, `fig-mapa-main width ${mmw}`);
   assert.ok(mmh >= 335 && mmh <= 365, `fig-mapa-main height ${mmh}`);

@@ -11,6 +11,7 @@ O leitor mobile-first (HTML) passa a ser alimentado por **campos de formulário*
 | Capa (título, subtítulo, abertura) | `intro` | H1/H2 + parágrafos |
 | Resumo do caso (ficha + destaque) | `facts` | cards + callout |
 | Vítimas (nome, descrição, foto, crédito) | `vitimas` | bloco `people` (1 pessoa = foto em destaque; várias = grade 2/3/4 colunas) |
+| Réus / acusados | `reus` | bloco `people` (mesmo componente que vítimas; seções separadas no índice) |
 | Fases (rótulo, título, texto, imagens) | `fase-<id>` (`kind: "phase"`) | card de etapa com índice sticky |
 | Linha do tempo (data, título, texto, imagem opcional) | `timeline` | mobile: trilho vertical; `md+`: espinha central, cards alternados |
 | Mapa e imagens | `mapa` | figuras com lightbox |
@@ -32,9 +33,9 @@ menor (~4,5 MB na Vercel) — reduza fotos grandes antes do envio.
 ## Migração de dossiês antigos
 
 - **HTML editorial / extraído de PDF (ex.: Banfield)**: continuam funcionando sem mudanças (leitor lê `sections`).
-- **Banfield em produção:** rode `npx tsx scripts/dossier-bootstrap-banfield-document.ts` com `POSTGRES_URL` (e `BLOB_READ_WRITE_TOKEN` se usar Blob). O script grava `caseForm` com vítimas separadas (legenda com vírgulas vira um card por nome; pode trocar fotos no admin).
+- **Banfield em produção:** rode `npm run dossier:bootstrap-banfield-html` (extrai mapas + divide a grade 2×2 em quatro retratos) ou `npx tsx scripts/dossier-bootstrap-banfield-document.ts` com `POSTGRES_URL` (e `BLOB_READ_WRITE_TOKEN` se usar Blob). Retratos: `fig-portrait-christine`, `fig-portrait-joseph`, `fig-portrait-brendan`, `fig-portrait-juliana`.
 - Para editar por campos: abrir **Editar dossiê** → **Converter para formulário** (`importCaseForm`): seções conhecidas
-  (`intro`, `facts`, `vitimas`, `timeline`, `mapa`, `teorias`) mapeiam 1:1; seções só com título/parágrafo/imagem viram
+  (`intro`, `facts`, `vitimas`, `reus`, `timeline`, `mapa`, `teorias`) mapeiam 1:1; seções só com título/parágrafo/imagem viram
   **fases** (cada heading = uma fase); o resto é preservado em `extraSections` (somente leitura). Revise, salve e publique.
 - “Desativar formulário” volta ao editor de blocos legado (mantém as `sections` atuais).
 - **Fluxo PDF** (`dossier:process`, worker, upload) permanece como importador opcional (`<details>` no admin); o
