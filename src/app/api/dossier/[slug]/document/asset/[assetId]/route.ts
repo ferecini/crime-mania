@@ -6,6 +6,7 @@ import { readDocumentAsset } from "@/lib/dossier/document-db";
 import { readAdminDocument, readMemberDocument } from "@/lib/dossier/document-store";
 import { createDossierStorage } from "@/lib/dossier/storage";
 import { getSession } from "@/lib/auth/session";
+import { ensureBanfieldPortraitWebp } from "@/lib/dossier/banfield-portrait-assets";
 
 export async function GET(
   _request: Request,
@@ -53,6 +54,12 @@ export async function GET(
 
   if (!bytes) {
     return NextResponse.json({ error: "Recurso não encontrado." }, { status: 404 });
+  }
+
+  const portraitFix = await ensureBanfieldPortraitWebp(slug, assetId, bytes);
+  if (portraitFix) {
+    bytes = portraitFix.bytes;
+    mimeType = portraitFix.mimeType;
   }
 
   return new NextResponse(new Uint8Array(bytes), {

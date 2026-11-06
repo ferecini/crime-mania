@@ -1,12 +1,12 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 8,
+  "version": 9,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
   "meta": {
-    "charCount": 3247,
+    "charCount": 3188,
     "ocrUsed": false,
     "extractionWarnings": [],
     "pageCount": 1
@@ -41,12 +41,10 @@
       "people": [
         {
           "name": "Christine Banfield",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-christine"
         },
         {
           "name": "Joseph Ryan",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-joseph"
         }
       ]
@@ -56,12 +54,10 @@
       "people": [
         {
           "name": "Brendan Banfield",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-brendan"
         },
         {
           "name": "Juliana Magalhães",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-juliana"
         }
       ]
@@ -87,7 +83,7 @@
       }
     ],
     "timeline": {
-      "title": "Cronologia editorial",
+      "title": "Cronologia",
       "entries": [
         {
           "date": "Out. 2021",
@@ -127,22 +123,20 @@
         {
           "assetId": "fig-mapa-main",
           "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Fairfax e região metropolitana de Washington D.C."
         },
         {
           "assetId": "fig-mapa-inset",
           "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
         }
       ]
     },
     "theories": {
-      "title": "Teorias — Crime Mania",
-      "text": "O dossiê reúne versões da acusação, das defesas e a análise editorial sobre inconsistências nos relatos, o uso do FetLife como isca e o papel de cada envolvido na encenação da invasão.",
+      "title": "Teorias",
+      "text": "Versões da acusação e das defesas, o perfil no FetLife e o que cada parte alegou sobre a invasão e os disparos, conforme o material do PDF.",
       "quote": "O que parecia ser uma invasão escondia uma história muito mais complexa.",
-      "quoteAttribution": "Dossiê Crime Mania — Família Banfield"
+      "quoteAttribution": "Dossiê Banfield (PDF)"
     },
     "extraSections": []
   },
@@ -228,12 +222,10 @@
           "items": [
             {
               "name": "Christine Banfield",
-              "credit": "Material editorial Crime Mania",
               "assetId": "fig-portrait-christine"
             },
             {
               "name": "Joseph Ryan",
-              "credit": "Material editorial Crime Mania",
               "assetId": "fig-portrait-joseph"
             }
           ]
@@ -253,12 +245,10 @@
           "items": [
             {
               "name": "Brendan Banfield",
-              "credit": "Material editorial Crime Mania",
               "assetId": "fig-portrait-brendan"
             },
             {
               "name": "Juliana Magalhães",
-              "credit": "Material editorial Crime Mania",
               "assetId": "fig-portrait-juliana"
             }
           ]
@@ -319,7 +309,7 @@
           "id": "timeline-main",
           "type": "timeline",
           "order": 1,
-          "title": "Cronologia editorial",
+          "title": "Cronologia",
           "entries": [
             {
               "date": "Out. 2021",
@@ -373,8 +363,7 @@
           "order": 2,
           "assetId": "fig-mapa-main",
           "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Fairfax e região metropolitana de Washington D.C."
         },
         {
           "id": "map-img-2",
@@ -382,8 +371,7 @@
           "order": 3,
           "assetId": "fig-mapa-inset",
           "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
         }
       ]
     },
@@ -397,20 +385,20 @@
           "type": "heading",
           "order": 1,
           "level": 2,
-          "text": "Teorias — Crime Mania"
+          "text": "Teorias"
         },
         {
           "id": "theories-p-1",
           "type": "paragraph",
           "order": 2,
-          "text": "O dossiê reúne versões da acusação, das defesas e a análise editorial sobre inconsistências nos relatos, o uso do FetLife como isca e o papel de cada envolvido na encenação da invasão."
+          "text": "Versões da acusação e das defesas, o perfil no FetLife e o que cada parte alegou sobre a invasão e os disparos, conforme o material do PDF."
         },
         {
           "id": "theories-quote",
           "type": "quote",
           "order": 3,
           "text": "O que parecia ser uma invasão escondia uma história muito mais complexa.",
-          "attribution": "Dossiê Crime Mania — Família Banfield"
+          "attribution": "Dossiê Banfield (PDF)"
         }
       ]
     }

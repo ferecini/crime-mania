@@ -1,7 +1,7 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 8,
+  "version": 9,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
@@ -32,12 +32,10 @@
       "people": [
         {
           "name": "Christine Banfield",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-christine"
         },
         {
           "name": "Joseph Ryan",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-joseph"
         }
       ]
@@ -47,12 +45,10 @@
       "people": [
         {
           "name": "Brendan Banfield",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-brendan"
         },
         {
           "name": "Juliana Magalhães",
-          "credit": "Material editorial Crime Mania",
           "assetId": "fig-portrait-juliana"
         }
       ]
@@ -81,7 +77,7 @@
       }
     ],
     "timeline": {
-      "title": "Cronologia editorial",
+      "title": "Cronologia",
       "entries": [
         {
           "date": "Out. 2021",
@@ -121,22 +117,20 @@
         {
           "assetId": "fig-mapa-main",
           "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Fairfax e região metropolitana de Washington D.C."
         },
         {
           "assetId": "fig-mapa-inset",
           "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O.",
-          "credit": "Material editorial Crime Mania"
+          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
         }
       ]
     },
     "theories": {
-      "title": "Teorias — Crime Mania",
-      "text": "O dossiê reúne versões da acusação, das defesas e a análise editorial sobre inconsistências nos relatos, o uso do FetLife como isca e o papel de cada envolvido na encenação da invasão.",
+      "title": "Teorias",
+      "text": "Versões da acusação e das defesas, o perfil no FetLife e o que cada parte alegou sobre a invasão e os disparos, conforme o material do PDF.",
       "quote": "O que parecia ser uma invasão escondia uma história muito mais complexa.",
-      "quoteAttribution": "Dossiê Crime Mania — Família Banfield"
+      "quoteAttribution": "Dossiê Banfield (PDF)"
     },
     "extraSections": []
   },
