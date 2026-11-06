@@ -7,12 +7,14 @@ import { readAdminDocument, readMemberDocument } from "@/lib/dossier/document-st
 import { createDossierStorage } from "@/lib/dossier/storage";
 import { getSession } from "@/lib/auth/session";
 import { ensureBanfieldPortraitWebp } from "@/lib/dossier/banfield-portrait-assets";
+import { parseVitimasQuadrantQuery } from "@/lib/dossier/banfield-vitimas-quadrants";
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ slug: string; assetId: string }> },
 ) {
   const { slug, assetId } = await params;
+  const qParam = parseVitimasQuadrantQuery(new URL(request.url).searchParams.get("q"));
   const dossier = await resolveDossierRecord(slug);
   if (!dossier) {
     return NextResponse.json({ error: "Dossiê não encontrado." }, { status: 404 });
@@ -56,7 +58,7 @@ export async function GET(
     return NextResponse.json({ error: "Recurso não encontrado." }, { status: 404 });
   }
 
-  const portraitFix = await ensureBanfieldPortraitWebp(slug, assetId, bytes);
+  const portraitFix = await ensureBanfieldPortraitWebp(slug, assetId, bytes, qParam);
   if (portraitFix) {
     bytes = portraitFix.bytes;
     mimeType = portraitFix.mimeType;

@@ -11,10 +11,7 @@ export const BANFIELD_PORTRAIT_GRID_ORDER: Record<string, 0 | 1 | 2 | 3> = {
 const COLLAGE_MIN_SIDE = 320;
 const CROPPED_MAX_SIDE = 280;
 
-function extractQuadrant(
-  input: Buffer,
-  index: 0 | 1 | 2 | 3,
-): Promise<Buffer> {
+function extractQuadrant(input: Buffer, index: 0 | 1 | 2 | 3): Promise<Buffer> {
   return sharp(input)
     .metadata()
     .then((meta) => {
@@ -37,15 +34,26 @@ function extractQuadrant(
 /**
  * Se o Blob/Postgres ainda tiver o arquivo antigo (grade 2×2) para um id de retrato,
  * recorta o quadrante certo na hora do GET para o leitor mostrar uma pessoa por card.
+ *
+ * Para `fig-vitimas` legado, passe `quadrantFromQuery` (via `?q=0..3` no URL da imagem).
  */
 export async function ensureBanfieldPortraitWebp(
   slug: string,
   assetId: string,
   bytes: Buffer,
+  quadrantFromQuery: 0 | 1 | 2 | 3 | null = null,
 ): Promise<{ bytes: Buffer; mimeType: string } | null> {
   if (slug !== "familia-banfield") return null;
-  const quadrant = BANFIELD_PORTRAIT_GRID_ORDER[assetId];
-  if (quadrant === undefined) return null;
+
+  let quadrant: 0 | 1 | 2 | 3;
+  if (assetId === "fig-vitimas") {
+    if (quadrantFromQuery === null) return null;
+    quadrant = quadrantFromQuery;
+  } else {
+    const q = BANFIELD_PORTRAIT_GRID_ORDER[assetId];
+    if (q === undefined) return null;
+    quadrant = q;
+  }
 
   const meta = await sharp(bytes).metadata();
   const w = meta.width ?? 0;

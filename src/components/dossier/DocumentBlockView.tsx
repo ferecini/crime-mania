@@ -1,5 +1,6 @@
 import type { DocumentBlock } from "@/lib/dossier/document-types";
 import { DocumentFigureBlock } from "@/components/dossier/DocumentFigureBlock";
+import { banfieldVitimasQuadrantFromPersonName } from "@/lib/dossier/banfield-vitimas-quadrants";
 
 export function DocumentBlockView({
   slug,
@@ -117,7 +118,13 @@ export function DocumentBlockView({
           <ul
             className={`grid gap-4 ${solo ? "grid-cols-1" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}
           >
-            {block.items.map((p, i) => (
+            {block.items.map((p, i) => {
+              const vitimasQ =
+                slug === "familia-banfield" && p.assetId === "fig-vitimas"
+                  ? banfieldVitimasQuadrantFromPersonName(p.name)
+                  : null;
+              const qParam = vitimasQ !== null ? `&q=${vitimasQ}` : "";
+              return (
               <li key={`${i}-${p.name}`} className="min-w-0">
                 {p.assetId && solo ? (
                   <DocumentFigureBlock
@@ -126,13 +133,14 @@ export function DocumentBlockView({
                     alt={p.name}
                     caption={[p.name, p.role].filter(Boolean).join(" — ")}
                     credit={p.credit}
+                    vitimasQuadrant={vitimasQ ?? undefined}
                   />
                 ) : (
                   <figure>
                     {p.assetId ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={`/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(p.assetId)}?w=480`}
+                        src={`/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(p.assetId)}?w=480${qParam}`}
                         alt={p.name}
                         loading="lazy"
                         decoding="async"
@@ -147,7 +155,8 @@ export function DocumentBlockView({
                   </figure>
                 )}
               </li>
-            ))}
+            );
+            })}
           </ul>
         </div>
       );

@@ -17,11 +17,15 @@ async function main() {
 
   const fromCollage = await ensureBanfieldPortraitWebp("familia-banfield", "fig-portrait-christine", collage);
   assert.ok(fromCollage && fromCollage.bytes.length > 100, "recorta quadrante a partir da grade");
+  const legacyVitimas = await ensureBanfieldPortraitWebp("familia-banfield", "fig-vitimas", collage, 2);
+  assert.ok(legacyVitimas && legacyVitimas.bytes.length > 100, "fig-vitimas?q= recorta quadrante");
   const noopGrid = await ensureBanfieldPortraitWebp("familia-banfield", "fig-portrait-christine", christine);
   assert.equal(noopGrid, null, "não altera quando já é retrato");
 
   const noopSlug = await ensureBanfieldPortraitWebp("outro-slug", "fig-portrait-christine", collage);
   assert.equal(noopSlug, null);
+  const noopVitimasNoQ = await ensureBanfieldPortraitWebp("familia-banfield", "fig-vitimas", collage, null);
+  assert.equal(noopVitimasNoQ, null);
 
   console.log("test-banfield-portrait-fallback: OK");
 }

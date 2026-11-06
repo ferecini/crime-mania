@@ -3,8 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-function assetSrc(slug: string, assetId: string, width = 1440) {
-  return `/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(assetId)}?w=${width}`;
+function assetSrc(slug: string, assetId: string, width = 1440, vitimasQuadrant?: number | null) {
+  const q =
+    vitimasQuadrant !== undefined && vitimasQuadrant !== null && [0, 1, 2, 3].includes(vitimasQuadrant)
+      ? `&q=${vitimasQuadrant}`
+      : "";
+  return `/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(assetId)}?w=${width}${q}`;
 }
 
 export function DocumentFigureBlock({
@@ -15,6 +19,7 @@ export function DocumentFigureBlock({
   credit,
   portrait,
   mapPanelLayout,
+  vitimasQuadrant,
 }: {
   slug: string;
   assetId: string;
@@ -23,6 +28,8 @@ export function DocumentFigureBlock({
   credit?: string;
   portrait?: boolean;
   mapPanelLayout?: boolean;
+  /** Banfield legado: `fig-vitimas` é grade 2×2 — quadrante 0–3 para recorte no servidor. */
+  vitimasQuadrant?: number | null;
 }) {
   const mapPanel = assetId.startsWith("fig-mapa");
   const [open, setOpen] = useState(false);
@@ -78,7 +85,7 @@ export function DocumentFigureBlock({
             <div className="flex min-h-0 flex-1 items-start justify-center overflow-auto px-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={assetSrc(slug, assetId, mapPanel ? 1920 : 1440)}
+                src={assetSrc(slug, assetId, mapPanel ? 1920 : 1440, vitimasQuadrant)}
                 alt={alt}
                 className="block h-auto w-full max-w-[min(100%,960px)] object-contain"
                 draggable={false}
@@ -103,7 +110,7 @@ export function DocumentFigureBlock({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={assetSrc(slug, assetId, 960)}
+            src={assetSrc(slug, assetId, 960, vitimasQuadrant)}
             alt={alt}
             className={`block w-full ${portrait ? "h-auto max-h-[75vh] object-contain" : mapPanel ? "h-auto max-h-[min(70vh,520px)] w-full object-contain" : "h-auto object-contain"}`}
             loading="eager"
