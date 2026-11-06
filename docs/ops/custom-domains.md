@@ -6,10 +6,10 @@ Domínio canônico recomendado (BR): **`https://crimemania.com.br`**
 
 | Host | Registrador | DNS hoje | Vercel (27 out 2026) |
 |------|-------------|----------|----------------------|
-| `crimemania.com.br` | Registro.br | NS `a.auto.dns.br`, `b.auto.dns.br` — sem A/CNAME para Vercel | Anexado ao projeto — **Invalid Configuration** |
-| `www.crimemania.com.br` | Registro.br | (mesma zona) | Anexado — **Invalid Configuration** |
-| `crimemania.com` | GoDaddy | A `@` → `76.223.105.230`, `13.248.243.5`; `www` CNAME → `crimemania.com` | Anexado — **Invalid Configuration** |
-| `www.crimemania.com` | GoDaddy | CNAME flattening via apex acima | Anexado — **Invalid Configuration** |
+| `crimemania.com.br` | Registro.br | NS `a.auto.dns.br`, `b.auto.dns.br`; A `@` → `216.198.79.1`, `64.29.17.1` | Anexado — **Verified** |
+| `www.crimemania.com.br` | Registro.br | CNAME `www` → `6d07db50557dbb99.vercel-dns-017.com` | Anexado — **Verified** |
+| `crimemania.com` | GoDaddy | A `@` → `216.198.79.1`, `64.29.17.1`; `www` CNAME → `6d07db50557dbb99.vercel-dns-017.com` | Anexado — **Verified** |
+| `www.crimemania.com` | GoDaddy | CNAME `www` → `6d07db50557dbb99.vercel-dns-017.com` | Anexado — **Verified** |
 
 Ownership no time **investwise**: **verificado** (sem TXT extra no momento). SSL só sobe após DNS válido.
 
@@ -95,7 +95,7 @@ Alternativa apex (rank 2): um único **A** `@` → `76.76.21.21`.
 5. Asaas → domínios permitidos para callback de pagamento — ver [asaas-billing.md](./asaas-billing.md).
 6. `vercel deploy --prod` após mudar env.
 
-Enquanto DNS não propagar, **não** altere `APP_BASE_URL` na Vercel (continua `https://crime-mania.vercel.app` ou vazio + `VERCEL_URL`).
+**Produção (27 out 2026, ~12:42 BRT):** DNS verificado nos quatro hosts; `APP_BASE_URL` = `https://crimemania.com.br`; `ASAAS_CHECKOUT_SUCCESS_URL` = `https://crimemania.com.br/membro/conta`; deploy prod `crime-mania-nkbh70vyz-investwise.vercel.app`. Definir **Primary** = `crimemania.com.br` no painel Vercel → Domains (CLI `vercel alias` para `.com.br` pode falhar na emissão de certificado até o primary estar definido).
 
 ---
 
@@ -112,3 +112,15 @@ vercel domains inspect crimemania.com.br --scope investwise
 ```
 
 Propagação DNS: tipicamente minutos a 48 h (BR + GoDaddy).
+
+---
+
+## Verificação rápida
+
+```bash
+vercel domains verify crimemania.com.br --scope investwise   # misconfigured: false
+curl -sI https://crimemania.com.br | rg -i '^HTTP|server'
+curl -sI https://crimemania.com | rg -i location   # → crimemania.com.br
+```
+
+Painel Vercel → Domains → **Primary** = `crimemania.com.br` (se ainda não estiver).
