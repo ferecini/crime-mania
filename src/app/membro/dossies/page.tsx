@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { MemberSectionHeader } from "@/components/member/MemberSectionHeader";
-import { getFeaturedDossierSlug, listDossierRecords } from "@/data/dossiers";
+import { getFeaturedDossierSlug } from "@/data/dossiers";
+import { listPublishedDossierRecords } from "@/lib/dossier/catalog";
 import { getSession } from "@/lib/auth/session";
 
 export const metadata = { title: "Dossiês" };
@@ -18,7 +19,7 @@ export default async function DossiersListPage({
   }
 
   await getSession();
-  const dossiers = listDossierRecords();
+  const dossiers = await listPublishedDossierRecords();
 
   return (
     <div className="space-y-6">

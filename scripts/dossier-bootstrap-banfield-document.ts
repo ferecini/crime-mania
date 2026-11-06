@@ -8,6 +8,8 @@ import {
   publishDocument,
   upsertDocumentAsset,
 } from "../src/lib/dossier/document-db";
+import { importCaseForm } from "../src/lib/dossier/case-form";
+import { sanitizeDocument } from "../src/lib/dossier/document-sanitize";
 import { writeDocumentFile } from "../src/lib/dossier/document-store";
 import { createDossierStorage } from "../src/lib/dossier/storage";
 import type { DossierDocument } from "../src/lib/dossier/document-types";
@@ -34,7 +36,14 @@ const ASSETS: { id: string; localRel: string; alt: string }[] = [
 
 function loadDocument(): DossierDocument {
   const p = path.join(process.cwd(), "scripts", "data", "familia-banfield-document.json");
-  return JSON.parse(fs.readFileSync(p, "utf8")) as DossierDocument;
+  const raw = JSON.parse(fs.readFileSync(p, "utf8")) as DossierDocument;
+  const caseForm = importCaseForm(raw);
+  const next: DossierDocument = {
+    ...raw,
+    version: (raw.version ?? 0) + 1,
+    caseForm,
+  };
+  return sanitizeDocument(next);
 }
 
 async function main() {

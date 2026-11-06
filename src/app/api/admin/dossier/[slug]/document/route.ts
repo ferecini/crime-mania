@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getDossierRecord } from "@/data/dossiers";
+import { resolveDossierRecord } from "@/lib/dossier/catalog";
 import { assertSameOrigin, requireDossierAdmin } from "@/lib/dossier/admin-api";
 import {
   listDocumentVersionSnapshots,
@@ -46,7 +46,7 @@ export async function PATCH(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Origem inválida." }, { status: 403 });
   }
   const { slug } = await params;
-  if (!getDossierRecord(slug)) {
+  if (!(await resolveDossierRecord(slug))) {
     return NextResponse.json({ error: "Dossiê não encontrado." }, { status: 404 });
   }
 

@@ -2,10 +2,10 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { DossierDocument } from "@/lib/dossier/document-types";
-import {
-  DossierDocumentEditor,
-  type DocumentVersionSummary,
-} from "@/components/dossier/DossierDocumentEditor";
+import { DossierCaseFormEditor } from "@/components/dossier/DossierCaseFormEditor";
+import { DossierDocumentEditor } from "@/components/dossier/DossierDocumentEditor";
+import type { DocumentSaveAction, DocumentVersionSummary } from "@/components/dossier/DossierDocumentActions";
+import { emptyCaseForm, importCaseForm } from "@/lib/dossier/case-form";
 import { Button } from "@/components/ui/Button";
 import { dossierJobProgressLabel, dossierJobStatusLabel } from "@/lib/dossier/job-labels";
 import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors";
@@ -77,10 +77,35 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
     return () => clearInterval(t);
   }, [job, slug, load]);
 
-  async function runAction(
-    action: "save_draft" | "publish" | "unpublish" | "new_version" | "restore_version",
-    extra?: { versionId?: string },
-  ) {
+  async function createBlank() {
+    setSaving(true);
+    setError(null);
+    try {
+      const blank: DossierDocument = {
+        slug,
+        title: title ?? slug,
+        version: 1,
+        status: "needs_review",
+        sections: [],
+        caseForm: emptyCaseForm(title ?? ""),
+        meta: { charCount: 0, ocrUsed: false, extractionWarnings: [] },
+      };
+      const res = await fetch(`/api/admin/dossier/${slug}/document`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ document: blank, action: "save_draft" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erro");
+      setDocument(data.document);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha ao criar dossiê.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function runAction(action: DocumentSaveAction, extra?: { versionId?: string }) {
     if (!document) return;
     if (action === "publish" && document.status === "needs_review" && document.meta.extractionWarnings.length) {
       if (
@@ -154,12 +179,12 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
   return (
     <section className="space-y-6 rounded-[4px] border border-cm-divider p-4">
       <header>
-        <p className="text-xs uppercase tracking-widest text-cm-red">Documento HTML</p>
+        <p className="text-xs uppercase tracking-widest text-cm-red">Dossiê — conteúdo estruturado</p>
         {title ? <h1 className="font-display mt-1 text-2xl text-white">{title}</h1> : null}
         <p className="mt-2 text-sm text-cm-gray">
           {document
             ? `Status: ${document.status} · v${document.version} · ${blockCount} blocos · ${document.meta.charCount} caracteres${document.meta.ocrUsed ? " · OCR" : ""}`
-            : "Sem rascunho HTML — envie um PDF ou use o bootstrap editorial (Banfield)."}
+            : "Sem rascunho — crie um dossiê em branco (sem PDF) ou importe de um PDF."}
         </p>
         {job ? (
           <p className="mt-1 text-xs text-cm-gray">
@@ -170,8 +195,10 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
         ) : null}
       </header>
 
-      <div className="rounded border border-cm-divider p-4">
-        <h2 className="text-sm font-semibold text-white">Enviar PDF → extração → revisão</h2>
+      <details className="rounded border border-cm-divider p-4">
+        <summary className="min-h-11 cursor-pointer text-sm font-semibold text-white">
+          Importar de PDF (opcional — fluxo legado)
+        </summary>
         <p className="mt-1 text-xs text-cm-gray">
           Armazenamento privado + fila no banco. Após o envio, o processamento é automático (texto e imagens; OCR manual
           se necessário). Não publica automaticamente.
@@ -207,7 +234,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
             )}
           </div>
         </div>
-      </div>
+      </details>
 
       {uploadMessage ? (
         <p className="text-sm text-emerald-400" role="status">
@@ -222,18 +249,65 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
       ) : null}
 
       {!document ? (
-        <div className="rounded border border-dashed border-cm-divider p-4 text-sm text-cm-gray">
-          Aguardando processamento do PDF ou carga editorial manual.
+        <div className="space-y-3 rounded border border-dashed border-cm-divider p-4 text-sm text-cm-gray">
+          <p>Nenhum conteúdo ainda. Comece pelo formulário — fotos, fases e linha do tempo, sem PDF.</p>
+          <Button type="button" className="min-h-11" disabled={saving} onClick={createBlank}>
+            {saving ? "Criando…" : "Criar dossiê em branco"}
+          </Button>
+        </div>
+      ) : document.caseForm ? (
+        <div className="space-y-4">
+          <DossierCaseFormEditor
+            slug={slug}
+            document={document}
+            form={document.caseForm}
+            versions={versions}
+            onDocumentChange={setDocument}
+            onSave={runAction}
+            saving={saving}
+          />
+          <button
+            type="button"
+            className="min-h-11 text-xs text-cm-gray underline"
+            onClick={() => {
+              if (
+                confirm(
+                  "Desativar o formulário e editar por blocos? O conteúdo atual é mantido, mas as seções deixam de ser regeneradas a partir dos campos.",
+                )
+              ) {
+                setDocument({ ...document, caseForm: undefined });
+              }
+            }}
+          >
+            Desativar formulário (editor de blocos avançado)
+          </button>
         </div>
       ) : (
-        <DossierDocumentEditor
-          slug={slug}
-          document={document}
-          versions={versions}
-          onDocumentChange={setDocument}
-          onSave={runAction}
-          saving={saving}
-        />
+        <div className="space-y-4">
+          <div className="space-y-2 rounded border border-amber-500/30 bg-amber-950/20 p-4 text-sm text-amber-100/90">
+            <p>
+              Este dossiê usa o editor de blocos (legado: HTML editorial ou extraído de PDF). Converta para o formulário
+              estruturado para editar fotos, fases e linha do tempo por campos.
+            </p>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-11"
+              onClick={() => setDocument({ ...document, caseForm: importCaseForm(document) })}
+            >
+              Converter para formulário
+            </Button>
+            <p className="text-xs">Revise os campos e salve o rascunho; nada é publicado até clicar em Publicar.</p>
+          </div>
+          <DossierDocumentEditor
+            slug={slug}
+            document={document}
+            versions={versions}
+            onDocumentChange={setDocument}
+            onSave={runAction}
+            saving={saving}
+          />
+        </div>
       )}
     </section>
   );

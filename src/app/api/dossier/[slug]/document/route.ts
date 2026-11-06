@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDossierRecord } from "@/data/dossiers";
+import { resolveDossierRecord } from "@/lib/dossier/catalog";
 import { canAccessPublishedDocument } from "@/lib/dossier/access";
 import { readMemberDocument, resolvePublishedFormat } from "@/lib/dossier/document-store";
 import { toPublicDocument } from "@/lib/dossier/public-document";
@@ -10,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ slug: string }> },
 ) {
   const { slug } = await params;
-  const dossier = getDossierRecord(slug);
+  const dossier = await resolveDossierRecord(slug);
   if (!dossier) {
     return NextResponse.json({ error: "Dossiê não encontrado." }, { status: 404 });
   }

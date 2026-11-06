@@ -8,6 +8,11 @@ import type {
   DossierDocumentSection,
 } from "@/lib/dossier/document-types";
 import { DocumentBlockView } from "@/components/dossier/DocumentBlockView";
+import {
+  DossierDocumentActions,
+  type DocumentSaveHandler,
+  type DocumentVersionSummary,
+} from "@/components/dossier/DossierDocumentActions";
 import { Button } from "@/components/ui/Button";
 
 const BLOCK_TYPES: DocumentBlockType[] = [
@@ -66,14 +71,12 @@ function emptyBlock(type: DocumentBlockType): DocumentBlock {
   }
 }
 
-export type DocumentVersionSummary = { id: string; version: number; publishedAt: string };
-
 type Props = {
   slug: string;
   document: DossierDocument;
   versions: DocumentVersionSummary[];
   onDocumentChange: (doc: DossierDocument) => void;
-  onSave: (action: "save_draft" | "publish" | "unpublish" | "new_version" | "restore_version", extra?: { versionId?: string }) => Promise<void>;
+  onSave: DocumentSaveHandler;
   saving: boolean;
 };
 
@@ -395,44 +398,7 @@ export function DossierDocumentEditor({
         Nova seção
       </Button>
 
-      {versions.length > 0 ? (
-        <details className="rounded border border-cm-divider p-4">
-          <summary className="cursor-pointer text-sm text-cm-gray">Histórico de versões publicadas</summary>
-          <ul className="mt-3 space-y-2 text-sm">
-            {versions.map((v) => (
-              <li key={v.id} className="flex flex-wrap items-center gap-2">
-                <span className="text-cm-gray">
-                  v{v.version} — {new Date(v.publishedAt).toLocaleString("pt-BR")}
-                </span>
-                <Button
-                  type="button"
-                  variant="secondary"
-                  className="min-h-9 text-xs"
-                  disabled={saving}
-                  onClick={() => onSave("restore_version", { versionId: v.id })}
-                >
-                  Restaurar rascunho
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </details>
-      ) : null}
-
-      <div className="flex flex-wrap gap-3">
-        <Button type="button" className="min-h-11" disabled={saving} onClick={() => onSave("save_draft")}>
-          {saving ? "Salvando…" : "Salvar rascunho"}
-        </Button>
-        <Button type="button" variant="secondary" className="min-h-11" disabled={saving} onClick={() => onSave("publish")}>
-          Publicar HTML
-        </Button>
-        <Button type="button" variant="secondary" className="min-h-11" disabled={saving} onClick={() => onSave("unpublish")}>
-          Despublicar
-        </Button>
-        <Button type="button" variant="secondary" className="min-h-11" disabled={saving} onClick={() => onSave("new_version")}>
-          Nova versão (rascunho)
-        </Button>
-      </div>
+      <DossierDocumentActions slug={slug} versions={versions} onSave={onSave} saving={saving} />
     </div>
   );
 }

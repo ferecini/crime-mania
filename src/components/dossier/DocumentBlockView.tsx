@@ -70,20 +70,88 @@ export function DocumentBlockView({
       return (
         <div className="space-y-4">
           {block.title ? <h3 className="font-display text-xl text-white">{block.title}</h3> : null}
-          <ol className="relative space-y-6 border-l border-cm-divider pl-6 md:flex md:flex-row md:gap-6 md:overflow-x-auto md:border-l-0 md:border-t md:pl-0 md:pt-6">
-            {block.entries.map((entry) => (
+          {/* Mobile: trilho vertical à esquerda. md+: espinha central com cards alternados. */}
+          <ol className="relative space-y-6 border-l border-cm-divider md:space-y-0 md:border-l-0 md:before:absolute md:before:inset-y-0 md:before:left-1/2 md:before:w-px md:before:-translate-x-1/2 md:before:bg-cm-divider">
+            {block.entries.map((entry, i) => (
               <li
-                key={`${entry.date}-${entry.title}`}
-                className="md:min-w-[14rem] md:flex-1 md:border-l md:border-cm-divider md:pl-4 md:first:border-l-0 md:first:pl-0"
+                key={`${i}-${entry.date}-${entry.title}`}
+                className="relative pl-6 md:grid md:grid-cols-2 md:pb-10 md:pl-0 md:last:pb-0"
               >
-                <p className="text-xs font-medium uppercase tracking-wider text-cm-red">{entry.date}</p>
-                <p className="font-display mt-1 text-white">{entry.title}</p>
-                <p className="mt-2 text-sm leading-relaxed text-cm-gray">{entry.body}</p>
+                <span
+                  aria-hidden
+                  className="absolute left-0 top-1.5 size-3 -translate-x-1/2 rounded-full border-2 border-cm-red bg-cm-bg md:left-1/2 md:top-5"
+                />
+                <div
+                  className={`min-w-0 rounded-[4px] border border-cm-divider bg-white/[0.03] p-4 md:p-5 ${
+                    i % 2 === 0 ? "md:col-start-1 md:mr-10" : "md:col-start-2 md:ml-10"
+                  }`}
+                >
+                  {entry.date ? (
+                    <p className="text-xs font-semibold uppercase tracking-wider text-cm-red">{entry.date}</p>
+                  ) : null}
+                  {entry.title ? <p className="font-display mt-1 text-lg text-white">{entry.title}</p> : null}
+                  {entry.assetId ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={`/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(entry.assetId)}?w=640`}
+                      alt={entry.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="mt-3 h-auto w-full rounded-[4px] object-cover"
+                    />
+                  ) : null}
+                  {entry.body ? (
+                    <p className="mt-2 text-[15px] leading-relaxed text-cm-gray md:text-sm">{entry.body}</p>
+                  ) : null}
+                </div>
               </li>
             ))}
           </ol>
         </div>
       );
+    case "people": {
+      const solo = block.items.length === 1;
+      return (
+        <div className="space-y-4">
+          {block.title ? <h3 className="font-display text-xl text-white md:text-2xl">{block.title}</h3> : null}
+          <ul
+            className={`grid gap-4 ${solo ? "grid-cols-1" : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4"}`}
+          >
+            {block.items.map((p, i) => (
+              <li key={`${i}-${p.name}`} className="min-w-0">
+                {p.assetId && solo ? (
+                  <DocumentFigureBlock
+                    slug={slug}
+                    assetId={p.assetId}
+                    alt={p.name}
+                    caption={[p.name, p.role].filter(Boolean).join(" — ")}
+                    credit={p.credit}
+                  />
+                ) : (
+                  <figure>
+                    {p.assetId ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={`/api/dossier/${encodeURIComponent(slug)}/document/asset/${encodeURIComponent(p.assetId)}?w=480`}
+                        alt={p.name}
+                        loading="lazy"
+                        decoding="async"
+                        className="aspect-[4/5] w-full rounded-[4px] border border-cm-divider object-cover"
+                      />
+                    ) : null}
+                    <figcaption className="mt-2">
+                      <p className="font-display text-sm text-white">{p.name}</p>
+                      {p.role ? <p className="text-xs text-cm-gray">{p.role}</p> : null}
+                      {p.credit ? <p className="text-xs text-cm-gray">Crédito: {p.credit}</p> : null}
+                    </figcaption>
+                  </figure>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      );
+    }
     case "list":
       if (block.style === "ordered") {
         return (

@@ -7,6 +7,7 @@ export type DossierCatalogRow = {
   accessTier: string;
   intro: string | null;
   status: string;
+  createdAt?: string;
 };
 
 function sqlUrl(): string {
@@ -25,6 +26,7 @@ export async function listDossierCatalog(): Promise<DossierCatalogRow[]> {
     accessTier: r.access_tier as string,
     intro: (r.intro as string) ?? null,
     status: r.status as string,
+    createdAt: r.created_at ? (r.created_at as Date).toISOString().slice(0, 10) : undefined,
   }));
 }
 

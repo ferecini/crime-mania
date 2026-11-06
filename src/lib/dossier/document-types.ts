@@ -1,3 +1,4 @@
+import type { DossierCaseForm } from "@/lib/dossier/case-form";
 import type { DossierProcessingStatus } from "@/lib/dossier/types";
 
 export type DossierPublishedFormat = "html" | "legacy";
@@ -12,7 +13,8 @@ export type DocumentBlockType =
   | "timeline"
   | "list"
   | "table"
-  | "callout";
+  | "callout"
+  | "people";
 
 export type DocumentLink = {
   href: string;
@@ -72,6 +74,8 @@ export type TimelineEntry = {
   date: string;
   title: string;
   body: string;
+  /** Imagem opcional (asset do dossiê) exibida no card. */
+  assetId?: string;
 };
 
 export type TimelineBlock = DocumentBlockBase & {
@@ -100,6 +104,12 @@ export type CalloutBlock = DocumentBlockBase & {
   text: string;
 };
 
+export type PeopleBlock = DocumentBlockBase & {
+  type: "people";
+  title?: string;
+  items: { name: string; role?: string; credit?: string; assetId?: string }[];
+};
+
 export type DocumentBlock =
   | HeadingBlock
   | ParagraphBlock
@@ -110,12 +120,17 @@ export type DocumentBlock =
   | TimelineBlock
   | ListBlock
   | TableBlock
-  | CalloutBlock;
+  | CalloutBlock
+  | PeopleBlock;
 
 export type DossierDocumentSection = {
   id: string;
   order: number;
   title?: string;
+  /** "phase" renderiza cabeçalho visível (rótulo + título) como etapa do dossiê. */
+  kind?: "phase";
+  /** Rótulo curto exibido acima do título da fase (ex.: "Fase 1"). */
+  label?: string;
   blocks: DocumentBlock[];
 };
 
@@ -133,6 +148,11 @@ export type DossierDocument = {
   status: DossierProcessingStatus;
   sourcePdfStorageKey?: string;
   sections: DossierDocumentSection[];
+  /**
+   * Conteúdo estruturado (fonte da verdade quando presente). `sections` é
+   * regenerado a partir dele em toda gravação (sanitizeDocument).
+   */
+  caseForm?: DossierCaseForm;
   meta: DossierDocumentMeta;
   processingError?: string;
   publishedAt?: string;

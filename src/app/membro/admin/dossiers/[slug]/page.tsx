@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { DossierHtmlReviewPanel } from "@/components/dossier/DossierHtmlReviewPanel";
-import { getDossierRecord } from "@/data/dossiers";
+import { resolveDossierRecord } from "@/lib/dossier/catalog";
 import { isDossierAdmin } from "@/lib/dossier/admin-access";
 import { getSession } from "@/lib/auth/session";
 
@@ -23,7 +23,7 @@ export default async function MemberAdminDossierPage({
   }
 
   const { slug } = await params;
-  const dossier = getDossierRecord(slug);
+  const dossier = await resolveDossierRecord(slug);
   if (!dossier) notFound();
 
   return (

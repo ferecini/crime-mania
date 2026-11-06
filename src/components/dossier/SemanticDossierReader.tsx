@@ -1,14 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { DocumentBlock, DossierDocumentPublic } from "@/lib/dossier/document-types";
-import { DocumentBlockView } from "@/components/dossier/DocumentBlockView";
+import type { DossierDocumentPublic } from "@/lib/dossier/document-types";
+import { DossierDocumentView } from "@/components/dossier/DossierDocumentView";
 
 type LoadState = "loading" | "ready" | "blocked" | "error" | "processing";
-
-function sortedBlocks(blocks: DocumentBlock[]) {
-  return blocks.slice().sort((a, b) => a.order - b.order);
-}
 
 export function SemanticDossierReader({ slug }: { slug: string }) {
   const [doc, setDoc] = useState<DossierDocumentPublic | null>(null);
@@ -74,7 +70,7 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
       <div className="space-y-2 rounded-[4px] border border-dashed border-cm-divider p-6">
         <p className="font-display text-white">Documento em processamento</p>
         <p className="text-sm text-cm-gray">
-          A extração editorial está em andamento. Enquanto isso, use o download do PDF original.
+          A extração editorial está em andamento. Volte em breve.
         </p>
       </div>
     );
@@ -87,7 +83,7 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
         <p className="text-sm text-cm-gray">{errorDetail}</p>
         <button
           type="button"
-          className="text-sm text-cm-red-light underline"
+          className="min-h-11 text-sm text-cm-red-light underline"
           onClick={() => window.location.reload()}
         >
           Tentar novamente
@@ -99,66 +95,10 @@ export function SemanticDossierReader({ slug }: { slug: string }) {
   if (!doc) return null;
 
   return (
-    <div className="dossier-html-reader mx-auto max-w-3xl space-y-10 px-4 pb-28 [scroll-padding-bottom:7rem] md:max-w-[42rem] md:px-0 lg:max-w-[52rem]">
-      {doc.meta.extractionWarnings.length > 0 ? (
-        <ul className="rounded border border-amber-500/30 bg-amber-950/20 p-3 text-sm text-amber-100/90">
-          {doc.meta.extractionWarnings.map((w) => (
-            <li key={w}>{w}</li>
-          ))}
-        </ul>
-      ) : null}
-      {doc.sections
-        .slice()
-        .sort((a, b) => a.order - b.order)
-        .map((section) => {
-          const blocks = sortedBlocks(section.blocks);
-          const isMapSection = section.id === "mapa";
-
-          if (isMapSection) {
-            const prose = blocks.filter((b) => b.type !== "figure");
-            const figures = blocks.filter((b) => b.type === "figure");
-            return (
-              <section
-                key={section.id}
-                className="space-y-5"
-                aria-labelledby={`sec-${section.id}`}
-                data-dossier-section="mapa"
-              >
-                {section.title ? (
-                  <h2 id={`sec-${section.id}`} className="sr-only">
-                    {section.title}
-                  </h2>
-                ) : null}
-                {prose.map((block) => (
-                  <DocumentBlockView key={block.id} slug={slug} block={block} />
-                ))}
-                <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
-                  {figures.map((block) => (
-                    <DocumentBlockView
-                      key={block.id}
-                      slug={slug}
-                      block={block}
-                      mapPanelLayout
-                    />
-                  ))}
-                </div>
-              </section>
-            );
-          }
-
-          return (
-            <section key={section.id} className="space-y-5" aria-labelledby={`sec-${section.id}`}>
-              {section.title ? (
-                <h2 id={`sec-${section.id}`} className="sr-only">
-                  {section.title}
-                </h2>
-              ) : null}
-              {blocks.map((block) => (
-                <DocumentBlockView key={block.id} slug={slug} block={block} />
-              ))}
-            </section>
-          );
-        })}
-    </div>
+    <DossierDocumentView
+      slug={slug}
+      sections={doc.sections}
+      warnings={doc.meta.extractionWarnings}
+    />
   );
 }

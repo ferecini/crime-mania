@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getDossierRecord } from "@/data/dossiers";
+import { resolveDossierRecord } from "@/lib/dossier/catalog";
 import { assertSameOrigin, requireDossierAdmin } from "@/lib/dossier/admin-api";
 import { upsertDocumentAsset, readDraftDocument } from "@/lib/dossier/document-db";
 import { DOSSIER_DOCUMENT_LIMITS } from "@/lib/dossier/document-limits";
@@ -16,7 +16,7 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ error: "Origem inválida." }, { status: 403 });
   }
   const { slug } = await params;
-  if (!getDossierRecord(slug)) {
+  if (!(await resolveDossierRecord(slug))) {
     return NextResponse.json({ error: "Dossiê não encontrado." }, { status: 404 });
   }
 

@@ -1,4 +1,5 @@
 import type { DocumentBlock, DossierDocument } from "@/lib/dossier/document-types";
+import { compileCaseForm, normalizeCaseForm } from "@/lib/dossier/case-form";
 import { DOSSIER_DOCUMENT_LIMITS } from "@/lib/dossier/document-limits";
 
 const HTTP_LINK = /^https?:\/\//i;
@@ -17,6 +18,10 @@ export function sanitizeLinkHref(href: string): string | null {
   if (!HTTP_LINK.test(trimmed)) return null;
   if (trimmed.length > 2048) return null;
   return trimmed;
+}
+
+function cleanAssetId(id?: string): string {
+  return (id ?? "").replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64);
 }
 
 function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
@@ -58,10 +63,25 @@ function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
     case "timeline":
       return {
         ...block,
-        entries: block.entries.slice(0, 48).map((e) => ({
-          date: e.date.trim().slice(0, 80),
-          title: e.title.trim().slice(0, 200),
-          body: e.body.trim().slice(0, 4000),
+        entries: block.entries.slice(0, 48).map((e) => {
+          const assetId = cleanAssetId(e.assetId);
+          return {
+            date: e.date.trim().slice(0, 80),
+            title: e.title.trim().slice(0, 200),
+            body: e.body.trim().slice(0, 4000),
+            ...(assetId ? { assetId } : {}),
+          };
+        }),
+      };
+    case "people":
+      return {
+        ...block,
+        title: block.title?.trim().slice(0, 200),
+        items: block.items.slice(0, 24).map((p) => ({
+          name: p.name.trim().slice(0, 200),
+          role: p.role?.trim().slice(0, 300),
+          credit: p.credit?.trim().slice(0, 300),
+          assetId: cleanAssetId(p.assetId) || undefined,
         })),
       };
     case "list":
@@ -83,13 +103,17 @@ function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
 }
 
 export function sanitizeDocument(doc: DossierDocument): DossierDocument {
-  const sections = doc.sections
+  // Com formulário estruturado, `sections` é sempre derivado dele (única fonte da verdade).
+  const caseForm = doc.caseForm ? normalizeCaseForm(doc.caseForm) : undefined;
+  const sourceSections = caseForm ? compileCaseForm(caseForm) : doc.sections;
+  const sections = sourceSections
     .slice(0, DOSSIER_DOCUMENT_LIMITS.maxSections)
     .map((section, si) => ({
       ...section,
       id: section.id.slice(0, 64) || `section-${si + 1}`,
       order: si + 1,
       title: section.title?.trim().slice(0, 200),
+      label: section.label?.trim().slice(0, 40),
       blocks: section.blocks
         .slice(0, DOSSIER_DOCUMENT_LIMITS.maxBlocksPerSection)
         .map((b, bi) => sanitizeBlock({ ...b, order: bi + 1 }))
@@ -113,6 +137,7 @@ export function sanitizeDocument(doc: DossierDocument): DossierDocument {
     ...doc,
     title: doc.title.trim().slice(0, 300),
     sections,
+    ...(caseForm ? { caseForm } : {}),
     meta: {
       ...doc.meta,
       charCount: Math.min(charCount, 500_000),

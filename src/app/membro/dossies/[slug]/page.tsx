@@ -9,7 +9,7 @@ import { readMemberDocument, resolvePublishedFormat } from "@/lib/dossier/docume
 import { readProcessedManifest } from "@/lib/dossier/manifest-store";
 import { DossierTextSummary } from "@/components/dossier/DossierTextSummary";
 import { PaywallCard } from "@/components/member/PaywallCard";
-import { getDossierRecord } from "@/data/dossiers";
+import { resolveDossierRecord } from "@/lib/dossier/catalog";
 import { getJurisItem } from "@/data/member-media";
 import { getSession } from "@/lib/auth/session";
 import { isDossierAdmin } from "@/lib/dossier/admin-access";
@@ -23,7 +23,7 @@ export default async function DossierDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const dossier = getDossierRecord(slug);
+  const dossier = await resolveDossierRecord(slug);
   if (!dossier) notFound();
 
   const session = await getSession();
@@ -69,7 +69,7 @@ export default async function DossierDetailPage({
               href={`/membro/admin/dossiers/${slug}`}
               className="text-sm text-cm-red-light hover:text-white"
             >
-              Revisão dossiê
+              Editar dossiê
             </Link>
             <Link
               href={`/membro/admin/galerias/${slug}`}
