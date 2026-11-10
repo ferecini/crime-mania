@@ -93,7 +93,7 @@ export function DossierDocumentView({
               {prose.map((block) => (
                 <DocumentBlockView key={block.id} slug={slug} block={block} />
               ))}
-              <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2 xl:items-start">
+              <div className="flex min-w-0 flex-col gap-8">
                 {figures.map((block) => (
                   <DocumentBlockView key={block.id} slug={slug} block={block} mapPanelLayout />
                 ))}

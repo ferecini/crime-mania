@@ -57,12 +57,6 @@ export function DocumentFigureBlock({
     };
   }, [open, close]);
 
-  /** Full-bleed só em viewports estreitos; md+ fica contido no grid/coluna */
-  const bleed =
-    mapPanelLayout && mapPanel
-      ? "max-md:relative max-md:left-1/2 max-md:w-screen max-md:max-w-[100vw] max-md:-translate-x-1/2"
-      : "";
-
   const lightbox =
     open && mounted
       ? createPortal(
@@ -99,7 +93,7 @@ export function DocumentFigureBlock({
   return (
     <>
       <figure
-        className={`min-w-0 w-full ${mapPanelLayout ? "max-w-none" : "mx-auto max-w-[75rem]"} ${bleed}`}
+        className={`min-w-0 w-full ${mapPanelLayout ? "max-w-none" : "mx-auto max-w-[75rem]"}`}
         data-dossier-figure={assetId}
       >
         <button
@@ -110,9 +104,9 @@ export function DocumentFigureBlock({
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={assetSrc(slug, assetId, 960, vitimasQuadrant)}
+            src={assetSrc(slug, assetId, mapPanel ? 1440 : 960, vitimasQuadrant)}
             alt={alt}
-            className={`block w-full ${portrait ? "h-auto max-h-[75vh] object-contain" : mapPanel ? "h-auto max-h-[min(70vh,520px)] w-full object-contain" : "h-auto object-contain"}`}
+            className={`block w-full max-w-full ${portrait ? "h-auto max-h-[75vh] object-contain" : mapPanel ? "h-auto object-contain" : "h-auto object-contain"}`}
             loading="eager"
             decoding="async"
           />
