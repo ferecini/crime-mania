@@ -6,6 +6,7 @@ export const DEFAULT_DESCRIPTION =
   "Podcast brasileiro de true crime: assassinatos, mistérios e desaparecimentos narrados com respeito às vítimas. Ouça episódios, conheça planos de assinatura e conteúdo exclusivo.";
 
 const OG_IMAGE_PATH = "/logo-crime-mania.jpg";
+const FAVICON_PATH = "/logo-crime-mania.jpg";
 
 export function defaultOpenGraph(): NonNullable<Metadata["openGraph"]> {
   const url = getSiteUrl();
@@ -63,6 +64,14 @@ export function rootMetadata(): Metadata {
     },
     description: DEFAULT_DESCRIPTION,
     applicationName: SITE_NAME,
+    icons: {
+      icon: [
+        { url: FAVICON_PATH, type: "image/jpeg", sizes: "1024x1024" },
+        { url: "/favicon-32.png", type: "image/png", sizes: "32x32" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+      shortcut: FAVICON_PATH,
+    },
     keywords: [
       "true crime",
       "podcast true crime",
