@@ -3,6 +3,14 @@ import { compileCaseForm, normalizeCaseForm } from "@/lib/dossier/case-form";
 import { DOSSIER_DOCUMENT_LIMITS } from "@/lib/dossier/document-limits";
 
 const HTTP_LINK = /^https?:\/\//i;
+const EDITORIAL_CREDIT = /material\s+editorial|crime\s+mania/i;
+
+function cleanCredit(credit?: string): string | undefined {
+  const trimmed = credit?.trim();
+  if (!trimmed) return undefined;
+  if (EDITORIAL_CREDIT.test(trimmed)) return undefined;
+  return trimmed.slice(0, 300);
+}
 
 export function escapePlainText(input: string): string {
   return input
@@ -42,7 +50,7 @@ function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
         assetId: block.assetId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64),
         alt: block.alt.trim().slice(0, 500),
         caption: block.caption?.trim().slice(0, 1000),
-        credit: block.credit?.trim().slice(0, 300),
+        credit: cleanCredit(block.credit),
       };
     case "figure":
       return {
@@ -50,7 +58,7 @@ function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
         assetId: block.assetId.replace(/[^a-zA-Z0-9_-]/g, "").slice(0, 64),
         alt: block.alt.trim().slice(0, 500),
         caption: block.caption.trim().slice(0, 1000),
-        credit: block.credit?.trim().slice(0, 300),
+        credit: cleanCredit(block.credit),
       };
     case "facts":
       return {
@@ -80,7 +88,7 @@ function sanitizeBlock(block: DocumentBlock): DocumentBlock | null {
         items: block.items.slice(0, 24).map((p) => ({
           name: p.name.trim().slice(0, 200),
           role: p.role?.trim().slice(0, 300),
-          credit: p.credit?.trim().slice(0, 300),
+          credit: cleanCredit(p.credit),
           assetId: cleanAssetId(p.assetId) || undefined,
         })),
       };

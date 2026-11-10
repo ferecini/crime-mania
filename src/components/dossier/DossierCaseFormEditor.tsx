@@ -10,6 +10,7 @@ import {
   type DossierCaseForm,
 } from "@/lib/dossier/case-form";
 import type { DossierDocument, TimelineEntry } from "@/lib/dossier/document-types";
+import { banfieldVitimasQuadrantFromPersonName } from "@/lib/dossier/banfield-vitimas-quadrants";
 import {
   DossierDocumentActions,
   type DocumentSaveHandler,
@@ -150,11 +151,26 @@ function RowControls({
   );
 }
 
-function Thumb({ slug, assetId, alt }: { slug: string; assetId: string; alt: string }) {
+function Thumb({
+  slug,
+  assetId,
+  alt,
+  personName,
+}: {
+  slug: string;
+  assetId: string;
+  alt: string;
+  personName?: string;
+}) {
+  const vitimasQ =
+    slug === "familia-banfield" && assetId === "fig-vitimas" && personName
+      ? banfieldVitimasQuadrantFromPersonName(personName)
+      : null;
+  const qParam = vitimasQ !== null ? `&q=${vitimasQ}` : "";
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={`/api/dossier/${slug}/document/asset/${encodeURIComponent(assetId)}?w=480`}
+      src={`/api/dossier/${slug}/document/asset/${encodeURIComponent(assetId)}?w=480${qParam}`}
       alt={alt}
       className="max-h-40 w-auto max-w-full rounded border border-cm-divider object-contain"
     />
@@ -360,7 +376,9 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
         {victims.people.map((p, i) => (
           <div key={i} className="grid gap-3 rounded border border-cm-divider/80 p-3 md:grid-cols-[10rem_1fr]">
             <div className="space-y-2">
-              {p.assetId ? <Thumb slug={slug} assetId={p.assetId} alt={p.name || "Foto"} /> : null}
+              {p.assetId ? (
+                <Thumb slug={slug} assetId={p.assetId} alt={p.name || "Foto"} personName={p.name} />
+              ) : null}
               <ImageUpload
                 slug={slug}
                 label={p.assetId ? "Trocar foto" : "Enviar foto"}
@@ -416,7 +434,9 @@ export function DossierCaseFormEditor({ slug, document, form, versions, onDocume
         {reus.people.map((p, i) => (
           <div key={i} className="grid gap-3 rounded border border-cm-divider/80 p-3 md:grid-cols-[10rem_1fr]">
             <div className="space-y-2">
-              {p.assetId ? <Thumb slug={slug} assetId={p.assetId} alt={p.name || "Foto"} /> : null}
+              {p.assetId ? (
+                <Thumb slug={slug} assetId={p.assetId} alt={p.name || "Foto"} personName={p.name} />
+              ) : null}
               <ImageUpload
                 slug={slug}
                 label={p.assetId ? "Trocar foto" : "Enviar foto"}

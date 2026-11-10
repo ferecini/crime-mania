@@ -117,8 +117,10 @@ export function DocumentFigureBlock({
             decoding="async"
           />
         </button>
-        {caption ? <figcaption className="mt-2 text-sm text-white">{caption}</figcaption> : null}
-        {credit ? <p className="text-xs text-cm-gray">Crédito: {credit}</p> : null}
+        {caption ? (
+          <figcaption className="mt-2 break-words px-1 text-sm text-white">{caption}</figcaption>
+        ) : null}
+        {credit ? <p className="break-words px-1 text-xs text-cm-gray">Crédito: {credit}</p> : null}
       </figure>
       {lightbox}
     </>

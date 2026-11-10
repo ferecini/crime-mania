@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { DossierDocument, DossierPublishedFormat } from "@/lib/dossier/document-types";
 import { readPublishedDocument, readPublishedFormat, readDraftDocument } from "@/lib/dossier/document-db";
+import { sanitizeDocument } from "@/lib/dossier/document-sanitize";
 
 const DOCUMENT_ROOT = path.join(process.cwd(), "private", "dossiers", "documents");
 
@@ -22,18 +23,22 @@ function readDocumentFile(slug: string): DossierDocument | null {
   }
 }
 
+function memberReadyDocument(doc: DossierDocument | null): DossierDocument | null {
+  if (!doc || doc.status !== "ready") return null;
+  return doc.caseForm ? sanitizeDocument(doc) : doc;
+}
+
 export async function readMemberDocument(slug: string): Promise<DossierDocument | null> {
   if (hasPostgres()) {
     try {
       const pub = await readPublishedDocument(slug);
-      if (pub) return pub;
+      const ready = memberReadyDocument(pub);
+      if (ready) return ready;
     } catch {
       /* dev fallback */
     }
   }
-  const file = readDocumentFile(slug);
-  if (file?.status === "ready") return file;
-  return null;
+  return memberReadyDocument(readDocumentFile(slug));
 }
 
 export async function readAdminDocument(slug: string): Promise<DossierDocument | null> {

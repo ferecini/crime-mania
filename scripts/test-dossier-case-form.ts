@@ -34,7 +34,11 @@ assert.equal(form.extraSections.length, 0);
 // 2. Formulário -> sections (ids estáveis para o leitor: mapa, timeline)
 const sections = compileCaseForm(form);
 const ids = sections.map((s) => s.id);
-assert.deepEqual(ids.slice(0, 4), ["intro", "facts", "vitimas", "reus"]);
+assert.deepEqual(ids.slice(0, 3), ["intro", "facts", "envolvidos"]);
+const envolvidos = sections.find((s) => s.id === "envolvidos");
+assert.equal(envolvidos?.title, "Envolvidos");
+const people = envolvidos?.blocks.find((b) => b.type === "people");
+assert.equal(people && people.type === "people" ? people.items.length : 0, 4);
 assert.ok(ids.includes("mapa") && ids.includes("timeline") && ids.includes("teorias"));
 const phaseSections = sections.filter((s) => s.kind === "phase");
 assert.equal(phaseSections.length, 3);

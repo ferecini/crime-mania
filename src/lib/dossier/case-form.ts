@@ -314,37 +314,25 @@ export function compileCaseForm(form: DossierCaseForm): DossierDocumentSection[]
     ]),
   );
 
+  const involved = [...victims.people, ...reus.people];
+  if (involved.length > 0) {
+  const mergeInvolved = reus.people.length > 0;
+  const sectionId = mergeInvolved ? "envolvidos" : "vitimas";
+  const sectionTitle =
+    victims.title?.trim() ||
+    (mergeInvolved ? reus.title?.trim() || "Envolvidos" : "Vítimas");
   sections.push(
-    ...section("vitimas", victims.title || "Vítimas", [
-      ...(victims.people.length
-        ? [
-            {
-              id: "people-main",
-              type: "people" as const,
-              order: 0,
-              title: victims.title,
-              items: victims.people,
-            },
-          ]
-        : []),
+    ...section(sectionId, sectionTitle, [
+      {
+        id: mergeInvolved ? "people-envolvidos" : "people-main",
+        type: "people" as const,
+        order: 0,
+        title: sectionTitle,
+        items: involved,
+      },
     ]),
   );
-
-  sections.push(
-    ...section("reus", reus.title || "Réus / acusados", [
-      ...(reus.people.length
-        ? [
-            {
-              id: "people-reus",
-              type: "people" as const,
-              order: 0,
-              title: reus.title,
-              items: reus.people,
-            },
-          ]
-        : []),
-    ]),
-  );
+  }
 
   form.phases.forEach((phase, i) => {
     sections.push(
@@ -478,7 +466,9 @@ export function importCaseForm(doc: DossierDocument): DossierCaseForm {
       return out;
     };
 
-    const known = ["intro", "facts", "vitimas", "reus", "timeline", "mapa", "teorias"].includes(sec.id) && !seen.has(sec.id);
+    const known =
+      ["intro", "facts", "vitimas", "reus", "envolvidos", "timeline", "mapa", "teorias"].includes(sec.id) &&
+      !seen.has(sec.id);
     if (known) seen.add(sec.id);
 
     if (known && sec.id === "intro") {
@@ -505,6 +495,13 @@ export function importCaseForm(doc: DossierDocument): DossierCaseForm {
       if (callout) {
         form.summary.highlightTitle = callout.title;
         form.summary.highlightText = callout.text;
+      }
+    } else if (known && sec.id === "envolvidos") {
+      const people = first("people");
+      if (people) {
+        form.victims.title = people.title || sec.title || "Envolvidos";
+        form.victims.people = people.items;
+        form.reus.people = [];
       }
     } else if (known && sec.id === "vitimas") {
       const h = first("heading");

@@ -30,7 +30,7 @@ export async function GET(_request: Request, { params }: Params) {
   } catch {
     /* migration 005 optional */
   }
-  return NextResponse.json({ document, versions });
+  return NextResponse.json({ document: sanitizeDocument(document), versions });
 }
 
 const patchSchema = z.object({

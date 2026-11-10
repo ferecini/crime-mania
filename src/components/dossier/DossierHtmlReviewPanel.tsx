@@ -5,7 +5,7 @@ import type { DossierDocument } from "@/lib/dossier/document-types";
 import { DossierCaseFormEditor } from "@/components/dossier/DossierCaseFormEditor";
 import { DossierDocumentEditor } from "@/components/dossier/DossierDocumentEditor";
 import type { DocumentSaveAction, DocumentVersionSummary } from "@/components/dossier/DossierDocumentActions";
-import { emptyCaseForm, importCaseForm } from "@/lib/dossier/case-form";
+import { emptyCaseForm, importCaseForm, normalizeCaseForm } from "@/lib/dossier/case-form";
 import { Button } from "@/components/ui/Button";
 import { dossierJobProgressLabel, dossierJobStatusLabel } from "@/lib/dossier/job-labels";
 import { humanizeDossierProcessingError } from "@/lib/dossier/processing-errors";
@@ -107,7 +107,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
 
   async function runAction(action: DocumentSaveAction, extra?: { versionId?: string }) {
     if (!document) return;
-    if (action === "publish" && document.status === "needs_review" && document.meta.extractionWarnings.length) {
+    if (action === "publish" && document.status === "needs_review" && (document.meta.extractionWarnings?.length ?? 0) > 0) {
       if (
         !confirm(
           "Há avisos de extração/OCR. Confirma publicação após revisão editorial?",
@@ -260,7 +260,7 @@ export function DossierHtmlReviewPanel({ slug, title }: { slug: string; title?: 
           <DossierCaseFormEditor
             slug={slug}
             document={document}
-            form={document.caseForm}
+            form={normalizeCaseForm(document.caseForm)}
             versions={versions}
             onDocumentChange={setDocument}
             onSave={runAction}
