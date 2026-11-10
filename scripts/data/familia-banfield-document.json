@@ -115,14 +115,9 @@
       "title": "Mapa",
       "images": [
         {
-          "assetId": "fig-mapa-main",
-          "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C."
-        },
-        {
-          "assetId": "fig-mapa-inset",
-          "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
+          "assetId": "fig-mapa",
+          "alt": "Mapa de Fairfax, Virgínia e Washington D.C.",
+          "caption": "Fairfax e região metropolitana de Washington D.C. — Virgínia (EUA), 38,9589° N, 77,3538° O."
         }
       ]
     },

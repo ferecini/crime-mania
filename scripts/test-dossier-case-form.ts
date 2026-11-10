@@ -27,7 +27,8 @@ assert.deepEqual(
 assert.equal(form.victims.people[0]!.name, "Christine Banfield");
 assert.equal(form.phases.length, 3, "versoes -> 3 fases (acusação, defesa Brendan, defesa Juliana)");
 assert.equal(form.timeline.entries.length, 6);
-assert.equal(form.map.images.length, 2);
+assert.equal(form.map.images.length, 1);
+assert.equal(form.map.images[0]!.assetId, "fig-mapa");
 assert.ok(form.theories.quote?.includes("invasão"));
 assert.equal(form.extraSections.length, 0);
 

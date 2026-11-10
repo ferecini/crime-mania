@@ -12,8 +12,8 @@ const assetsDir = path.join(
   "assets",
 );
 
-/** Crop v7: map-main ~908×349 — altura renderizada menor, ainda legível @390 */
-const MOBILE_MAP_MIN_HEIGHT_AT_358 = 130;
+/** Painel mapa único ~1410×321 — panorâmico, altura @358 ainda legível (~82px) */
+const MOBILE_MAP_MIN_HEIGHT_AT_358 = 78;
 /** Largura útil ~358px com bleed -mx-4 @390 viewport */
 const MOBILE_CONTENT_WIDTH = 358;
 
@@ -24,13 +24,12 @@ async function testFigureAssets() {
     "fig-portrait-brendan",
     "fig-portrait-juliana",
   ];
-  for (const id of [...portraitIds, "fig-vitimas", "fig-mapa-main", "fig-mapa-inset"]) {
+  for (const id of [...portraitIds, "fig-vitimas", "fig-mapa"]) {
     const p = path.join(assetsDir, `${id}.webp`);
     assert.ok(fs.existsSync(p), `${id}.webp deve existir`);
   }
 
-  const mapaMainPath = path.join(assetsDir, "fig-mapa-main.webp");
-  const mapaInsetPath = path.join(assetsDir, "fig-mapa-inset.webp");
+  const mapaPath = path.join(assetsDir, "fig-mapa.webp");
 
   for (const id of portraitIds) {
     const meta = await sharp(path.join(assetsDir, `${id}.webp`)).metadata();
@@ -40,25 +39,19 @@ async function testFigureAssets() {
     assert.ok(h >= 200 && h <= 215, `${id} height ${h}`);
   }
 
-  const mapaMain = await sharp(mapaMainPath).metadata();
-  const mapaInset = await sharp(mapaInsetPath).metadata();
-  const mmw = mapaMain.width ?? 0;
-  const mmh = mapaMain.height ?? 0;
-  const miw = mapaInset.width ?? 0;
-  const mih = mapaInset.height ?? 0;
+  const mapa = await sharp(mapaPath).metadata();
+  const mmw = mapa.width ?? 0;
+  const mmh = mapa.height ?? 0;
 
-  assert.ok(mmw >= 880 && mmw <= 930, `fig-mapa-main width ${mmw}`);
-  assert.ok(mmh >= 335 && mmh <= 365, `fig-mapa-main height ${mmh}`);
-  const mainRenderedH = MOBILE_CONTENT_WIDTH / (mmw / mmh);
+  assert.ok(mmw >= 1350 && mmw <= 1450, `fig-mapa width ${mmw}`);
+  assert.ok(mmh >= 300 && mmh <= 350, `fig-mapa height ${mmh}`);
+  const renderedH = MOBILE_CONTENT_WIDTH / (mmw / mmh);
   assert.ok(
-    mainRenderedH >= MOBILE_MAP_MIN_HEIGHT_AT_358 - 0.5,
-    `fig-mapa-main rendered height @${MOBILE_CONTENT_WIDTH}px = ${mainRenderedH.toFixed(1)} (need ≥${MOBILE_MAP_MIN_HEIGHT_AT_358})`,
+    renderedH >= MOBILE_MAP_MIN_HEIGHT_AT_358 - 0.5,
+    `fig-mapa rendered height @${MOBILE_CONTENT_WIDTH}px = ${renderedH.toFixed(1)} (need ≥${MOBILE_MAP_MIN_HEIGHT_AT_358})`,
   );
 
-  assert.ok(miw >= 650 && miw <= 780, `fig-mapa-inset width ${miw}`);
-  assert.ok(mih >= 400 && mih <= 490, `fig-mapa-inset height ${mih}`);
-
-  const { data, info } = await sharp(mapaMainPath).raw().toBuffer({ resolveWithObject: true });
+  const { data, info } = await sharp(mapaPath).raw().toBuffer({ resolveWithObject: true });
   const w = info.width ?? 0;
   const h = info.height ?? 0;
   const scanRows = Math.min(100, Math.floor(h * 0.25));
@@ -82,7 +75,7 @@ async function testFigureAssets() {
   assert.equal(
     timelineBleedRow,
     null,
-    `fig-mapa-main não deve incluir vermelho «03» na faixa inferior (row=${timelineBleedRow})`,
+    `fig-mapa não deve incluir vermelho «03» na faixa inferior (row=${timelineBleedRow})`,
   );
 }
 

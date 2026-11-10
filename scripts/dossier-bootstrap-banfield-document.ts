@@ -38,14 +38,9 @@ const ASSETS: { id: string; localRel: string; alt: string }[] = [
     alt: "Juliana Magalhães.",
   },
   {
-    id: "fig-mapa-main",
-    localRel: "private/dossiers/documents/familia-banfield/assets/fig-mapa-main.webp",
-    alt: "Mapa satélite de Fairfax e Washington D.C.",
-  },
-  {
-    id: "fig-mapa-inset",
-    localRel: "private/dossiers/documents/familia-banfield/assets/fig-mapa-inset.webp",
-    alt: "Inset de Virgínia e coordenadas de Fairfax.",
+    id: "fig-mapa",
+    localRel: "private/dossiers/documents/familia-banfield/assets/fig-mapa.webp",
+    alt: "Mapa de Fairfax, Virgínia e Washington D.C.",
   },
 ];
 

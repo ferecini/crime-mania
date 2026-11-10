@@ -1,7 +1,7 @@
 {
   "slug": "familia-banfield",
   "title": "Família Banfield",
-  "version": 9,
+  "version": 10,
   "status": "ready",
   "sourcePdfStorageKey": "dossiers/Dossie_Banfield.pdf",
   "publishedAt": "2026-10-06",
@@ -121,14 +121,9 @@
       "title": "Mapa",
       "images": [
         {
-          "assetId": "fig-mapa-main",
-          "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C."
-        },
-        {
-          "assetId": "fig-mapa-inset",
-          "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
+          "assetId": "fig-mapa",
+          "alt": "Mapa de Fairfax, Virgínia e Washington D.C.",
+          "caption": "Fairfax e região metropolitana de Washington D.C. — Virgínia (EUA), 38,9589° N, 77,3538° O."
         }
       ]
     },
@@ -210,15 +205,15 @@
       ]
     },
     {
-      "id": "vitimas",
+      "id": "envolvidos",
       "order": 3,
-      "title": "Vítimas",
+      "title": "Envolvidos",
       "blocks": [
         {
-          "id": "people-main",
+          "id": "people-envolvidos",
           "type": "people",
           "order": 1,
-          "title": "Vítimas",
+          "title": "Envolvidos",
           "items": [
             {
               "name": "Christine Banfield",
@@ -227,22 +222,7 @@
             {
               "name": "Joseph Ryan",
               "assetId": "fig-portrait-joseph"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "id": "reus",
-      "order": 4,
-      "title": "Réus / acusados",
-      "blocks": [
-        {
-          "id": "people-reus",
-          "type": "people",
-          "order": 1,
-          "title": "Réus / acusados",
-          "items": [
+            },
             {
               "name": "Brendan Banfield",
               "assetId": "fig-portrait-brendan"
@@ -257,7 +237,7 @@
     },
     {
       "id": "fase-p1",
-      "order": 5,
+      "order": 4,
       "title": "Versão da acusação",
       "kind": "phase",
       "label": "Fase 1",
@@ -272,7 +252,7 @@
     },
     {
       "id": "fase-p2",
-      "order": 6,
+      "order": 5,
       "title": "Versão da defesa de Brendan",
       "kind": "phase",
       "label": "Fase 2",
@@ -287,7 +267,7 @@
     },
     {
       "id": "fase-p3",
-      "order": 7,
+      "order": 6,
       "title": "Versão da defesa de Juliana",
       "kind": "phase",
       "label": "Fase 3",
@@ -302,7 +282,7 @@
     },
     {
       "id": "timeline",
-      "order": 8,
+      "order": 7,
       "title": "Linha do tempo",
       "blocks": [
         {
@@ -347,7 +327,7 @@
     },
     {
       "id": "mapa",
-      "order": 9,
+      "order": 8,
       "title": "Mapa",
       "blocks": [
         {
@@ -361,23 +341,15 @@
           "id": "map-img-1",
           "type": "figure",
           "order": 2,
-          "assetId": "fig-mapa-main",
-          "alt": "Mapa satélite de Fairfax e Washington D.C.",
-          "caption": "Fairfax e região metropolitana de Washington D.C."
-        },
-        {
-          "id": "map-img-2",
-          "type": "figure",
-          "order": 3,
-          "assetId": "fig-mapa-inset",
-          "alt": "Inset de Virgínia e coordenadas de Fairfax.",
-          "caption": "Virgínia (EUA) — 38,9589° N, 77,3538° O."
+          "assetId": "fig-mapa",
+          "alt": "Mapa de Fairfax, Virgínia e Washington D.C.",
+          "caption": "Fairfax e região metropolitana de Washington D.C. — Virgínia (EUA), 38,9589° N, 77,3538° O."
         }
       ]
     },
     {
       "id": "teorias",
-      "order": 10,
+      "order": 9,
       "title": "Teorias do dossiê",
       "blocks": [
         {
