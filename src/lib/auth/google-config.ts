@@ -1,3 +1,5 @@
+import { getSiteUrl } from "@/lib/seo/site-url";
+
 const SCOPES = ["openid", "email", "profile"].join(" ");
 
 export function isGoogleAuthConfigured(): boolean {
@@ -18,10 +20,13 @@ export function getGoogleClientSecret(): string {
   return secret;
 }
 
-/** URI exata cadastrada no Google Cloud Console. */
+/** URI exata cadastrada no Google Cloud Console (Authorized redirect URIs). */
 export function getGoogleRedirectUri(request: Request): string {
   const configured = process.env.GOOGLE_REDIRECT_URI?.trim();
-  if (configured) return configured;
+  if (configured) return configured.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") {
+    return `${getSiteUrl()}/api/auth/google/callback`;
+  }
   const origin = new URL(request.url).origin;
   return `${origin}/api/auth/google/callback`;
 }
